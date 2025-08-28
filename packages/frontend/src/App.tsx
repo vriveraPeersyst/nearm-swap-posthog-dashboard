@@ -36,7 +36,12 @@ function App() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch('http://localhost:3001/api/swap-metrics');
+      // Use relative URL for production, localhost for development
+      const apiUrl = process.env.NODE_ENV === 'production' 
+        ? '/api/swap-metrics'  // Relative URL for Vercel
+        : 'http://localhost:3001/api/swap-metrics';  // Local development
+        
+      const response = await fetch(apiUrl);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
