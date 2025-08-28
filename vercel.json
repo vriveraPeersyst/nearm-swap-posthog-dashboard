@@ -1,6 +1,5 @@
 {
-  "buildCommand": "npm run build",
+  "buildCommand": "npm run build && mkdir -p api && node -e \"const fs=require('fs'); const path=require('path'); const handlerPath=path.join(__dirname,'packages/api/dist/handler.js'); if(fs.existsSync(handlerPath)){ const content=fs.readFileSync(handlerPath,'utf8'); const wrapper='const handler=require(\\\"../packages/api/dist/handler.js\\\"); module.exports=handler.default||handler;'; fs.writeFileSync('api/swap-metrics.js',wrapper); }\"",
   "outputDirectory": "packages/frontend/dist",
-  "installCommand": "npm install",
-  "devCommand": "npm run dev:frontend"
+  "installCommand": "npm install"
 }
