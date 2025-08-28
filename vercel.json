@@ -6,6 +6,5 @@
   },
   "buildCommand": "cd api && npm run build && cd ../packages/frontend && npm run build",
   "outputDirectory": "packages/frontend/dist",
-  "installCommand": "npm install",
-  "nodeVersion": "18.x"
+  "installCommand": "npm install"
 }
