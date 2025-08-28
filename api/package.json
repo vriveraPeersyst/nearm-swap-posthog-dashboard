@@ -1,0 +1,12 @@
+{
+  "name": "nearm-swaps-api",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "main": "swap-metrics.js",
+  "dependencies": {
+    "decimal.js": "^10.4.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
