@@ -1,0 +1,17 @@
+{
+  "buildCommand": "cd packages/api && npm install && npm run build && cd ../frontend && npm install && npm run build",
+  "outputDirectory": "packages/frontend/dist",
+  "devCommand": "cd packages/frontend && npm run dev",
+  "installCommand": "npm install",
+  "functions": {
+    "packages/api/dist/**/*.js": {
+      "runtime": "nodejs18.x"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/swap-metrics",
+      "destination": "/packages/api/dist/handler.js"
+    }
+  ]
+}
