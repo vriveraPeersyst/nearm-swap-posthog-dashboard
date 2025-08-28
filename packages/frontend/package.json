@@ -1,0 +1,17 @@
+{
+  "name": "@nearm-swaps/frontend",
+  "version": "1.0.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "React frontend for NEAR swaps analytics dashboard",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run dev:vite\"",
+    "dev:vite": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "server": "node server.js",
+    "start": "concurrently \"npm run server\" \"npm run dev:vite\"",
+    "clean": "rm -rf dist"
+  }
+}
