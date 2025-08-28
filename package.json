@@ -10,7 +10,6 @@
     "build": "npm run build:api && npm run build:frontend",
     "build:api": "cd packages/api && npm run build",
     "build:frontend": "cd packages/frontend && npm run build",
-    "prepare-api": "mkdir -p api && echo 'const handler=require(\"../packages/api/dist/handler.js\"); module.exports=handler.default||handler;' > api/swap-metrics.js",
     "start": "cd packages/frontend && npm run start",
     "metrics": "cd packages/api && npm run run",
     "check-data": "cd packages/api && npm run check-data",
