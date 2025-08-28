@@ -1,17 +1,6 @@
 {
-  "buildCommand": "cd packages/api && npm install && npm run build && cd ../frontend && npm install && npm run build",
+  "buildCommand": "cd packages/api && npm install && npm run build && mkdir -p ../../api && cp dist/handler.js ../../api/swap-metrics.js && cd ../frontend && npm install && npm run build",
   "outputDirectory": "packages/frontend/dist",
   "devCommand": "cd packages/frontend && npm run dev",
-  "installCommand": "npm install",
-  "functions": {
-    "packages/api/dist/**/*.js": {
-      "runtime": "@vercel/node@3.0.7"
-    }
-  },
-  "rewrites": [
-    {
-      "source": "/api/swap-metrics",
-      "destination": "/packages/api/dist/handler.js"
-    }
-  ]
+  "installCommand": "npm install"
 }
