@@ -4,14 +4,8 @@
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "functions": {
-    "packages/api/src/handler.ts": {
+    "api/**/*.js": {
       "runtime": "@vercel/node@3.0.7"
     }
-  },
-  "rewrites": [
-    {
-      "source": "/api/swap-metrics",
-      "destination": "/packages/api/src/handler.ts"
-    }
-  ]
+  }
 }
