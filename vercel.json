@@ -1,6 +1,26 @@
 {
-  "buildCommand": "cd packages/frontend && npm install && npm run build",
-  "outputDirectory": "packages/frontend/dist",
-  "devCommand": "cd packages/frontend && npm run dev",
-  "installCommand": "npm install"
+  "builds": [
+    {
+      "src": "packages/api/src/handler.ts",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "packages/frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "buildCommand": "npm run build",
+        "outputDirectory": "dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/swap-metrics",
+      "dest": "/packages/api/src/handler.ts"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/packages/frontend/dist/$1"
+    }
+  ]
 }
