@@ -11,10 +11,15 @@
     "build:api": "cd packages/api && npm run build",
     "build:frontend": "cd packages/frontend && npm run build",
     "start": "cd packages/frontend && npm run start",
+    "start:prod": "NODE_ENV=production cd packages/frontend && node server.js",
     "metrics": "cd packages/api && npm run run",
     "check-data": "cd packages/api && npm run check-data",
     "lint": "cd packages/frontend && npm run lint",
-    "clean": "rm -rf node_modules packages/*/node_modules packages/*/dist"
+    "clean": "rm -rf node_modules packages/*/node_modules packages/*/dist",
+    "docker:build": "docker build -t nearm-swaps-posthog:latest .",
+    "docker:run": "docker run -p 3001:3001 --env-file packages/api/.env.production nearm-swaps-posthog:latest",
+    "prod:setup": "npm ci --only=production && npm run build",
+    "security:audit": "npm audit && npm audit --workspace=api && npm audit --workspace=frontend"
   },
   "workspaces": [
     "packages/api",

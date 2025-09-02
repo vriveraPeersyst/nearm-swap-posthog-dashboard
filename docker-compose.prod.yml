@@ -1,0 +1,24 @@
+# Docker Compose for Production
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - POSTHOG_BASE_URL=${POSTHOG_BASE_URL}
+      - POSTHOG_PROJECT_ID=${POSTHOG_PROJECT_ID}
+      - POSTHOG_API_KEY=${POSTHOG_API_KEY}
+      - PRICES_API_URL=${PRICES_API_URL}
+      - COINGECKO_API_KEY=${COINGECKO_API_KEY}
+    env_file:
+      - packages/api/.env.production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

@@ -1,0 +1,41 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "packages/frontend/src/**/*",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "packages/frontend/dist"
+      }
+    },
+    {
+      "src": "packages/api/src/index.ts",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["packages/api/src/**/*"]
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/packages/api/src/index.ts"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/packages/frontend/dist/$1"
+    }
+  ],
+  "buildCommand": "npm run build",
+  "outputDirectory": "packages/frontend/dist",
+  "installCommand": "npm install",
+  "framework": "vite",
+  "functions": {
+    "packages/api/src/index.ts": {
+      "runtime": "nodejs18.x"
+    }
+  },
+  "env": {
+    "NODE_ENV": "production"
+  }
+}
