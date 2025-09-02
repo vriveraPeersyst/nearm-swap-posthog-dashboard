@@ -1,8 +1,8 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { VercelRequest, VercelResponse } from '@vercel/node';
 import { Decimal } from 'decimal.js';
-import { cfg } from '../src/config.js';
-import { fetchPricesOnce } from '../src/prices.js';
-import { fetchSwapBatch, type SwapEventRow } from '../src/posthog.js';
+import { cfg } from './config.js';
+import { fetchPricesOnce } from './prices.js';
+import { fetchSwapBatch, type SwapEventRow } from './posthog.js';
 import { intentsToPriceId } from '../src/tokenMapping.js';
 
 type Diagnostics = {
@@ -78,6 +78,7 @@ async function getSwapMetrics() {
   // 5) Iterate events one-by-one oldest→newest
   let offset = 0;
   const limit = cfg.BATCH_SIZE;
+
   let processed = 0;
   const useIn = cfg.VOLUME_SIDE === 'in';
 
@@ -91,7 +92,7 @@ async function getSwapMetrics() {
       if (cfg.MAX_EVENTS > 0 && processed >= cfg.MAX_EVENTS) break;
 
       const amountStr = (useIn ? ev.amount_in : ev.amount_out) ?? '0';
-      const tokenId = (useIn ? ev.token_in_id : ev.token_out_id) ?? '';
+      const tokenId   = (useIn ? ev.token_in_id : ev.token_out_id) ?? '';
 
       // Get both token IDs for pair tracking
       const tokenInId = ev.token_in_id ?? '';
@@ -99,166 +100,202 @@ async function getSwapMetrics() {
 
       // Parse event timestamp
       const eventTime = new Date(ev.timestamp).getTime();
+      const isLast24h = eventTime >= timeFrames['24h'];
+      
+      let amount: Decimal;
+      try { amount = new Decimal(amountStr); }
+      catch { diags.badAmounts++; continue; }
 
-      try {
-        const amount = new Decimal(amountStr);
-        if (amount.lte(0)) {
-          diags.badAmounts++;
-          processed++;
-          continue;
-        }
-
-        // Map token to price ID
-        const priceId = intentsToPriceId(tokenId);
-        if (!priceId) {
-          diags.unmappedIntentTokenIds.add(tokenId);
-          processed++;
-          continue;
-        }
-
-        // Get USD price
-        const usdPrice = prices[priceId];
-        if (!usdPrice) {
+      let volumeContribution = new Decimal(0);
+      const priceId = intentsToPriceId(tokenId);
+      if (!priceId) {
+        diags.unmappedIntentTokenIds.add(tokenId || '(empty)');
+      } else {
+        const price = prices[priceId];
+        if (!price) {
           diags.priceIdMissing.add(priceId);
-          processed++;
-          continue;
+        } else {
+          volumeContribution = amount.times(price);
         }
-
-        const volumeUSD = amount.times(usdPrice);
-
-        // Update time-based metrics
-        metrics.allTime.swaps++;
-        metrics.allTime.volumeUSD = metrics.allTime.volumeUSD.plus(volumeUSD);
-
-        if (eventTime >= timeFrames['24h']) {
-          metrics.last24h.swaps++;
-          metrics.last24h.volumeUSD = metrics.last24h.volumeUSD.plus(volumeUSD);
-        } else if (eventTime >= timeFrames['48h']) {
-          metrics.previous24h.swaps++;
-          metrics.previous24h.volumeUSD = metrics.previous24h.volumeUSD.plus(volumeUSD);
-        }
-
-        if (eventTime >= timeFrames['7d']) {
-          metrics.last7d.swaps++;
-          metrics.last7d.volumeUSD = metrics.last7d.volumeUSD.plus(volumeUSD);
-        } else if (eventTime >= timeFrames['14d']) {
-          metrics.previous7d.swaps++;
-          metrics.previous7d.volumeUSD = metrics.previous7d.volumeUSD.plus(volumeUSD);
-        }
-
-        if (eventTime >= timeFrames['30d']) {
-          metrics.last30d.swaps++;
-          metrics.last30d.volumeUSD = metrics.last30d.volumeUSD.plus(volumeUSD);
-        } else if (eventTime >= timeFrames['60d']) {
-          metrics.previous30d.swaps++;
-          metrics.previous30d.volumeUSD = metrics.previous30d.volumeUSD.plus(volumeUSD);
-        }
-
-        // Update trading pair metrics
-        if (tokenInId && tokenOutId) {
-          const pairMetrics = getPairMetrics(tokenInId, tokenOutId);
-          pairMetrics.swaps++;
-          pairMetrics.volumeUSD = pairMetrics.volumeUSD.plus(volumeUSD);
-
-          if (eventTime >= timeFrames['24h']) {
-            pairMetrics.last24h.swaps++;
-            pairMetrics.last24h.volumeUSD = pairMetrics.last24h.volumeUSD.plus(volumeUSD);
-          }
-        }
-
-        processed++;
-      } catch (error) {
-        diags.badAmounts++;
-        processed++;
-        continue;
       }
+
+      // Add to all-time metrics
+      metrics.allTime.swaps++;
+      metrics.allTime.volumeUSD = metrics.allTime.volumeUSD.plus(volumeContribution);
+
+      // Add to time-based metrics if within timeframe
+      if (eventTime >= timeFrames['30d']) {
+        metrics.last30d.swaps++;
+        metrics.last30d.volumeUSD = metrics.last30d.volumeUSD.plus(volumeContribution);
+      }
+      if (eventTime >= timeFrames['7d']) {
+        metrics.last7d.swaps++;
+        metrics.last7d.volumeUSD = metrics.last7d.volumeUSD.plus(volumeContribution);
+      }
+      if (eventTime >= timeFrames['24h']) {
+        metrics.last24h.swaps++;
+        metrics.last24h.volumeUSD = metrics.last24h.volumeUSD.plus(volumeContribution);
+      }
+      
+      // Track previous periods for growth calculations
+      // Previous 24h period (24-48h ago)
+      if (eventTime >= timeFrames['48h'] && eventTime < timeFrames['24h']) {
+        metrics.previous24h.swaps++;
+        metrics.previous24h.volumeUSD = metrics.previous24h.volumeUSD.plus(volumeContribution);
+      }
+      // Previous 7d period (7-14d ago)
+      if (eventTime >= timeFrames['14d'] && eventTime < timeFrames['7d']) {
+        metrics.previous7d.swaps++;
+        metrics.previous7d.volumeUSD = metrics.previous7d.volumeUSD.plus(volumeContribution);
+      }
+      // Previous 30d period (30-60d ago)
+      if (eventTime >= timeFrames['60d'] && eventTime < timeFrames['30d']) {
+        metrics.previous30d.swaps++;
+        metrics.previous30d.volumeUSD = metrics.previous30d.volumeUSD.plus(volumeContribution);
+      }
+
+      // Track trading pairs (A → B)
+      if (tokenInId && tokenOutId) {
+        const pairMetrics = getPairMetrics(tokenInId, tokenOutId);
+        pairMetrics.swaps++;
+        pairMetrics.volumeUSD = pairMetrics.volumeUSD.plus(volumeContribution);
+        
+        if (isLast24h) {
+          pairMetrics.last24h.swaps++;
+          pairMetrics.last24h.volumeUSD = pairMetrics.last24h.volumeUSD.plus(volumeContribution);
+        }
+      }
+
+      processed++;
     }
 
-    offset += limit;
+    offset += batch.length;
+    if (batch.length < limit) break; // finished
   }
 
-  // 6) Calculate percentage changes
-  const calculateChange = (current: number, previous: number) => {
-    if (previous === 0) return current > 0 ? 100 : 0;
+  // 5) Calculate growth percentages
+  const calculateGrowth = (current: number, previous: number): number | null => {
+    if (previous === 0) return current > 0 ? null : 0; // Can't calculate % from zero
     return ((current - previous) / previous) * 100;
   };
 
-  const volumeChange24h = calculateChange(
-    metrics.last24h.volumeUSD.toNumber(),
+  const swapGrowth24h = calculateGrowth(metrics.last24h.swaps, metrics.previous24h.swaps);
+  const volumeGrowth24h = calculateGrowth(
+    metrics.last24h.volumeUSD.toNumber(), 
     metrics.previous24h.volumeUSD.toNumber()
   );
 
-  const volumeChange7d = calculateChange(
-    metrics.last7d.volumeUSD.toNumber(),
+  const swapGrowth7d = calculateGrowth(metrics.last7d.swaps, metrics.previous7d.swaps);
+  const volumeGrowth7d = calculateGrowth(
+    metrics.last7d.volumeUSD.toNumber(), 
     metrics.previous7d.volumeUSD.toNumber()
   );
 
-  const volumeChange30d = calculateChange(
-    metrics.last30d.volumeUSD.toNumber(),
+  const swapGrowth30d = calculateGrowth(metrics.last30d.swaps, metrics.previous30d.swaps);
+  const volumeGrowth30d = calculateGrowth(
+    metrics.last30d.volumeUSD.toNumber(), 
     metrics.previous30d.volumeUSD.toNumber()
   );
 
-  const swapChange24h = calculateChange(metrics.last24h.swaps, metrics.previous24h.swaps);
-  const swapChange7d = calculateChange(metrics.last7d.swaps, metrics.previous7d.swaps);
-  const swapChange30d = calculateChange(metrics.last30d.swaps, metrics.previous30d.swaps);
-
-  // 7) Prepare top pairs (sort by 24h volume)
-  const topPairs = Array.from(tradingPairs.entries())
-    .sort(([, a], [, b]) => b.last24h.volumeUSD.minus(a.last24h.volumeUSD).toNumber())
-    .slice(0, 10)
+  // 6) Process trading pairs for output
+  const topPairsAllTime = Array.from(tradingPairs.entries())
     .map(([pair, metrics]) => ({
       pair,
-      swaps: metrics.swaps,
-      volumeUSD: metrics.volumeUSD.toFixed(2),
-      last24h: {
-        swaps: metrics.last24h.swaps,
-        volumeUSD: metrics.last24h.volumeUSD.toFixed(2)
-      }
-    }));
+      totalSwaps: metrics.swaps,
+      totalVolumeUSD: metrics.volumeUSD.toNumber(),
+      last24hSwaps: metrics.last24h.swaps,
+      last24hVolumeUSD: metrics.last24h.volumeUSD.toNumber()
+    }))
+    .sort((a, b) => b.totalVolumeUSD - a.totalVolumeUSD)
+    .slice(0, 10); // Top 10 pairs by volume
 
-  // 8) Return structured data
+  const topPairs24h = Array.from(tradingPairs.entries())
+    .map(([pair, metrics]) => ({
+      pair,
+      totalSwaps: metrics.swaps,
+      totalVolumeUSD: metrics.volumeUSD.toNumber(),
+      last24hSwaps: metrics.last24h.swaps,
+      last24hVolumeUSD: metrics.last24h.volumeUSD.toNumber()
+    }))
+    .filter(p => p.last24hSwaps > 0)
+    .sort((a, b) => b.last24hVolumeUSD - a.last24hVolumeUSD)
+    .slice(0, 10); // Top 10 pairs by 24h volume
+
+  // 7) Output with time-based metrics and growth
   return {
-    summary: {
-      totalVolume: metrics.allTime.volumeUSD.toFixed(2),
+    sideValued: cfg.VOLUME_SIDE,
+    
+    // All-time metrics
+    allTime: {
       totalSwaps: metrics.allTime.swaps,
-      volume24h: metrics.last24h.volumeUSD.toFixed(2),
-      swaps24h: metrics.last24h.swaps,
-      volumeChange24h: volumeChange24h.toFixed(2),
-      swapChange24h: swapChange24h.toFixed(2),
-      volume7d: metrics.last7d.volumeUSD.toFixed(2),
-      swaps7d: metrics.last7d.swaps,
-      volumeChange7d: volumeChange7d.toFixed(2),
-      swapChange7d: swapChange7d.toFixed(2),
-      volume30d: metrics.last30d.volumeUSD.toFixed(2),
-      swaps30d: metrics.last30d.swaps,
-      volumeChange30d: volumeChange30d.toFixed(2),
-      swapChange30d: swapChange30d.toFixed(2)
+      totalVolumeUSD: metrics.allTime.volumeUSD.toNumber()
     },
-    topPairs,
-    diagnostics: {
-      unmappedTokens: Array.from(diags.unmappedIntentTokenIds).slice(0, 10),
-      missingPrices: Array.from(diags.priceIdMissing).slice(0, 10),
-      badAmounts: diags.badAmounts,
-      processed
+    
+    // Recent activity metrics
+    last24h: {
+      totalSwaps: metrics.last24h.swaps,
+      totalVolumeUSD: metrics.last24h.volumeUSD.toNumber(),
+      swapGrowthPercent: swapGrowth24h !== null ? Number(swapGrowth24h.toFixed(2)) : null,
+      volumeGrowthPercent: volumeGrowth24h !== null ? Number(volumeGrowth24h.toFixed(2)) : null
+    },
+    
+    // Previous 24h for context
+    previous24h: {
+      totalSwaps: metrics.previous24h.swaps,
+      totalVolumeUSD: metrics.previous24h.volumeUSD.toNumber()
+    },
+    
+    last7d: {
+      totalSwaps: metrics.last7d.swaps,
+      totalVolumeUSD: metrics.last7d.volumeUSD.toNumber(),
+      swapGrowthPercent: swapGrowth7d !== null ? Number(swapGrowth7d.toFixed(2)) : null,
+      volumeGrowthPercent: volumeGrowth7d !== null ? Number(volumeGrowth7d.toFixed(2)) : null
+    },
+    
+    last30d: {
+      totalSwaps: metrics.last30d.swaps,
+      totalVolumeUSD: metrics.last30d.volumeUSD.toNumber(),
+      swapGrowthPercent: swapGrowth30d !== null ? Number(swapGrowth30d.toFixed(2)) : null,
+      volumeGrowthPercent: volumeGrowth30d !== null ? Number(volumeGrowth30d.toFixed(2)) : null
+    },
+    
+    // Trading pair analytics
+    topTradingPairs: {
+      allTime: topPairsAllTime,
+      last24h: topPairs24h
+    },
+    
+    // Diagnostics
+    notes: {
+      unmappedIntentTokenIds: [...diags.unmappedIntentTokenIds],
+      priceIdMissing: [...diags.priceIdMissing],
+      badAmounts: diags.badAmounts
     }
   };
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
   if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    console.log('Fetching swap metrics...');
     const data = await getSwapMetrics();
-    console.log('Successfully fetched metrics');
-    res.json(data);
+    return res.status(200).json(data);
   } catch (error) {
     console.error('Error fetching swap metrics:', error);
-    res.status(500).json({ 
-      error: 'Failed to fetch swap metrics',
-      message: error instanceof Error ? error.message : 'Unknown error'
+    return res.status(500).json({ 
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 }

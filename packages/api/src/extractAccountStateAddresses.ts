@@ -291,6 +291,6 @@ export async function extractAccountStateAddresses(): Promise<void> {
 }
 
 // Main execution
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (require.main === module) {
   extractAccountStateAddresses().catch(console.error);
 }

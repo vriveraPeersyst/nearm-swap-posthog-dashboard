@@ -24,7 +24,7 @@ type PairMetrics = {
   };
 };
 
-async function getSwapMetrics() {
+export async function getSwapMetrics() {
   // 1) Get prices ONCE
   const prices = await fetchPricesOnce(); // id -> Decimal price
   const diags: Diagnostics = {

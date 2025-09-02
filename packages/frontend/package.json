@@ -13,5 +13,25 @@
     "server": "node server.js",
     "start": "concurrently \"npm run server\" \"npm run dev:vite\"",
     "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "lucide-react": "^0.542.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.8.3",
+    "vite": "^6.0.5",
+    "eslint": "^9.33.0",
+    "@eslint/js": "^9.33.0",
+    "globals": "^15.15.0",
+    "typescript-eslint": "^8.18.2",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.16",
+    "concurrently": "^9.2.1"
   }
 }
