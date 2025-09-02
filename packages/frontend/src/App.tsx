@@ -4,6 +4,7 @@ import type { SwapMetrics, AccountValueSummary } from './types';
 import MetricsCard from './components/MetricsCard';
 import TradingPairsTable from './components/TradingPairsTable';
 import AccountValuesCard from './components/AccountValuesCard';
+import { apiCall } from './utils/api';
 import logoSvg from './assets/NEARMobile_Logo.svg';
 import './App.css';
 
@@ -77,10 +78,7 @@ function App() {
     setIsLoading(true);
     setError(null);
     try {
-      // Use relative URL - Vite proxy will forward to localhost:3001 in development
-      const apiUrl = '/api/swap-metrics';
-        
-      const response = await fetch(apiUrl);
+      const response = await apiCall('/api/swap-metrics');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -106,8 +104,7 @@ function App() {
   const fetchAccountValues = async () => {
     setIsLoadingAccountValues(true);
     try {
-      const apiUrl = '/api/account-values';
-      const response = await fetch(apiUrl);
+      const response = await apiCall('/api/account-values');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
