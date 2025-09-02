@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Database, RefreshCw } from 'lucide-react';
 import type { SwapMetrics, AccountValueSummary } from './types';
 import MetricsCard from './components/MetricsCard';
-import SummaryTable from './components/SummaryTable';
 import TradingPairsTable from './components/TradingPairsTable';
 import AccountValuesCard from './components/AccountValuesCard';
 import logoSvg from './assets/NEARMobile_Logo.svg';
@@ -274,9 +273,6 @@ function App() {
               </div>
             </div>
           )}
-
-          {/* Summary Table */}
-          <SummaryTable data={data} />
 
           {/* Trading Pairs Tables */}
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
