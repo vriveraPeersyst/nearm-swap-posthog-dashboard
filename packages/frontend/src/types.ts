@@ -13,6 +13,22 @@ export interface TimeMetrics {
   volumeGrowthPercent?: number | null;
 }
 
+export interface AccountValueSummary {
+  total_unique_accounts: number;
+  total_near_value: number;
+  total_near_staked: number;
+  total_near_staked_by_validator: number;
+  total_near_combined: number;
+  avg_near_value: number;
+  avg_near_staked: number;
+  accounts_with_near_value: number;
+  accounts_with_near_staked: number;
+  accounts_with_any_balance: number;
+  earliest_account_update: string;
+  most_recent_account_update: string;
+  total_account_state_events: number;
+}
+
 export interface SwapMetrics {
   sideValued: string;
   allTime: TimeMetrics;

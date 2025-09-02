@@ -70,6 +70,64 @@ app.get('/api/swap-metrics', async (req, res) => {
   }
 });
 
+// API endpoint to get account values
+app.get('/api/account-values', async (req, res) => {
+  try {
+    console.log('Fetching account values...');
+    
+    // Change to the API directory and run the account values script
+    const apiDir = path.join(process.cwd(), '../api');
+    const { stdout, stderr } = await execAsync('npx tsx src/getTotalAccountValues.ts', { 
+      cwd: apiDir,
+      timeout: 60000 // 60 second timeout
+    });
+    
+    if (stderr) {
+      console.warn('Script warnings:', stderr);
+    }
+    
+    // Clean up the output - find the JSON part (starts with { and ends with })
+    const lines = stdout.split('\n');
+    let jsonLines = [];
+    let insideJson = false;
+    let braceCount = 0;
+    
+    for (const line of lines) {
+      if (!insideJson && line.trim().startsWith('{')) {
+        insideJson = true;
+        jsonLines.push(line);
+        braceCount = (line.match(/{/g) || []).length - (line.match(/}/g) || []).length;
+      } else if (insideJson) {
+        jsonLines.push(line);
+        braceCount += (line.match(/{/g) || []).length - (line.match(/}/g) || []).length;
+        
+        if (braceCount === 0) {
+          break; // Complete JSON object found
+        }
+      }
+    }
+    
+    if (jsonLines.length === 0) {
+      throw new Error('No JSON output found in script response');
+    }
+    
+    const jsonOutput = jsonLines.join('\n');
+    
+    // Parse the JSON output from the script
+    const data = JSON.parse(jsonOutput);
+    
+    console.log('Successfully fetched account values');
+    res.json(data);
+    
+  } catch (error) {
+    console.error('Error fetching account values:', error);
+    res.status(500).json({ 
+      error: 'Failed to fetch account values',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

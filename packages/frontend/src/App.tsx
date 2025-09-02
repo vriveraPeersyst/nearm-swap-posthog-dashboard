@@ -1,15 +1,18 @@
 import { useState, useEffect } from 'react';
 import { Database, RefreshCw } from 'lucide-react';
-import type { SwapMetrics } from './types';
+import type { SwapMetrics, AccountValueSummary } from './types';
 import MetricsCard from './components/MetricsCard';
 import SummaryTable from './components/SummaryTable';
 import TradingPairsTable from './components/TradingPairsTable';
+import AccountValuesCard from './components/AccountValuesCard';
 import logoSvg from './assets/NEARMobile_Logo.svg';
 import './App.css';
 
 function App() {
   const [data, setData] = useState<SwapMetrics | null>(null);
+  const [accountValues, setAccountValues] = useState<AccountValueSummary | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingAccountValues, setIsLoadingAccountValues] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [error, setError] = useState<string | null>(null);
 
@@ -17,6 +20,8 @@ function App() {
   useEffect(() => {
     const savedData = localStorage.getItem('swapMetrics');
     const savedTimestamp = localStorage.getItem('swapMetricsTimestamp');
+    const savedAccountValues = localStorage.getItem('accountValues');
+    const savedAccountValuesTimestamp = localStorage.getItem('accountValuesTimestamp');
     
     if (savedData && savedTimestamp) {
       try {
@@ -31,16 +36,26 @@ function App() {
         localStorage.removeItem('swapMetricsTimestamp');
       }
     }
+
+    if (savedAccountValues && savedAccountValuesTimestamp) {
+      try {
+        const parsedAccountValues = JSON.parse(savedAccountValues);
+        setAccountValues(parsedAccountValues);
+      } catch (error) {
+        console.error('Error loading saved account values:', error);
+        // Clear corrupted data
+        localStorage.removeItem('accountValues');
+        localStorage.removeItem('accountValuesTimestamp');
+      }
+    }
   }, []);
 
   const fetchData = async () => {
     setIsLoading(true);
     setError(null);
     try {
-      // Use relative URL for production, localhost for development
-      const apiUrl = process.env.NODE_ENV === 'production' 
-        ? '/api/swap-metrics'  // Relative URL for Vercel
-        : 'http://localhost:3001/api/swap-metrics';  // Local development
+      // Use relative URL - Vite proxy will forward to localhost:3001 in development
+      const apiUrl = '/api/swap-metrics';
         
       const response = await fetch(apiUrl);
       if (!response.ok) {
@@ -65,14 +80,42 @@ function App() {
     }
   };
 
+  const fetchAccountValues = async () => {
+    setIsLoadingAccountValues(true);
+    try {
+      const apiUrl = '/api/account-values';
+      const response = await fetch(apiUrl);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const newAccountValues = await response.json();
+      const timestamp = new Date();
+      
+      // Save to state
+      setAccountValues(newAccountValues);
+      
+      // Save to localStorage for persistence
+      localStorage.setItem('accountValues', JSON.stringify(newAccountValues));
+      localStorage.setItem('accountValuesTimestamp', timestamp.toISOString());
+    } catch (error) {
+      console.error('Failed to fetch account values:', error);
+      // Don't set main error for account values failure
+    } finally {
+      setIsLoadingAccountValues(false);
+    }
+  };
+
   const refreshData = async () => {
-    await fetchData();
+    await Promise.all([fetchData(), fetchAccountValues()]);
   };
 
   const clearCache = () => {
     localStorage.removeItem('swapMetrics');
     localStorage.removeItem('swapMetricsTimestamp');
+    localStorage.removeItem('accountValues');
+    localStorage.removeItem('accountValuesTimestamp');
     setData(null);
+    setAccountValues(null);
     setError(null);
   };
 
@@ -184,11 +227,11 @@ function App() {
               </button>
               <button
                 onClick={refreshData}
-                disabled={isLoading}
+                disabled={isLoading || isLoadingAccountValues}
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-                {isLoading ? 'Refreshing...' : 'Refresh Data'}
+                <RefreshCw className={`h-4 w-4 ${(isLoading || isLoadingAccountValues) ? 'animate-spin' : ''}`} />
+                {isLoading || isLoadingAccountValues ? 'Refreshing...' : 'Refresh Data'}
               </button>
             </div>
           </div>
@@ -220,6 +263,17 @@ function App() {
               showGrowth={true}
             />
           </div>
+
+          {/* Account Values */}
+          {accountValues && <AccountValuesCard data={accountValues} />}
+          {isLoadingAccountValues && (
+            <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+              <div className="flex items-center justify-center">
+                <RefreshCw className="h-6 w-6 animate-spin text-blue-600 mr-2" />
+                <span className="text-gray-600">Loading account values...</span>
+              </div>
+            </div>
+          )}
 
           {/* Summary Table */}
           <SummaryTable data={data} />
