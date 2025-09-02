@@ -10,6 +10,7 @@ import './App.css';
 function App() {
   const [data, setData] = useState<SwapMetrics | null>(null);
   const [accountValues, setAccountValues] = useState<AccountValueSummary | null>(null);
+  const [nearPriceUSD, setNearPriceUSD] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingAccountValues, setIsLoadingAccountValues] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
@@ -21,6 +22,8 @@ function App() {
     const savedTimestamp = localStorage.getItem('swapMetricsTimestamp');
     const savedAccountValues = localStorage.getItem('accountValues');
     const savedAccountValuesTimestamp = localStorage.getItem('accountValuesTimestamp');
+    const savedNearPrice = localStorage.getItem('nearPriceUSD');
+    const savedNearPriceTimestamp = localStorage.getItem('nearPriceTimestamp');
     
     if (savedData && savedTimestamp) {
       try {
@@ -46,6 +49,27 @@ function App() {
         localStorage.removeItem('accountValues');
         localStorage.removeItem('accountValuesTimestamp');
       }
+    }
+
+    if (savedNearPrice && savedNearPriceTimestamp) {
+      try {
+        const price = parseFloat(savedNearPrice);
+        const priceTimestamp = new Date(savedNearPriceTimestamp);
+        const now = new Date();
+        // Use cached price if it's less than 5 minutes old
+        if (now.getTime() - priceTimestamp.getTime() < 5 * 60 * 1000) {
+          setNearPriceUSD(price);
+        } else {
+          // Fetch fresh price if cached price is old
+          fetchNearPrice();
+        }
+      } catch (error) {
+        console.error('Error loading saved NEAR price:', error);
+        fetchNearPrice();
+      }
+    } else {
+      // No cached price, fetch it
+      fetchNearPrice();
     }
   }, []);
 
@@ -104,8 +128,27 @@ function App() {
     }
   };
 
+  const fetchNearPrice = async () => {
+    try {
+      const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=near&vs_currencies=usd');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const priceData = await response.json();
+      const price = priceData?.near?.usd;
+      if (price) {
+        setNearPriceUSD(price);
+        localStorage.setItem('nearPriceUSD', price.toString());
+        localStorage.setItem('nearPriceTimestamp', new Date().toISOString());
+      }
+    } catch (error) {
+      console.error('Failed to fetch NEAR price:', error);
+      // Don't fail the whole app if price fetch fails
+    }
+  };
+
   const refreshData = async () => {
-    await Promise.all([fetchData(), fetchAccountValues()]);
+    await Promise.all([fetchData(), fetchAccountValues(), fetchNearPrice()]);
   };
 
   const clearCache = () => {
@@ -264,7 +307,7 @@ function App() {
           </div>
 
           {/* Account Values */}
-          {accountValues && <AccountValuesCard data={accountValues} />}
+          {accountValues && <AccountValuesCard data={accountValues} nearPriceUSD={nearPriceUSD || undefined} />}
           {isLoadingAccountValues && (
             <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
               <div className="flex items-center justify-center">

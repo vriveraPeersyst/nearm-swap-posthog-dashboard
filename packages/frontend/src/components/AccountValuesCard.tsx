@@ -4,9 +4,10 @@ import type { AccountValueSummary } from '../types';
 
 interface AccountValuesCardProps {
   data: AccountValueSummary;
+  nearPriceUSD?: number;
 }
 
-const AccountValuesCard: React.FC<AccountValuesCardProps> = ({ data }) => {
+const AccountValuesCard: React.FC<AccountValuesCardProps> = ({ data, nearPriceUSD }) => {
   const formatNEAR = (amount: number) => {
     if (amount >= 1000000) {
       return `${(amount / 1000000).toFixed(2)}M NEAR`;
@@ -14,6 +15,17 @@ const AccountValuesCard: React.FC<AccountValuesCardProps> = ({ data }) => {
       return `${(amount / 1000).toFixed(2)}K NEAR`;
     }
     return `${amount.toFixed(3)} NEAR`;
+  };
+
+  const formatUSD = (nearAmount: number) => {
+    if (!nearPriceUSD) return null;
+    const usdValue = nearAmount * nearPriceUSD;
+    if (usdValue >= 1000000) {
+      return `$${(usdValue / 1000000).toFixed(2)}M`;
+    } else if (usdValue >= 1000) {
+      return `$${(usdValue / 1000).toFixed(2)}K`;
+    }
+    return `$${usdValue.toFixed(2)}`;
   };
 
   const formatDate = (dateString: string) => {
@@ -44,6 +56,9 @@ const AccountValuesCard: React.FC<AccountValuesCardProps> = ({ data }) => {
           </div>
           <p className="text-sm text-gray-600 mb-1">Total NEAR Value</p>
           <p className="text-2xl font-bold text-gray-900">{formatNEAR(data.total_near_value)}</p>
+          {nearPriceUSD && (
+            <p className="text-sm text-gray-500 mt-1">{formatUSD(data.total_near_value)}</p>
+          )}
         </div>
 
         {/* Total NEAR Staked */}
@@ -53,6 +68,9 @@ const AccountValuesCard: React.FC<AccountValuesCardProps> = ({ data }) => {
           </div>
           <p className="text-sm text-gray-600 mb-1">Total NEAR Staked</p>
           <p className="text-2xl font-bold text-gray-900">{formatNEAR(data.total_near_staked)}</p>
+          {nearPriceUSD && (
+            <p className="text-sm text-gray-500 mt-1">{formatUSD(data.total_near_staked)}</p>
+          )}
         </div>
 
         {/* Combined Total */}
@@ -62,6 +80,9 @@ const AccountValuesCard: React.FC<AccountValuesCardProps> = ({ data }) => {
           </div>
           <p className="text-sm text-gray-600 mb-1">Total Combined</p>
           <p className="text-2xl font-bold text-gray-900">{formatNEAR(data.total_near_combined)}</p>
+          {nearPriceUSD && (
+            <p className="text-sm text-gray-500 mt-1">{formatUSD(data.total_near_combined)}</p>
+          )}
         </div>
       </div>
 
@@ -72,10 +93,16 @@ const AccountValuesCard: React.FC<AccountValuesCardProps> = ({ data }) => {
           <div className="bg-blue-50 rounded-lg p-4">
             <p className="text-sm text-blue-600 font-medium">Average NEAR per Account</p>
             <p className="text-xl font-bold text-blue-800">{data.avg_near_value.toFixed(2)} NEAR</p>
+            {nearPriceUSD && (
+              <p className="text-sm text-blue-600 mt-1">{formatUSD(data.avg_near_value)}</p>
+            )}
           </div>
           <div className="bg-purple-50 rounded-lg p-4">
             <p className="text-sm text-purple-600 font-medium">Average Staked per Account</p>
             <p className="text-xl font-bold text-purple-800">{data.avg_near_staked.toFixed(2)} NEAR</p>
+            {nearPriceUSD && (
+              <p className="text-sm text-purple-600 mt-1">{formatUSD(data.avg_near_staked)}</p>
+            )}
           </div>
           <div className="bg-green-50 rounded-lg p-4">
             <p className="text-sm text-green-600 font-medium">Accounts with Balance</p>
