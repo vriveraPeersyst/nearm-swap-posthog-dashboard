@@ -167,22 +167,23 @@ function App() {
         {/* Header */}
         <header className="bg-white shadow-sm border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 py-4 sm:h-16 sm:py-0">
               <div className="flex items-center gap-3">
-                <img src={logoSvg} alt="NEARMobile Logo" className="h-8 w-8" />
+                <img src={logoSvg} alt="NEARMobile Logo" className="h-8 w-8 flex-shrink-0" />
                 <div>
-                  <h1 className="text-xl font-semibold text-gray-900">NEARMobile Swaps Analytics</h1>
-                  <p className="text-sm text-gray-500">PostHog Data Dashboard</p>
+                  <h1 className="text-lg sm:text-xl font-semibold text-gray-900">NEARMobile PostHog Analytics</h1>
+                  <p className="text-xs sm:text-sm text-gray-500">PostHog Data Dashboard</p>
                 </div>
               </div>
               
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 w-full sm:w-auto justify-end">
                 <button
                   onClick={refreshData}
-                  className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="flex items-center gap-2 px-4 sm:px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
                 >
                   <Database className="h-4 w-4" />
-                  Load Data
+                  <span className="hidden sm:inline">Load Data</span>
+                  <span className="sm:hidden">Load</span>
                 </button>
               </div>
             </div>
@@ -190,16 +191,16 @@ function App() {
         </header>
 
         {/* Main Content - Empty State */}
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center py-16">
-            <Database className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <h2 className="text-2xl font-semibold text-gray-600 mb-2">No Data Loaded</h2>
-            <p className="text-gray-500 mb-6">Click "Load Data" to fetch the latest swap metrics from PostHog</p>
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+          <div className="text-center py-8 sm:py-16">
+            <Database className="h-12 w-12 sm:h-16 sm:w-16 text-gray-400 mx-auto mb-4" />
+            <h2 className="text-xl sm:text-2xl font-semibold text-gray-600 mb-2">No Data Loaded</h2>
+            <p className="text-sm sm:text-base text-gray-500 mb-6 px-4">Click "Load Data" to fetch the latest swap metrics from PostHog</p>
             <button
               onClick={refreshData}
-              className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors mx-auto"
+              className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors mx-auto text-sm sm:text-base"
             >
-              <Database className="h-5 w-5" />
+              <Database className="h-4 w-4 sm:h-5 sm:w-5" />
               Load Swap Metrics
             </button>
           </div>
@@ -243,45 +244,48 @@ function App() {
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 py-4 sm:h-16 sm:py-0">
             <div className="flex items-center gap-3">
-              <img src={logoSvg} alt="NEARMobile Logo" className="h-8 w-8" />
+              <img src={logoSvg} alt="NEARMobile Logo" className="h-8 w-8 flex-shrink-0" />
               <div>
-                <h1 className="text-xl font-semibold text-gray-900">NEARMobile Swaps Analytics</h1>
-                <p className="text-sm text-gray-500">PostHog Data Dashboard</p>
+                <h1 className="text-lg sm:text-xl font-semibold text-gray-900">NEARMobile PostHog Analytics</h1>
+                <p className="text-xs sm:text-sm text-gray-500">PostHog Data Dashboard</p>
               </div>
             </div>
             
-            <div className="flex items-center gap-4">
-              <div className="text-sm text-gray-500">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
+              <div className="text-xs sm:text-sm text-gray-500 order-2 sm:order-1">
                 Last updated: {lastUpdated.toLocaleTimeString()}
                 {error && <span className="text-red-500 ml-2">(Using fallback data)</span>}
               </div>
-              <button
-                onClick={clearCache}
-                className="text-xs px-2 py-1 bg-gray-200 text-gray-600 rounded hover:bg-gray-300 transition-colors"
-                title="Clear cached data"
-              >
-                Clear Cache
-              </button>
-              <button
-                onClick={refreshData}
-                disabled={isLoading || isLoadingAccountValues}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                <RefreshCw className={`h-4 w-4 ${(isLoading || isLoadingAccountValues) ? 'animate-spin' : ''}`} />
-                {isLoading || isLoadingAccountValues ? 'Refreshing...' : 'Refresh Data'}
-              </button>
+              <div className="flex items-center gap-2 order-1 sm:order-2">
+                <button
+                  onClick={clearCache}
+                  className="text-xs px-2 py-1 bg-gray-200 text-gray-600 rounded hover:bg-gray-300 transition-colors"
+                  title="Clear cached data"
+                >
+                  Clear Cache
+                </button>
+                <button
+                  onClick={refreshData}
+                  disabled={isLoading || isLoadingAccountValues}
+                  className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                >
+                  <RefreshCw className={`h-4 w-4 ${(isLoading || isLoadingAccountValues) ? 'animate-spin' : ''}`} />
+                  <span className="hidden sm:inline">{isLoading || isLoadingAccountValues ? 'Refreshing...' : 'Refresh Data'}</span>
+                  <span className="sm:hidden">Refresh</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="space-y-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+        <div className="space-y-6 sm:space-y-8">
           {/* Overview Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             <MetricsCard 
               title="All Time" 
               metrics={data.allTime}
@@ -315,7 +319,7 @@ function App() {
           )}
 
           {/* Trading Pairs Tables */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 sm:gap-8">
             <TradingPairsTable 
               title="Top Trading Pairs (All Time)"
               pairs={data.topTradingPairs.allTime.slice(0, 10)}

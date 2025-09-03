@@ -30,20 +30,32 @@ const MetricsCard: React.FC<MetricsCardProps> = ({ title, metrics, showGrowth = 
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-      <h3 className="text-lg font-semibold text-gray-800 mb-4">{title}</h3>
+    <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border border-gray-200">
+      <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">{title}</h3>
       
       <div className="space-y-3">
         <div>
-          <p className="text-sm text-gray-600">Total Swaps</p>
-          <p className="text-2xl font-bold text-gray-900">{metrics.totalSwaps.toLocaleString()}</p>
-          {showGrowth && formatPercent(metrics.swapGrowthPercent)}
+          <p className="text-xs sm:text-sm text-gray-600">Total Swaps</p>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-xl sm:text-2xl font-bold text-gray-900">{metrics.totalSwaps.toLocaleString()}</p>
+            {showGrowth && (
+              <div className="mt-1 sm:mt-0">
+                {formatPercent(metrics.swapGrowthPercent)}
+              </div>
+            )}
+          </div>
         </div>
         
         <div>
-          <p className="text-sm text-gray-600">Total Volume (USD)</p>
-          <p className="text-2xl font-bold text-gray-900">{formatNumber(metrics.totalVolumeUSD)}</p>
-          {showGrowth && formatPercent(metrics.volumeGrowthPercent)}
+          <p className="text-xs sm:text-sm text-gray-600">Total Volume (USD)</p>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-xl sm:text-2xl font-bold text-gray-900">{formatNumber(metrics.totalVolumeUSD)}</p>
+            {showGrowth && (
+              <div className="mt-1 sm:mt-0">
+                {formatPercent(metrics.volumeGrowthPercent)}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
