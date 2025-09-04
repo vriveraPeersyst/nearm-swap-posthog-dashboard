@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "..",
+    "outDir": "../.vercel/output",
+    "noEmit": true,
+    "moduleResolution": "nodenext"
+  },
+  "include": [
+    "*.ts",
+    "../src/**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

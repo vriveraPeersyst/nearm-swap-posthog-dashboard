@@ -1,0 +1,13 @@
+{
+  "functions": {
+    "api/health.ts": {
+      "maxDuration": 30
+    },
+    "api/swap-metrics.ts": {
+      "maxDuration": 60
+    },
+    "api/account-values.ts": {
+      "maxDuration": 60
+    }
+  }
+}

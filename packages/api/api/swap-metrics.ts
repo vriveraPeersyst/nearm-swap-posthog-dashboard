@@ -1,8 +1,9 @@
+import { VercelRequest, VercelResponse } from '@vercel/node';
 import { Decimal } from 'decimal.js';
 import { cfg } from './config.js';
 import { fetchPricesOnce } from './prices.js';
 import { fetchSwapBatch, type SwapEventRow } from './posthog.js';
-import { intentsToPriceId } from './tokenMapping.js';
+import { intentsToPriceId } from '../src/tokenMapping.js';
 
 type Diagnostics = {
   unmappedIntentTokenIds: Set<string>;
@@ -24,7 +25,7 @@ type PairMetrics = {
   };
 };
 
-export async function getSwapMetrics() {
+async function getSwapMetrics() {
   // 1) Get prices ONCE
   const prices = await fetchPricesOnce(); // id -> Decimal price
   const diags: Diagnostics = {
@@ -273,8 +274,7 @@ export async function getSwapMetrics() {
   };
 }
 
-// Vercel serverless function handler
-export default async function handler(req: any, res: any) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
@@ -290,10 +290,10 @@ export default async function handler(req: any, res: any) {
 
   try {
     const data = await getSwapMetrics();
-    res.status(200).json(data);
+    return res.status(200).json(data);
   } catch (error) {
     console.error('Error fetching swap metrics:', error);
-    res.status(500).json({ 
+    return res.status(500).json({ 
       error: 'Internal server error',
       details: error instanceof Error ? error.message : 'Unknown error'
     });

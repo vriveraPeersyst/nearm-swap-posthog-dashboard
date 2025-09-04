@@ -171,8 +171,8 @@ export async function getTotalAccountValues(): Promise<AccountValueSummary> {
   }
 }
 
-// Main execution
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Main execution - only run when called directly (not when imported)
+if (require.main === module) {
   getTotalAccountValues()
     .then(summary => {
       // Output JSON for API consumption

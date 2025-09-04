@@ -49,10 +49,10 @@ const TradingPairsTable: React.FC<TradingPairsTableProps> = ({
     };
 
     return (
-      <div className="flex items-center gap-1 text-xs">
-        <span className="font-medium text-blue-600">{cleanTokenName(tokenA)}</span>
-        <ArrowRight size={12} className="text-gray-400 flex-shrink-0" />
-        <span className="font-medium text-green-600">{cleanTokenName(tokenB)}</span>
+      <div className="flex items-center gap-1 text-xs max-w-full">
+        <span className="font-medium text-blue-600 truncate">{cleanTokenName(tokenA)}</span>
+        <ArrowRight size={10} className="text-gray-400 flex-shrink-0 mx-0.5" />
+        <span className="font-medium text-green-600 truncate">{cleanTokenName(tokenB)}</span>
       </div>
     );
   };
@@ -60,28 +60,28 @@ const TradingPairsTable: React.FC<TradingPairsTableProps> = ({
   return (
     <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
       <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
-        <h3 className="text-base font-semibold text-gray-800">{title}</h3>
+        <h3 className="text-sm sm:text-base font-semibold text-gray-800">{title}</h3>
       </div>
       
       <div className="overflow-x-auto">
-        <table className="w-full text-sm min-w-full">
+        <table className="w-full text-sm">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-2 sm:px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Pair
               </th>
-              <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-1 sm:px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Swaps
               </th>
-              <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-1 sm:px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Volume
               </th>
               {showLast24h && (
                 <>
-                  <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-1 sm:px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
                     24h Swaps
                   </th>
-                  <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-1 sm:px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     24h Vol
                   </th>
                 </>
@@ -91,21 +91,23 @@ const TradingPairsTable: React.FC<TradingPairsTableProps> = ({
           <tbody className="bg-white divide-y divide-gray-200">
             {pairs.map((pair, index) => (
               <tr key={`${pair.pair}-${index}`} className="hover:bg-gray-50">
-                <td className="px-3 py-2">
-                  {formatPair(pair.pair)}
+                <td className="px-2 sm:px-3 py-2 min-w-0">
+                  <div className="truncate">
+                    {formatPair(pair.pair)}
+                  </div>
                 </td>
-                <td className="px-2 py-2 text-xs text-gray-900">
+                <td className="px-1 sm:px-2 py-2 text-xs text-gray-900 whitespace-nowrap">
                   {pair.totalSwaps.toLocaleString()}
                 </td>
-                <td className="px-2 py-2 text-xs text-gray-900">
+                <td className="px-1 sm:px-2 py-2 text-xs text-gray-900 whitespace-nowrap">
                   {formatNumber(pair.totalVolumeUSD)}
                 </td>
                 {showLast24h && (
                   <>
-                    <td className="px-2 py-2 text-xs text-gray-900">
+                    <td className="px-1 sm:px-2 py-2 text-xs text-gray-900 whitespace-nowrap hidden sm:table-cell">
                       {pair.last24hSwaps.toLocaleString()}
                     </td>
-                    <td className="px-2 py-2 text-xs text-gray-900">
+                    <td className="px-1 sm:px-2 py-2 text-xs text-gray-900 whitespace-nowrap">
                       {formatNumber(pair.last24hVolumeUSD)}
                     </td>
                   </>

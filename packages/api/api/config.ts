@@ -1,12 +1,3 @@
-// Only load dotenv in local development, not in Vercel production
-if (!process.env.VERCEL && !process.env.LAMBDA_TASK_ROOT) {
-  try {
-    // Use require for synchronous loading in CommonJS-style
-    require('dotenv/config');
-  } catch {
-    // dotenv not available, using environment variables directly
-  }
-}
 import { z } from 'zod';
 
 const Env = z.object({
