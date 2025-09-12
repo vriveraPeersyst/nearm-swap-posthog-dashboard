@@ -121,7 +121,7 @@ const TopAccountsTable: React.FC<TopAccountsTableProps> = ({ data }) => {
                   <div className="flex items-center gap-2">
                     <User className="text-gray-400" size={14} />
                     <a 
-                      href={`https://nearblocks.io/address/${account.account_id}`}
+                      href={`https://pikespeak.ai/wallet-explorer/${account.account_id}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="font-mono text-xs text-blue-600 hover:text-blue-800 truncate max-w-[200px] flex items-center gap-1 hover:underline"
