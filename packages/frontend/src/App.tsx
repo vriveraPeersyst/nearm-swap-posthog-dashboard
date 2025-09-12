@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Database, RefreshCw } from 'lucide-react';
-import type { SwapMetrics, AccountValueSummary } from './types';
+import type { SwapMetrics, AccountValueSummary, TopAccountsResponse } from './types';
 import MetricsCard from './components/MetricsCard';
 import TradingPairsTable from './components/TradingPairsTable';
 import AccountValuesCard from './components/AccountValuesCard';
+import TopAccountsTable from './components/TopAccountsTable';
 import { apiCall } from './utils/api';
 import logoSvg from './assets/NEARMobile_Logo.svg';
 import './App.css';
@@ -11,9 +12,11 @@ import './App.css';
 function App() {
   const [data, setData] = useState<SwapMetrics | null>(null);
   const [accountValues, setAccountValues] = useState<AccountValueSummary | null>(null);
+  const [topAccounts, setTopAccounts] = useState<TopAccountsResponse | null>(null);
   const [nearPriceUSD, setNearPriceUSD] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingAccountValues, setIsLoadingAccountValues] = useState(false);
+  const [isLoadingTopAccounts, setIsLoadingTopAccounts] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [error, setError] = useState<string | null>(null);
 
@@ -23,6 +26,8 @@ function App() {
     const savedTimestamp = localStorage.getItem('swapMetricsTimestamp');
     const savedAccountValues = localStorage.getItem('accountValues');
     const savedAccountValuesTimestamp = localStorage.getItem('accountValuesTimestamp');
+    const savedTopAccounts = localStorage.getItem('topAccounts');
+    const savedTopAccountsTimestamp = localStorage.getItem('topAccountsTimestamp');
     const savedNearPrice = localStorage.getItem('nearPriceUSD');
     const savedNearPriceTimestamp = localStorage.getItem('nearPriceTimestamp');
     
@@ -49,6 +54,18 @@ function App() {
         // Clear corrupted data
         localStorage.removeItem('accountValues');
         localStorage.removeItem('accountValuesTimestamp');
+      }
+    }
+
+    if (savedTopAccounts && savedTopAccountsTimestamp) {
+      try {
+        const parsedTopAccounts = JSON.parse(savedTopAccounts);
+        setTopAccounts(parsedTopAccounts);
+      } catch (error) {
+        console.error('Error loading saved top accounts:', error);
+        // Clear corrupted data
+        localStorage.removeItem('topAccounts');
+        localStorage.removeItem('topAccountsTimestamp');
       }
     }
 
@@ -125,6 +142,30 @@ function App() {
     }
   };
 
+  const fetchTopAccounts = async () => {
+    setIsLoadingTopAccounts(true);
+    try {
+      const response = await apiCall('/api/top-accounts');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const newTopAccounts = await response.json();
+      const timestamp = new Date();
+      
+      // Save to state
+      setTopAccounts(newTopAccounts);
+      
+      // Save to localStorage for persistence
+      localStorage.setItem('topAccounts', JSON.stringify(newTopAccounts));
+      localStorage.setItem('topAccountsTimestamp', timestamp.toISOString());
+    } catch (error) {
+      console.error('Failed to fetch top accounts:', error);
+      // Don't set main error for top accounts failure
+    } finally {
+      setIsLoadingTopAccounts(false);
+    }
+  };
+
   const fetchNearPrice = async () => {
     try {
       const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=near&vs_currencies=usd');
@@ -145,7 +186,7 @@ function App() {
   };
 
   const refreshData = async () => {
-    await Promise.all([fetchData(), fetchAccountValues(), fetchNearPrice()]);
+    await Promise.all([fetchData(), fetchAccountValues(), fetchTopAccounts(), fetchNearPrice()]);
   };
 
   const clearCache = () => {
@@ -153,8 +194,11 @@ function App() {
     localStorage.removeItem('swapMetricsTimestamp');
     localStorage.removeItem('accountValues');
     localStorage.removeItem('accountValuesTimestamp');
+    localStorage.removeItem('topAccounts');
+    localStorage.removeItem('topAccountsTimestamp');
     setData(null);
     setAccountValues(null);
+    setTopAccounts(null);
     setError(null);
   };
 
@@ -268,11 +312,11 @@ function App() {
                 </button>
                 <button
                   onClick={refreshData}
-                  disabled={isLoading || isLoadingAccountValues}
+                  disabled={isLoading || isLoadingAccountValues || isLoadingTopAccounts}
                   className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
                 >
-                  <RefreshCw className={`h-4 w-4 ${(isLoading || isLoadingAccountValues) ? 'animate-spin' : ''}`} />
-                  <span className="hidden sm:inline">{isLoading || isLoadingAccountValues ? 'Refreshing...' : 'Refresh Data'}</span>
+                  <RefreshCw className={`h-4 w-4 ${(isLoading || isLoadingAccountValues || isLoadingTopAccounts) ? 'animate-spin' : ''}`} />
+                  <span className="hidden sm:inline">{isLoading || isLoadingAccountValues || isLoadingTopAccounts ? 'Refreshing...' : 'Refresh Data'}</span>
                   <span className="sm:hidden">Refresh</span>
                 </button>
               </div>
@@ -314,6 +358,17 @@ function App() {
               <div className="flex items-center justify-center">
                 <RefreshCw className="h-6 w-6 animate-spin text-blue-600 mr-2" />
                 <span className="text-gray-600">Loading account values...</span>
+              </div>
+            </div>
+          )}
+
+          {/* Top Accounts */}
+          {topAccounts && <TopAccountsTable data={topAccounts} />}
+          {isLoadingTopAccounts && (
+            <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+              <div className="flex items-center justify-center">
+                <RefreshCw className="h-6 w-6 animate-spin text-blue-600 mr-2" />
+                <span className="text-gray-600">Loading top accounts...</span>
               </div>
             </div>
           )}

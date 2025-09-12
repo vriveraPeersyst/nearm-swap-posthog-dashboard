@@ -1,13 +1,14 @@
+import { z } from 'zod';
+import { config } from 'dotenv';
+
 // Only load dotenv in local development, not in Vercel production
 if (!process.env.VERCEL && !process.env.LAMBDA_TASK_ROOT) {
   try {
-    // Use require for synchronous loading in CommonJS-style
-    require('dotenv/config');
+    config();
   } catch {
     // dotenv not available, using environment variables directly
   }
 }
-import { z } from 'zod';
 
 const Env = z.object({
   POSTHOG_BASE_URL: z.string().default('https://app.posthog.com'),

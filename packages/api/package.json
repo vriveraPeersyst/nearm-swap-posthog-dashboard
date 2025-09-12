@@ -7,14 +7,10 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "run": "tsx src/index.ts",
-    "check-data": "tsx src/checkDataAvailability.ts",
-    "extract-addresses": "tsx src/extractLoadAccountsAddresses.ts",
-    "extract-account-state": "tsx src/extractAccountStateAddresses.ts",
-    "debug-load-accounts": "tsx src/debugLoadAccountsEvents.ts",
     "total-values": "tsx src/getTotalAccountValues.ts",
+    "top-accounts": "tsx src/getTopAccountsByValue.ts",
     "start": "node dist/index.js",
-    "clean": "rm -rf dist",
-    "generate-data": "tsx src/generateData.ts"
+    "clean": "rm -rf dist"
   },
   "dependencies": {
     "@vercel/node": "^3.0.0",

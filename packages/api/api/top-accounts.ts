@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getSwapMetrics } from '../src/swapMetrics.js';
+import { getTopAccountsByValue } from '../src/getTopAccountsByValue.js';
 
 // CORS headers for cross-origin requests
 const corsHeaders = {
@@ -27,13 +27,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const data = await getSwapMetrics();
-    return res.status(200).json(data);
+    console.log('Fetching top accounts by value...');
+    const data = await getTopAccountsByValue();
+    console.log('Successfully fetched top accounts by value');
+    res.json(data);
   } catch (error) {
-    console.error('Error fetching swap metrics:', error);
-    return res.status(500).json({ 
-      error: 'Internal server error',
-      details: error instanceof Error ? error.message : 'Unknown error'
+    console.error('Error fetching top accounts by value:', error);
+    res.status(500).json({ 
+      error: 'Failed to fetch top accounts by value',
+      message: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 }
