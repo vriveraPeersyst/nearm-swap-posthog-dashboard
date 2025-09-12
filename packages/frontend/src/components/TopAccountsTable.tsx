@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trophy, Calendar, User, Coins } from 'lucide-react';
+import { Trophy, Calendar, User, Coins, ExternalLink } from 'lucide-react';
 import type { TopAccountsResponse } from '../types';
 
 interface TopAccountsTableProps {
@@ -120,12 +120,16 @@ const TopAccountsTable: React.FC<TopAccountsTableProps> = ({ data }) => {
                 <td className="px-2 sm:px-3 py-2">
                   <div className="flex items-center gap-2">
                     <User className="text-gray-400" size={14} />
-                    <span 
-                      className="font-mono text-xs text-gray-900 truncate max-w-[200px]"
-                      title={account.account_id}
+                    <a 
+                      href={`https://nearblocks.io/address/${account.account_id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-mono text-xs text-blue-600 hover:text-blue-800 truncate max-w-[200px] flex items-center gap-1 hover:underline"
+                      title={`View ${account.account_id} on NEAR Explorer`}
                     >
-                      {formatAccountId(account.account_id)}
-                    </span>
+                      <span>{formatAccountId(account.account_id)}</span>
+                      <ExternalLink className="text-blue-500" size={10} />
+                    </a>
                   </div>
                 </td>
                 <td className="px-1 sm:px-2 py-2 text-right text-xs text-gray-900 whitespace-nowrap">
