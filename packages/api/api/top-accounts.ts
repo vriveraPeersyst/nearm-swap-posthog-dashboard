@@ -22,8 +22,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.setHeader(key, value);
   });
 
-  if (req.method !== 'GET') {
+  if (req.method !== 'GET' && req.method !== 'HEAD') {
     return res.status(405).json({ error: 'Method Not Allowed' });
+  }
+
+  // Handle HEAD requests
+  if (req.method === 'HEAD') {
+    return res.status(200).end();
   }
 
   try {
