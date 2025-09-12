@@ -41,7 +41,7 @@ const baseMap: Record<string, string> = {
   abg: "abg-966.meme-cooking.near",
   ref: "token.v2.ref-finance.near",
   mpdao: "mpdao-token.near",
-  hapi: "hapi",
+  hapi: "d9c2d319cd7e6177336b0a9c93c21cb48d84fb54.factory.bridge.near",
   score: "score.aidols.near",
   kaito: "kaito",
   trx: "tron",
