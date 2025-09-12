@@ -29,6 +29,28 @@ export interface AccountValueSummary {
   total_account_state_events: number;
 }
 
+export interface TopAccountData {
+  account_id: string;
+  near_balance: number;
+  near_staked: number;
+  total_value: number;
+  latest_update: string;
+  events_count: number;
+}
+
+export interface TopAccountsResponse {
+  accounts: TopAccountData[];
+  total_accounts_found: number;
+  date_range: {
+    start_date: string;
+    end_date: string;
+  };
+  query_metadata: {
+    limit: number;
+    total_events_processed: number;
+  };
+}
+
 export interface SwapMetrics {
   sideValued: string;
   allTime: TimeMetrics;
