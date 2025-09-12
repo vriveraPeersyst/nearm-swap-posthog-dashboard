@@ -8,6 +8,9 @@
     },
     "api/account-values.ts": {
       "maxDuration": 60
+    },
+    "api/top-accounts.ts": {
+      "maxDuration": 60
     }
   }
 }
