@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getTotalAccountValues } from './getTotalAccountValues.js';
+import { getTotalAccountValues } from '../src/getTotalAccountValues.js';
 
 // CORS headers for cross-origin requests
 const corsHeaders = {
