@@ -13,13 +13,18 @@ export type SwapEventRow = {
 
 function q(v: string) { return `'${v.replace(/'/g, "''")}'`; }
 
+// Helper to extract property from JSON using ClickHouse JSONExtractString
+function prop(field: string): string {
+  return `JSONExtractString(properties, '${field}')`;
+}
+
 function buildExclusions(): string {
   const substr = parseCSV(cfg.EXCLUDE_ACCOUNT_ID_PATTERNS).map((p) => p.toLowerCase());
   const exact = parseCSV(cfg.EXCLUDE_ACCOUNT_IDS);
 
   const clauses: string[] = [];
-  for (const p of substr) clauses.push(`lower(account_id) NOT LIKE ${q('%' + p + '%')}`);
-  if (exact.length) clauses.push(`account_id NOT IN (${exact.map(q).join(', ')})`);
+  for (const p of substr) clauses.push(`lower(${prop('account_id')}) NOT LIKE ${q('%' + p + '%')}`);
+  if (exact.length) clauses.push(`${prop('account_id')} NOT IN (${exact.map(q).join(', ')})`);
   return clauses.length ? clauses.join(' AND ') : '1';
 }
 
@@ -52,11 +57,6 @@ async function hogql<T = any>(query: string, retries = 3): Promise<T> {
     }
   }
   throw new Error('PostHog query failed after all retries');
-}
-
-// Helper to extract property from JSON using ClickHouse JSONExtractString
-function prop(field: string): string {
-  return `JSONExtractString(properties, '${field}')`;
 }
 
 /**

@@ -166,15 +166,15 @@ export async function getTopAccountsByValue(): Promise<TopAccountsResponse> {
     const countQuery = `
       WITH filtered_events AS (
         SELECT 
-          properties.account_id AS account_id,
-          properties.near_value AS near_value,
-          properties.near_staked AS near_staked,
+          ${prop('account_id')} AS account_id,
+          ${prop('near_value')} AS near_value,
+          ${prop('near_staked')} AS near_staked,
           timestamp
         FROM events 
         WHERE event = 'account_state' 
-          AND properties.network = 'mainnet'
-          AND properties.account_id IS NOT NULL
-          AND properties.account_id != ''
+          AND ${prop('network')} = 'mainnet'
+          AND ${prop('account_id')} IS NOT NULL
+          AND ${prop('account_id')} != ''
           AND timestamp >= toDateTime('${startDate}')
       ),
       latest_account_states AS (
