@@ -50,6 +50,16 @@ const baseMap: Record<string, string> = {
   bnb: "binancecoin",
   pol: "matic-network",
   sui: "sui",
+  gnosis: "gnosis",
+  aptos: "aptos",
+  cardano: "cardano",
+  kat: "kat",
+  npro: "npro",
+  public: "public-ai",
+  rhea: "rhea",
+  wbtc: "wrapped-bitcoin",
+  ltc: "litecoin",
+  itlx: "itlx",
   
   // NEAR ecosystem direct mappings (non-intents format)
   "near-native": "near",
@@ -65,6 +75,13 @@ const baseMap: Record<string, string> = {
   "token.0xshitzu.near": "shitzu",
   "score.aidols.near": "score.aidols.near",
   "zec.omft.near": "zcash",
+  "xrp.omft.near": "ripple",
+  "kat.token0.near": "kat",
+  "a35923162c49cf95e6bf26623385eb431ad920d3.factory.bridge.near": "matic-network",
+  "npro.nearmobile.near": "npro",
+  "token.publicailab.near": "public-ai",
+  "token.rhealab.near": "rhea",
+  "itlx.intellex_xyz.near": "itlx",
   
   // Contract addresses mapped to themselves as price IDs
   "mpdao-token.near": "mpdao-token.near",
@@ -73,6 +90,70 @@ const baseMap: Record<string, string> = {
   "aaaaaa20d9e0e2461697782ef11675f668207961.factory.bridge.near": "aaaaaa20d9e0e2461697782ef11675f668207961.factory.bridge.near",
   "d9c2d319cd7e6177336b0a9c93c21cb48d84fb54.factory.bridge.near": "d9c2d319cd7e6177336b0a9c93c21cb48d84fb54.factory.bridge.near",
 };
+
+/**
+ * Map native NEAR tokens to their intent equivalents.
+ * Used to identify deposit/withdraw operations (native ↔ intent swaps).
+ */
+const nativeToIntentMap: Record<string, string> = {
+  // NEAR native
+  "near-native": "intents:near",
+  
+  // Stablecoins
+  "usdt.tether-token.near": "intents:usdt",
+  "17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1": "intents:usdc", // USDC
+  
+  // Bridge tokens
+  "eth.bridge.near": "intents:eth",
+  "zec.omft.near": "intents:zcash",
+  "xrp.omft.near": "intents:xrp",
+  "a35923162c49cf95e6bf26623385eb431ad920d3.factory.bridge.near": "intents:pol", // MATIC/POL
+  
+  // NEAR ecosystem tokens
+  "npro.nearmobile.near": "intents:npro",
+  "kat.token0.near": "intents:kat",
+  "token.publicailab.near": "intents:public",
+  "token.rhealab.near": "intents:rhea",
+  "itlx.intellex_xyz.near": "intents:itlx",
+  "token.sweat": "intents:sweat",
+  "token.burrow.near": "intents:brrr",
+  "blackdragon.tkn.near": "intents:blackdragon",
+  "token.0xshitzu.near": "intents:shitzu",
+  "token.v2.ref-finance.near": "intents:ref",
+  "mpdao-token.near": "intents:mpdao",
+  "score.aidols.near": "intents:score",
+  "d9c2d319cd7e6177336b0a9c93c21cb48d84fb54.factory.bridge.near": "intents:hapi",
+  "aaaaaa20d9e0e2461697782ef11675f668207961.factory.bridge.near": "intents:aurora",
+};
+
+// Create reverse mapping (intent -> native)
+const intentToNativeMap: Record<string, string> = {};
+for (const [native, intent] of Object.entries(nativeToIntentMap)) {
+  intentToNativeMap[intent.toLowerCase()] = native;
+}
+
+/**
+ * Check if a swap pair is a deposit/withdraw (native ↔ intent conversion).
+ * Returns true if the pair is swapping between a native token and its intent equivalent.
+ */
+export function isDepositWithdrawPair(tokenInId: string, tokenOutId: string): boolean {
+  const tokenIn = tokenInId.toLowerCase();
+  const tokenOut = tokenOutId.toLowerCase();
+  
+  // Check if tokenIn is native and tokenOut is its intent equivalent (deposit)
+  const intentEquivalent = nativeToIntentMap[tokenIn];
+  if (intentEquivalent && intentEquivalent.toLowerCase() === tokenOut) {
+    return true;
+  }
+  
+  // Check if tokenIn is intent and tokenOut is its native equivalent (withdraw)
+  const nativeEquivalent = intentToNativeMap[tokenIn];
+  if (nativeEquivalent && nativeEquivalent.toLowerCase() === tokenOut) {
+    return true;
+  }
+  
+  return false;
+}
 
 export function intentsToPriceId(intentsTokenId?: string | null): string | null {
   if (!intentsTokenId) return null;

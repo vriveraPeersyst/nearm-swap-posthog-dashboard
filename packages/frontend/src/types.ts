@@ -6,6 +6,28 @@ export interface TradingPair {
   last24hVolumeUSD: number;
 }
 
+export interface PeriodTradingPair {
+  pair: string;
+  totalSwaps: number;
+  totalVolumeUSD: number;
+  periodSwaps: number;
+  periodVolumeUSD: number;
+}
+
+export interface SwapperData {
+  accountId: string;
+  totalSwaps: number;
+  totalVolumeUSD: number;
+  feeSwaps: number;
+  feeVolumeUSD: number;
+  last24hSwaps: number;
+  last24hVolumeUSD: number;
+  last7dSwaps: number;
+  last7dVolumeUSD: number;
+  last30dSwaps: number;
+  last30dVolumeUSD: number;
+}
+
 export interface TimeMetrics {
   totalSwaps: number;
   totalVolumeUSD: number;
@@ -61,6 +83,29 @@ export interface SwapMetrics {
   topTradingPairs: {
     allTime: TradingPair[];
     last24h: TradingPair[];
+    last7d?: PeriodTradingPair[];
+    last30d?: PeriodTradingPair[];
+  };
+  feeSwaps?: {
+    allTime: { totalSwaps: number; totalVolumeUSD: number };
+    last24h: { totalSwaps: number; totalVolumeUSD: number };
+    last7d: { totalSwaps: number; totalVolumeUSD: number };
+    last30d: { totalSwaps: number; totalVolumeUSD: number };
+    topPairs: {
+      allTime: TradingPair[];
+      last24h: TradingPair[];
+      last7d: PeriodTradingPair[];
+      last30d: PeriodTradingPair[];
+    };
+  };
+  topSwappers?: {
+    byVolume: SwapperData[];
+    byCount: SwapperData[];
+    byFeeVolume: SwapperData[];
+    last24h: SwapperData[];
+    last7d: SwapperData[];
+    last30d: SwapperData[];
+    totalUniqueAccounts: number;
   };
   notes: {
     unmappedIntentTokenIds: string[];

@@ -6,11 +6,14 @@ A comprehensive analytics platform for tracking NEAR blockchain swap activities 
 
 - 📊 **Multi-timeframe Analytics**: 24h, 7d, 30d, and all-time metrics
 - 📈 **Growth Tracking**: Period-over-period growth percentages for swaps and volume
-- 🎯 **Trading Pairs Analysis**: Top trading pairs by volume and activity
+- 🎯 **Trading Pairs Analysis**: Top 30 trading pairs by volume and activity for each period
+- 💸 **Fee Swaps Analytics**: Separate tracking excluding deposits/withdrawals (native ↔ intent conversions)
+- 👥 **Top Swappers Leaderboard**: Track top accounts by volume, swap count, and fee-generating swaps
 - 💾 **Persistent Data**: localStorage caching for instant page loads
 - 🎨 **Modern UI**: Responsive design with Tailwind CSS and Lucide icons
 - 🔄 **Manual Refresh**: Load data only when needed, no auto-refresh on page reload
 - 🏷️ **Smart Token Display**: Intent tokens formatted with "i" prefix (e.g., `intents:eth` → `iETH`)
+- 🪙 **CoinGecko Fallback**: Automatic price fetching from CoinGecko for tokens not in internal API
 - ☁️ **Vercel Deployment**: Ready-to-deploy configuration for Vercel hosting
 
 ## 🏗️ Project Structure
@@ -26,16 +29,23 @@ nearm-swaps-posthog/
 │   │   ├── src/
 │   │   │   ├── index.ts        # Main metrics collection script
 │   │   │   ├── posthog.ts      # PostHog API integration
-│   │   │   ├── prices.ts       # Price data fetching
+│   │   │   ├── prices.ts       # Price data fetching (with CoinGecko fallback)
+│   │   │   ├── swapMetrics.ts  # Core swap metrics calculation
 │   │   │   ├── config.ts       # Configuration management
-│   │   │   └── tokenMapping.ts # Token ID mapping
+│   │   │   └── tokenMapping.ts # Token ID mapping + deposit/withdraw detection
 │   │   ├── .env               # Environment variables
 │   │   ├── vercel.json        # Vercel configuration
 │   │   └── package.json
 │   │
 │   └── frontend/              # React dashboard
 │       ├── src/
-│       │   ├── components/    # React components
+│       │   ├── components/
+│       │   │   ├── MetricsCard.tsx        # Time period overview cards
+│       │   │   ├── SummaryTable.tsx       # Time-based metrics table
+│       │   │   ├── TradingPairsTable.tsx  # Trading pairs analysis
+│       │   │   ├── TopSwappersTable.tsx   # Top swappers leaderboard
+│       │   │   ├── TopAccountsTable.tsx   # Top accounts by value
+│       │   │   └── AccountValuesCard.tsx  # Account values display
 │       │   ├── utils/         # Utility functions
 │       │   ├── App.tsx        # Main app component
 │       │   └── types.ts       # TypeScript definitions

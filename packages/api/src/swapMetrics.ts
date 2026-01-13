@@ -2,7 +2,7 @@ import { Decimal } from 'decimal.js';
 import { cfg } from './config.js';
 import { fetchPricesOnce } from './prices.js';
 import { fetchSwapBatch, type SwapEventRow } from './posthog.js';
-import { intentsToPriceId } from './tokenMapping.js';
+import { intentsToPriceId, isDepositWithdrawPair } from './tokenMapping.js';
 
 type Diagnostics = {
   unmappedIntentTokenIds: Set<string>;
@@ -22,6 +22,24 @@ type PairMetrics = {
     swaps: number;
     volumeUSD: Decimal;
   };
+  last7d: {
+    swaps: number;
+    volumeUSD: Decimal;
+  };
+  last30d: {
+    swaps: number;
+    volumeUSD: Decimal;
+  };
+};
+
+type AccountMetrics = {
+  swaps: number;
+  volumeUSD: Decimal;
+  feeSwaps: number;
+  feeVolumeUSD: Decimal;
+  last24h: { swaps: number; volumeUSD: Decimal };
+  last7d: { swaps: number; volumeUSD: Decimal };
+  last30d: { swaps: number; volumeUSD: Decimal };
 };
 
 export async function getSwapMetrics() {
@@ -55,8 +73,35 @@ export async function getSwapMetrics() {
     previous30d: { swaps: 0, volumeUSD: new Decimal(0) } // 30-60d ago
   };
 
+  // Fee swaps metrics (excludes deposits/withdraws - native ↔ intent conversions)
+  const feeSwaps = {
+    allTime: { swaps: 0, volumeUSD: new Decimal(0) },
+    last24h: { swaps: 0, volumeUSD: new Decimal(0) },
+    last7d: { swaps: 0, volumeUSD: new Decimal(0) },
+    last30d: { swaps: 0, volumeUSD: new Decimal(0) }
+  };
+
   // 4) Initialize trading pair tracking
   const tradingPairs = new Map<string, PairMetrics>();
+  const feeSwapPairs = new Map<string, PairMetrics>(); // Only fee-generating swaps
+
+  // 5) Initialize account tracking
+  const accounts = new Map<string, AccountMetrics>();
+
+  const getAccountMetrics = (accountId: string): AccountMetrics => {
+    if (!accounts.has(accountId)) {
+      accounts.set(accountId, {
+        swaps: 0,
+        volumeUSD: new Decimal(0),
+        feeSwaps: 0,
+        feeVolumeUSD: new Decimal(0),
+        last24h: { swaps: 0, volumeUSD: new Decimal(0) },
+        last7d: { swaps: 0, volumeUSD: new Decimal(0) },
+        last30d: { swaps: 0, volumeUSD: new Decimal(0) }
+      });
+    }
+    return accounts.get(accountId)!;
+  };
 
   // Helper function to get/create pair metrics
   const getPairMetrics = (tokenA: string, tokenB: string): PairMetrics => {
@@ -66,6 +111,14 @@ export async function getSwapMetrics() {
         swaps: 0,
         volumeUSD: new Decimal(0),
         last24h: {
+          swaps: 0,
+          volumeUSD: new Decimal(0)
+        },
+        last7d: {
+          swaps: 0,
+          volumeUSD: new Decimal(0)
+        },
+        last30d: {
           swaps: 0,
           volumeUSD: new Decimal(0)
         }
@@ -96,6 +149,7 @@ export async function getSwapMetrics() {
       // Get both token IDs for pair tracking
       const tokenInId = ev.token_in_id ?? '';
       const tokenOutId = ev.token_out_id ?? '';
+      const accountId = ev.account_id ?? '';
 
       // Parse event timestamp
       const eventTime = new Date(ev.timestamp).getTime();
@@ -159,9 +213,92 @@ export async function getSwapMetrics() {
         pairMetrics.swaps++;
         pairMetrics.volumeUSD = pairMetrics.volumeUSD.plus(volumeContribution);
         
-        if (isLast24h) {
+        if (eventTime >= timeFrames['24h']) {
           pairMetrics.last24h.swaps++;
           pairMetrics.last24h.volumeUSD = pairMetrics.last24h.volumeUSD.plus(volumeContribution);
+        }
+        if (eventTime >= timeFrames['7d']) {
+          pairMetrics.last7d.swaps++;
+          pairMetrics.last7d.volumeUSD = pairMetrics.last7d.volumeUSD.plus(volumeContribution);
+        }
+        if (eventTime >= timeFrames['30d']) {
+          pairMetrics.last30d.swaps++;
+          pairMetrics.last30d.volumeUSD = pairMetrics.last30d.volumeUSD.plus(volumeContribution);
+        }
+
+        // Track fee swaps (exclude deposits/withdraws - native ↔ intent conversions)
+        const isDepositWithdraw = isDepositWithdrawPair(tokenInId, tokenOutId);
+        if (!isDepositWithdraw) {
+          // Update fee swap totals
+          feeSwaps.allTime.swaps++;
+          feeSwaps.allTime.volumeUSD = feeSwaps.allTime.volumeUSD.plus(volumeContribution);
+
+          if (eventTime >= timeFrames['24h']) {
+            feeSwaps.last24h.swaps++;
+            feeSwaps.last24h.volumeUSD = feeSwaps.last24h.volumeUSD.plus(volumeContribution);
+          }
+          if (eventTime >= timeFrames['7d']) {
+            feeSwaps.last7d.swaps++;
+            feeSwaps.last7d.volumeUSD = feeSwaps.last7d.volumeUSD.plus(volumeContribution);
+          }
+          if (eventTime >= timeFrames['30d']) {
+            feeSwaps.last30d.swaps++;
+            feeSwaps.last30d.volumeUSD = feeSwaps.last30d.volumeUSD.plus(volumeContribution);
+          }
+
+          // Track fee swap pairs
+          const feePairKey = `${tokenInId} → ${tokenOutId}`;
+          if (!feeSwapPairs.has(feePairKey)) {
+            feeSwapPairs.set(feePairKey, {
+              swaps: 0,
+              volumeUSD: new Decimal(0),
+              last24h: { swaps: 0, volumeUSD: new Decimal(0) },
+              last7d: { swaps: 0, volumeUSD: new Decimal(0) },
+              last30d: { swaps: 0, volumeUSD: new Decimal(0) }
+            });
+          }
+          const feePairMetrics = feeSwapPairs.get(feePairKey)!;
+          feePairMetrics.swaps++;
+          feePairMetrics.volumeUSD = feePairMetrics.volumeUSD.plus(volumeContribution);
+
+          if (eventTime >= timeFrames['24h']) {
+            feePairMetrics.last24h.swaps++;
+            feePairMetrics.last24h.volumeUSD = feePairMetrics.last24h.volumeUSD.plus(volumeContribution);
+          }
+          if (eventTime >= timeFrames['7d']) {
+            feePairMetrics.last7d.swaps++;
+            feePairMetrics.last7d.volumeUSD = feePairMetrics.last7d.volumeUSD.plus(volumeContribution);
+          }
+          if (eventTime >= timeFrames['30d']) {
+            feePairMetrics.last30d.swaps++;
+            feePairMetrics.last30d.volumeUSD = feePairMetrics.last30d.volumeUSD.plus(volumeContribution);
+          }
+        }
+      }
+
+      // Track account metrics
+      if (accountId) {
+        const acctMetrics = getAccountMetrics(accountId);
+        acctMetrics.swaps++;
+        acctMetrics.volumeUSD = acctMetrics.volumeUSD.plus(volumeContribution);
+
+        if (eventTime >= timeFrames['24h']) {
+          acctMetrics.last24h.swaps++;
+          acctMetrics.last24h.volumeUSD = acctMetrics.last24h.volumeUSD.plus(volumeContribution);
+        }
+        if (eventTime >= timeFrames['7d']) {
+          acctMetrics.last7d.swaps++;
+          acctMetrics.last7d.volumeUSD = acctMetrics.last7d.volumeUSD.plus(volumeContribution);
+        }
+        if (eventTime >= timeFrames['30d']) {
+          acctMetrics.last30d.swaps++;
+          acctMetrics.last30d.volumeUSD = acctMetrics.last30d.volumeUSD.plus(volumeContribution);
+        }
+
+        // Track fee swaps per account (only if not deposit/withdraw)
+        if (tokenInId && tokenOutId && !isDepositWithdrawPair(tokenInId, tokenOutId)) {
+          acctMetrics.feeSwaps++;
+          acctMetrics.feeVolumeUSD = acctMetrics.feeVolumeUSD.plus(volumeContribution);
         }
       }
 
@@ -206,7 +343,7 @@ export async function getSwapMetrics() {
       last24hVolumeUSD: metrics.last24h.volumeUSD.toNumber()
     }))
     .sort((a, b) => b.totalVolumeUSD - a.totalVolumeUSD)
-    .slice(0, 10); // Top 10 pairs by volume
+    .slice(0, 30); // Top 30 pairs by volume
 
   const topPairs24h = Array.from(tradingPairs.entries())
     .map(([pair, metrics]) => ({
@@ -218,7 +355,128 @@ export async function getSwapMetrics() {
     }))
     .filter(p => p.last24hSwaps > 0)
     .sort((a, b) => b.last24hVolumeUSD - a.last24hVolumeUSD)
-    .slice(0, 10); // Top 10 pairs by 24h volume
+    .slice(0, 30); // Top 30 pairs by 24h volume
+
+  const topPairs7d = Array.from(tradingPairs.entries())
+    .map(([pair, metrics]) => ({
+      pair,
+      totalSwaps: metrics.swaps,
+      totalVolumeUSD: metrics.volumeUSD.toNumber(),
+      periodSwaps: metrics.last7d.swaps,
+      periodVolumeUSD: metrics.last7d.volumeUSD.toNumber()
+    }))
+    .filter(p => p.periodSwaps > 0)
+    .sort((a, b) => b.periodVolumeUSD - a.periodVolumeUSD)
+    .slice(0, 30); // Top 30 pairs by 7d volume
+
+  const topPairs30d = Array.from(tradingPairs.entries())
+    .map(([pair, metrics]) => ({
+      pair,
+      totalSwaps: metrics.swaps,
+      totalVolumeUSD: metrics.volumeUSD.toNumber(),
+      periodSwaps: metrics.last30d.swaps,
+      periodVolumeUSD: metrics.last30d.volumeUSD.toNumber()
+    }))
+    .filter(p => p.periodSwaps > 0)
+    .sort((a, b) => b.periodVolumeUSD - a.periodVolumeUSD)
+    .slice(0, 30); // Top 30 pairs by 30d volume
+
+  // Process fee swap pairs (excludes deposits/withdraws)
+  const topFeeSwapPairsAllTime = Array.from(feeSwapPairs.entries())
+    .map(([pair, metrics]) => ({
+      pair,
+      totalSwaps: metrics.swaps,
+      totalVolumeUSD: metrics.volumeUSD.toNumber(),
+      last24hSwaps: metrics.last24h.swaps,
+      last24hVolumeUSD: metrics.last24h.volumeUSD.toNumber()
+    }))
+    .sort((a, b) => b.totalVolumeUSD - a.totalVolumeUSD)
+    .slice(0, 30);
+
+  const topFeeSwapPairs24h = Array.from(feeSwapPairs.entries())
+    .map(([pair, metrics]) => ({
+      pair,
+      totalSwaps: metrics.swaps,
+      totalVolumeUSD: metrics.volumeUSD.toNumber(),
+      last24hSwaps: metrics.last24h.swaps,
+      last24hVolumeUSD: metrics.last24h.volumeUSD.toNumber()
+    }))
+    .filter(p => p.last24hSwaps > 0)
+    .sort((a, b) => b.last24hVolumeUSD - a.last24hVolumeUSD)
+    .slice(0, 30);
+
+  const topFeeSwapPairs7d = Array.from(feeSwapPairs.entries())
+    .map(([pair, metrics]) => ({
+      pair,
+      totalSwaps: metrics.swaps,
+      totalVolumeUSD: metrics.volumeUSD.toNumber(),
+      periodSwaps: metrics.last7d.swaps,
+      periodVolumeUSD: metrics.last7d.volumeUSD.toNumber()
+    }))
+    .filter(p => p.periodSwaps > 0)
+    .sort((a, b) => b.periodVolumeUSD - a.periodVolumeUSD)
+    .slice(0, 30);
+
+  const topFeeSwapPairs30d = Array.from(feeSwapPairs.entries())
+    .map(([pair, metrics]) => ({
+      pair,
+      totalSwaps: metrics.swaps,
+      totalVolumeUSD: metrics.volumeUSD.toNumber(),
+      periodSwaps: metrics.last30d.swaps,
+      periodVolumeUSD: metrics.last30d.volumeUSD.toNumber()
+    }))
+    .filter(p => p.periodSwaps > 0)
+    .sort((a, b) => b.periodVolumeUSD - a.periodVolumeUSD)
+    .slice(0, 30);
+
+  // Process top swappers
+  const mapAccountToOutput = (accountId: string, m: AccountMetrics) => ({
+    accountId,
+    totalSwaps: m.swaps,
+    totalVolumeUSD: m.volumeUSD.toNumber(),
+    feeSwaps: m.feeSwaps,
+    feeVolumeUSD: m.feeVolumeUSD.toNumber(),
+    last24hSwaps: m.last24h.swaps,
+    last24hVolumeUSD: m.last24h.volumeUSD.toNumber(),
+    last7dSwaps: m.last7d.swaps,
+    last7dVolumeUSD: m.last7d.volumeUSD.toNumber(),
+    last30dSwaps: m.last30d.swaps,
+    last30dVolumeUSD: m.last30d.volumeUSD.toNumber()
+  });
+
+  const topSwappersByVolume = Array.from(accounts.entries())
+    .map(([accountId, m]) => mapAccountToOutput(accountId, m))
+    .sort((a, b) => b.totalVolumeUSD - a.totalVolumeUSD)
+    .slice(0, 30);
+
+  const topSwappersByCount = Array.from(accounts.entries())
+    .map(([accountId, m]) => mapAccountToOutput(accountId, m))
+    .sort((a, b) => b.totalSwaps - a.totalSwaps)
+    .slice(0, 30);
+
+  const topSwappersByFeeVolume = Array.from(accounts.entries())
+    .map(([accountId, m]) => mapAccountToOutput(accountId, m))
+    .filter(a => a.feeSwaps > 0)
+    .sort((a, b) => b.feeVolumeUSD - a.feeVolumeUSD)
+    .slice(0, 30);
+
+  const topSwappers24h = Array.from(accounts.entries())
+    .map(([accountId, m]) => mapAccountToOutput(accountId, m))
+    .filter(a => a.last24hSwaps > 0)
+    .sort((a, b) => b.last24hVolumeUSD - a.last24hVolumeUSD)
+    .slice(0, 30);
+
+  const topSwappers7d = Array.from(accounts.entries())
+    .map(([accountId, m]) => mapAccountToOutput(accountId, m))
+    .filter(a => a.last7dSwaps > 0)
+    .sort((a, b) => b.last7dVolumeUSD - a.last7dVolumeUSD)
+    .slice(0, 30);
+
+  const topSwappers30d = Array.from(accounts.entries())
+    .map(([accountId, m]) => mapAccountToOutput(accountId, m))
+    .filter(a => a.last30dSwaps > 0)
+    .sort((a, b) => b.last30dVolumeUSD - a.last30dVolumeUSD)
+    .slice(0, 30);
 
   // 7) Output with time-based metrics and growth
   return {
@@ -261,7 +519,46 @@ export async function getSwapMetrics() {
     // Trading pair analytics
     topTradingPairs: {
       allTime: topPairsAllTime,
-      last24h: topPairs24h
+      last24h: topPairs24h,
+      last7d: topPairs7d,
+      last30d: topPairs30d
+    },
+
+    // Fee swaps (excludes deposits/withdraws - native ↔ intent conversions)
+    feeSwaps: {
+      allTime: {
+        totalSwaps: feeSwaps.allTime.swaps,
+        totalVolumeUSD: feeSwaps.allTime.volumeUSD.toNumber()
+      },
+      last24h: {
+        totalSwaps: feeSwaps.last24h.swaps,
+        totalVolumeUSD: feeSwaps.last24h.volumeUSD.toNumber()
+      },
+      last7d: {
+        totalSwaps: feeSwaps.last7d.swaps,
+        totalVolumeUSD: feeSwaps.last7d.volumeUSD.toNumber()
+      },
+      last30d: {
+        totalSwaps: feeSwaps.last30d.swaps,
+        totalVolumeUSD: feeSwaps.last30d.volumeUSD.toNumber()
+      },
+      topPairs: {
+        allTime: topFeeSwapPairsAllTime,
+        last24h: topFeeSwapPairs24h,
+        last7d: topFeeSwapPairs7d,
+        last30d: topFeeSwapPairs30d
+      }
+    },
+
+    // Top swappers analytics
+    topSwappers: {
+      byVolume: topSwappersByVolume,
+      byCount: topSwappersByCount,
+      byFeeVolume: topSwappersByFeeVolume,
+      last24h: topSwappers24h,
+      last7d: topSwappers7d,
+      last30d: topSwappers30d,
+      totalUniqueAccounts: accounts.size
     },
     
     // Diagnostics

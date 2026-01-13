@@ -4,6 +4,7 @@ import { cfg, parseCSV } from './config.js';
 export type SwapEventRow = {
   uuid: string;
   timestamp: string;
+  account_id?: string | null;
   amount_in?: string | null;
   amount_out?: string | null;
   token_in_id?: string | null;
@@ -46,6 +47,7 @@ export async function fetchSwapBatch(offset: number, limit: number): Promise<Swa
     SELECT
       uuid,
       toString(timestamp) AS timestamp,
+      properties.account_id AS account_id,
       properties.${cfg.VOLUME_PROP_IN} AS amount_in,
       properties.${cfg.VOLUME_PROP_OUT} AS amount_out,
       properties.token_in_id AS token_in_id,
@@ -61,9 +63,10 @@ export async function fetchSwapBatch(offset: number, limit: number): Promise<Swa
   return (res?.results ?? []).map((r) => ({
     uuid: r[0],
     timestamp: r[1],
-    amount_in: r[2],
-    amount_out: r[3],
-    token_in_id: r[4],
-    token_out_id: r[5]
+    account_id: r[2],
+    amount_in: r[3],
+    amount_out: r[4],
+    token_in_id: r[5],
+    token_out_id: r[6]
   }));
 }

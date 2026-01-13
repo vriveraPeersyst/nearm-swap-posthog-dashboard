@@ -3,6 +3,7 @@ import { Database, RefreshCw } from 'lucide-react';
 import type { SwapMetrics, AccountValueSummary, TopAccountsResponse } from './types';
 import MetricsCard from './components/MetricsCard';
 import TradingPairsTable from './components/TradingPairsTable';
+import TopSwappersTable from './components/TopSwappersTable';
 import AccountValuesCard from './components/AccountValuesCard';
 import TopAccountsTable from './components/TopAccountsTable';
 import { apiCall } from './utils/api';
@@ -377,16 +378,146 @@ function App() {
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 sm:gap-8">
             <TradingPairsTable 
               title="Top Trading Pairs (All Time)"
-              pairs={data.topTradingPairs.allTime.slice(0, 10)}
+              pairs={data.topTradingPairs.allTime.slice(0, 30)}
               showLast24h={true}
             />
             
             <TradingPairsTable 
               title="Most Active Pairs (Last 24h)"
-              pairs={data.topTradingPairs.last24h.slice(0, 10)}
+              pairs={data.topTradingPairs.last24h.slice(0, 30)}
               showLast24h={true}
             />
           </div>
+
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 sm:gap-8">
+            <TradingPairsTable 
+              title="Most Active Pairs (Last 7 Days)"
+              pairs={(data.topTradingPairs.last7d ?? []).slice(0, 30)}
+              periodLabel="7d"
+            />
+            
+            <TradingPairsTable 
+              title="Most Active Pairs (Last 30 Days)"
+              pairs={(data.topTradingPairs.last30d ?? []).slice(0, 30)}
+              periodLabel="30d"
+            />
+          </div>
+
+          {/* Fee Swaps Section - Excludes Deposits/Withdraws */}
+          {data.feeSwaps && (
+            <>
+              <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-lg p-6">
+                <h2 className="text-xl font-bold text-purple-800 mb-4">💸 Fee-Generating Swaps</h2>
+                <p className="text-sm text-purple-600 mb-4">
+                  Excludes deposits/withdrawals (native ↔ intent token conversions like NEAR ↔ iNEAR, NPRO ↔ iNPRO)
+                </p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="bg-white rounded-lg p-4 shadow-sm">
+                    <div className="text-xs text-gray-500 uppercase">All Time</div>
+                    <div className="text-lg font-bold text-purple-700">{data.feeSwaps.allTime.totalSwaps.toLocaleString()}</div>
+                    <div className="text-sm text-gray-600">${(data.feeSwaps.allTime.totalVolumeUSD / 1000000).toFixed(2)}M</div>
+                  </div>
+                  <div className="bg-white rounded-lg p-4 shadow-sm">
+                    <div className="text-xs text-gray-500 uppercase">Last 24h</div>
+                    <div className="text-lg font-bold text-purple-700">{data.feeSwaps.last24h.totalSwaps.toLocaleString()}</div>
+                    <div className="text-sm text-gray-600">${data.feeSwaps.last24h.totalVolumeUSD.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
+                  </div>
+                  <div className="bg-white rounded-lg p-4 shadow-sm">
+                    <div className="text-xs text-gray-500 uppercase">Last 7 Days</div>
+                    <div className="text-lg font-bold text-purple-700">{data.feeSwaps.last7d.totalSwaps.toLocaleString()}</div>
+                    <div className="text-sm text-gray-600">${data.feeSwaps.last7d.totalVolumeUSD.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
+                  </div>
+                  <div className="bg-white rounded-lg p-4 shadow-sm">
+                    <div className="text-xs text-gray-500 uppercase">Last 30 Days</div>
+                    <div className="text-lg font-bold text-purple-700">{data.feeSwaps.last30d.totalSwaps.toLocaleString()}</div>
+                    <div className="text-sm text-gray-600">${data.feeSwaps.last30d.totalVolumeUSD.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 sm:gap-8">
+                <TradingPairsTable 
+                  title="Top Fee Swaps (All Time)"
+                  pairs={(data.feeSwaps.topPairs.allTime ?? []).slice(0, 30)}
+                  showLast24h={true}
+                />
+                
+                <TradingPairsTable 
+                  title="Top Fee Swaps (Last 24h)"
+                  pairs={(data.feeSwaps.topPairs.last24h ?? []).slice(0, 30)}
+                  showLast24h={true}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 sm:gap-8">
+                <TradingPairsTable 
+                  title="Top Fee Swaps (Last 7 Days)"
+                  pairs={(data.feeSwaps.topPairs.last7d ?? []).slice(0, 30)}
+                  periodLabel="7d"
+                />
+                
+                <TradingPairsTable 
+                  title="Top Fee Swaps (Last 30 Days)"
+                  pairs={(data.feeSwaps.topPairs.last30d ?? []).slice(0, 30)}
+                  periodLabel="30d"
+                />
+              </div>
+            </>
+          )}
+
+          {/* Top Swappers Section */}
+          {data.topSwappers && (
+            <>
+              <div className="bg-gradient-to-r from-green-50 to-teal-50 border border-green-200 rounded-lg p-6">
+                <h2 className="text-xl font-bold text-green-800 mb-2">👥 Top Swappers</h2>
+                <p className="text-sm text-green-600">
+                  Total unique accounts: <span className="font-bold">{data.topSwappers.totalUniqueAccounts.toLocaleString()}</span>
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 sm:gap-8">
+                <TopSwappersTable 
+                  title="Top Swappers by Volume (All Time)"
+                  swappers={(data.topSwappers.byVolume ?? []).slice(0, 30)}
+                  sortBy="volume"
+                />
+                
+                <TopSwappersTable 
+                  title="Top Swappers by Fee Volume"
+                  swappers={(data.topSwappers.byFeeVolume ?? []).slice(0, 30)}
+                  sortBy="feeVolume"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 sm:gap-8">
+                <TopSwappersTable 
+                  title="Top Swappers (Last 24h)"
+                  swappers={(data.topSwappers.last24h ?? []).slice(0, 30)}
+                  periodLabel="24h"
+                />
+                
+                <TopSwappersTable 
+                  title="Top Swappers (Last 7 Days)"
+                  swappers={(data.topSwappers.last7d ?? []).slice(0, 30)}
+                  periodLabel="7d"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 sm:gap-8">
+                <TopSwappersTable 
+                  title="Top Swappers (Last 30 Days)"
+                  swappers={(data.topSwappers.last30d ?? []).slice(0, 30)}
+                  periodLabel="30d"
+                />
+                
+                <TopSwappersTable 
+                  title="Top Swappers by Swap Count"
+                  swappers={(data.topSwappers.byCount ?? []).slice(0, 30)}
+                  sortBy="count"
+                />
+              </div>
+            </>
+          )}
 
           {/* Diagnostics */}
           {(data.notes.unmappedIntentTokenIds.length > 0 || 

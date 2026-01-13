@@ -1,17 +1,21 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
-import type { TradingPair } from '../types';
+import type { TradingPair, PeriodTradingPair } from '../types';
+
+type AnyTradingPair = TradingPair | PeriodTradingPair;
 
 interface TradingPairsTableProps {
   title: string;
-  pairs: TradingPair[];
+  pairs: AnyTradingPair[];
   showLast24h?: boolean;
+  periodLabel?: string; // e.g., "7d" or "30d" for period-based tables
 }
 
 const TradingPairsTable: React.FC<TradingPairsTableProps> = ({ 
   title, 
   pairs, 
-  showLast24h = false 
+  showLast24h = false,
+  periodLabel
 }) => {
   const formatNumber = (num: number) => {
     if (num >= 1000000) {
@@ -86,6 +90,16 @@ const TradingPairsTable: React.FC<TradingPairsTableProps> = ({
                   </th>
                 </>
               )}
+              {periodLabel && (
+                <>
+                  <th className="px-1 sm:px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
+                    {periodLabel} Swaps
+                  </th>
+                  <th className="px-1 sm:px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {periodLabel} Vol
+                  </th>
+                </>
+              )}
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -102,13 +116,23 @@ const TradingPairsTable: React.FC<TradingPairsTableProps> = ({
                 <td className="px-1 sm:px-2 py-2 text-xs text-gray-900 whitespace-nowrap">
                   {formatNumber(pair.totalVolumeUSD)}
                 </td>
-                {showLast24h && (
+                {showLast24h && 'last24hSwaps' in pair && (
                   <>
                     <td className="px-1 sm:px-2 py-2 text-xs text-gray-900 whitespace-nowrap hidden sm:table-cell">
                       {pair.last24hSwaps.toLocaleString()}
                     </td>
                     <td className="px-1 sm:px-2 py-2 text-xs text-gray-900 whitespace-nowrap">
                       {formatNumber(pair.last24hVolumeUSD)}
+                    </td>
+                  </>
+                )}
+                {periodLabel && 'periodSwaps' in pair && (
+                  <>
+                    <td className="px-1 sm:px-2 py-2 text-xs text-gray-900 whitespace-nowrap hidden sm:table-cell">
+                      {pair.periodSwaps.toLocaleString()}
+                    </td>
+                    <td className="px-1 sm:px-2 py-2 text-xs text-gray-900 whitespace-nowrap">
+                      {formatNumber(pair.periodVolumeUSD)}
                     </td>
                   </>
                 )}

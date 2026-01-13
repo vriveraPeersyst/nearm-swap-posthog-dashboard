@@ -15,9 +15,12 @@ A React-based dashboard for visualizing PostHog swap metrics data from the NEAR 
 
 - **Time-based Metrics**: View swap counts and volumes across different time periods (24h, 7d, 30d, all-time)
 - **Growth Tracking**: Monitor 24-hour growth percentages for swaps and volume
-- **Trading Pairs Analysis**: Explore the most active trading pairs with detailed volume metrics
+- **Trading Pairs Analysis**: Top 30 trading pairs with detailed volume metrics for each time period
+- **Fee Swaps Analytics**: Separate view excluding deposits/withdrawals (native ↔ intent conversions)
+- **Top Swappers Leaderboard**: Track top accounts by volume, swap count, and fee-generating activity
 - **Real-time Data**: Refresh button to fetch the latest metrics from your PostHog backend
-- **Clean UI**: Modern, responsive design with Tailwind CSS
+- **Persistent Cache**: localStorage caching for instant page loads
+- **Clean UI**: Modern, responsive design with Tailwind CSS and Lucide icons
 
 ## Screenshots
 
@@ -28,7 +31,17 @@ The dashboard displays:
 3. **Trading Pairs Tables**: 
    - Top pairs by all-time volume
    - Most active pairs in the last 24 hours
-4. **Data Quality Notes**: Information about unmapped tokens and data issues
+   - Most active pairs in the last 7 days
+   - Most active pairs in the last 30 days
+4. **Fee Swaps Section**: 
+   - Summary cards with fee swap metrics
+   - Fee swap trading pairs by period
+5. **Top Swappers Section**:
+   - By all-time volume
+   - By swap count
+   - By fee-generating volume
+   - Top swappers for 24h, 7d, 30d periods
+6. **Data Quality Notes**: Information about unmapped tokens and data issues
 
 ## Project Structure
 
@@ -36,13 +49,18 @@ The dashboard displays:
 posthog-swaps-frontend/
 ├── src/
 │   ├── components/
-│   │   ├── MetricsCard.tsx      # Time period overview cards
-│   │   ├── SummaryTable.tsx     # Time-based metrics table
-│   │   └── TradingPairsTable.tsx # Trading pairs analysis
-│   ├── types.ts                 # TypeScript interfaces
-│   ├── App.tsx                  # Main application component
-│   └── index.css               # Tailwind CSS setup
-├── server.js                   # Express API server
+│   │   ├── MetricsCard.tsx        # Time period overview cards
+│   │   ├── SummaryTable.tsx       # Time-based metrics table
+│   │   ├── TradingPairsTable.tsx  # Trading pairs analysis
+│   │   ├── TopSwappersTable.tsx   # Top swappers leaderboard
+│   │   ├── TopAccountsTable.tsx   # Top accounts by value
+│   │   └── AccountValuesCard.tsx  # Account values display
+│   ├── utils/
+│   │   └── api.ts                 # API client utilities
+│   ├── types.ts                   # TypeScript interfaces
+│   ├── App.tsx                    # Main application component
+│   └── index.css                  # Tailwind CSS setup
+├── server.js                      # Express API server
 └── package.json
 ```
 

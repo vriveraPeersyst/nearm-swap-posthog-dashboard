@@ -10,7 +10,9 @@ A TypeScript application that analyzes swap events from PostHog to calculate tot
 - **High precision**: Uses Decimal.js for accurate financial calculations
 - **Flexible configuration**: Supports volume calculation on either `amount_in` or `amount_out`
 - **Account filtering**: Exclude test/internal accounts from calculations
-- **Trading pair analytics**: Track top Token A → Token B conversions with volume and count
+- **Trading pair analytics**: Top 30 Token A → Token B conversions for each time period (24h, 7d, 30d, all-time)
+- **Fee Swaps tracking**: Separate metrics excluding deposits/withdrawals (native ↔ intent token conversions)
+- **Top Swappers leaderboard**: Track top accounts by volume, swap count, and fee-generating swaps
 - **Data quality monitoring**: Check data availability and identify gaps across date ranges
 - **Comprehensive diagnostics**: Reports unmapped tokens, missing prices, and bad amounts
 
@@ -120,25 +122,47 @@ The application handles multiple token ID formats:
   "sideValued": "in",
   "allTime": {
     "totalSwaps": 2951,
-    "totalVolumeUSD": 683997.460131663
+    "totalVolumeUSD": 683997.46
   },
   "last24h": {
     "totalSwaps": 121,
-    "totalVolumeUSD": 24411.73271967872,
+    "totalVolumeUSD": 24411.73,
     "swapGrowthPercent": -44.24,
     "volumeGrowthPercent": -40.08
   },
   "previous24h": {
     "totalSwaps": 217,
-    "totalVolumeUSD": 40738.48889244697
+    "totalVolumeUSD": 40738.49
   },
   "last7d": {
     "totalSwaps": 1081,
-    "totalVolumeUSD": 152777.93104626966
+    "totalVolumeUSD": 152777.93
   },
   "last30d": {
     "totalSwaps": 2712,
-    "totalVolumeUSD": 569813.4399897703
+    "totalVolumeUSD": 569813.44
+  },
+  "feeSwaps": {
+    "allTime": { "totalSwaps": 1200, "totalVolumeUSD": 450000.00 },
+    "last24h": { "totalSwaps": 50, "totalVolumeUSD": 15000.00 },
+    "last7d": { "totalSwaps": 400, "totalVolumeUSD": 100000.00 },
+    "last30d": { "totalSwaps": 1100, "totalVolumeUSD": 400000.00 }
+  },
+  "topSwappers": {
+    "byVolume": [
+      { "account_id": "trader.near", "swaps": 50, "volumeUSD": 120000.00, "feeSwaps": 45, "feeVolumeUSD": 110000.00 }
+    ],
+    "byCount": [...],
+    "byFeeVolume": [...],
+    "last24h": [...],
+    "last7d": [...],
+    "last30d": [...]
+  },
+  "topTradingPairs": {
+    "allTime": [{ "tokenIn": "NEAR", "tokenOut": "iUSDC", "count": 500, "volumeUSD": 150000 }],
+    "last24h": [...],
+    "last7d": [...],
+    "last30d": [...]
   },
   "notes": {
     "unmappedIntentTokenIds": [],
@@ -158,6 +182,13 @@ The application handles multiple token ID formats:
 - **`previous24h`**: Activity 24-48 hours ago (for growth comparison)
 - **`last7d`**: Activity in the last 7 days  
 - **`last30d`**: Activity in the last 30 days
+- **`feeSwaps`**: Metrics excluding deposits/withdrawals (native ↔ intent conversions)
+- **`topSwappers`**: Top accounts by various criteria
+  - **`byVolume`**: Ranked by total USD volume (all-time)
+  - **`byCount`**: Ranked by swap count (all-time)
+  - **`byFeeVolume`**: Ranked by fee-generating volume (all-time)
+  - **`last24h/7d/30d`**: Top swappers by volume for each period
+- **`topTradingPairs`**: Top 30 trading pairs for each time period
 - **`totalSwaps`**: Number of swap events in time period
 - **`totalVolumeUSD`**: Total volume in USD (high precision)
 - **`unmappedIntentTokenIds`**: Token IDs without mapping (should be empty)
