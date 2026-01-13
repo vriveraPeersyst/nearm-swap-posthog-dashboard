@@ -27,7 +27,7 @@ const Env = z.object({
 
   PRICES_API_URL: z.string(),
 
-  BATCH_SIZE: z.coerce.number().default(500),
+  BATCH_SIZE: z.coerce.number().default(200),
   MAX_EVENTS: z.coerce.number().default(0)
 });
 

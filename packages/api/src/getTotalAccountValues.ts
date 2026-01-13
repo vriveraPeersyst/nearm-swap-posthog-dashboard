@@ -17,31 +17,52 @@ export type AccountValueSummary = {
   total_account_state_events: number;
 };
 
-async function hogql<T = any>(query: string, retryCount = 0): Promise<T> {
+async function hogql<T = any>(query: string, retries = 3): Promise<T> {
   const url = `${cfg.POSTHOG_BASE_URL.replace(/\/$/, '')}/api/projects/${cfg.POSTHOG_PROJECT_ID}/query/`;
   
-  try {
-    const { data } = await axios.post(
-      url,
-      { query: { kind: 'HogQLQuery', query } },
-      { headers: { Authorization: `Bearer ${cfg.POSTHOG_API_KEY}` } }
-    );
-    return data;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.status === 429) {
-      const retryAfter = parseInt(error.response.headers['retry-after'] || '60');
-      console.log(`\n⚠️  Rate limited! Waiting ${retryAfter} seconds before retrying...`);
-      
-      if (retryCount < 3) {
-        await new Promise(resolve => setTimeout(resolve, retryAfter * 1000));
-        return hogql(query, retryCount + 1);
-      } else {
-        console.log('❌ Max retries reached for rate limiting');
-        throw error;
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const { data } = await axios.post(
+        url,
+        { query: { kind: 'HogQLQuery', query } },
+        { 
+          headers: { Authorization: `Bearer ${cfg.POSTHOG_API_KEY}` },
+          timeout: 60000 // 60 second timeout
+        }
+      );
+      return data;
+    } catch (error: any) {
+      // Handle rate limiting
+      if (axios.isAxiosError(error) && error.response?.status === 429) {
+        const retryAfter = parseInt(error.response.headers['retry-after'] || '60');
+        console.log(`\n⚠️  Rate limited! Waiting ${retryAfter} seconds before retrying...`);
+        
+        if (attempt < retries) {
+          await new Promise(resolve => setTimeout(resolve, retryAfter * 1000));
+          continue;
+        }
       }
+      
+      // Handle ClickHouse errors with retry
+      const isRetryable = error?.response?.status === 500 || 
+                          error?.response?.data?.detail?.includes('ClickHouse') ||
+                          error.code === 'ECONNABORTED';
+      
+      if (attempt < retries && isRetryable) {
+        const delay = Math.pow(2, attempt) * 1000; // Exponential backoff: 2s, 4s, 8s
+        console.log(`PostHog query failed (attempt ${attempt}/${retries}), retrying in ${delay/1000}s...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue;
+      }
+      throw error;
     }
-    throw error;
   }
+  throw new Error('PostHog query failed after all retries');
+}
+
+// Helper to extract property from JSON using ClickHouse JSONExtractString
+function prop(field: string): string {
+  return `JSONExtractString(properties, '${field}')`;
 }
 
 /**
@@ -54,18 +75,18 @@ export async function getTotalAccountValues(): Promise<AccountValueSummary> {
   const query = `
     WITH latest_account_states AS (
       SELECT 
-        properties.account_id AS account_id,
-        argMax(properties.near_value, timestamp) AS latest_near_value,
-        argMax(properties.near_staked, timestamp) AS latest_near_staked,
-        argMax(properties.near_staked_by_validator, timestamp) AS latest_near_staked_by_validator,
+        ${prop('account_id')} AS account_id,
+        argMax(${prop('near_value')}, timestamp) AS latest_near_value,
+        argMax(${prop('near_staked')}, timestamp) AS latest_near_staked,
+        argMax(${prop('near_staked_by_validator')}, timestamp) AS latest_near_staked_by_validator,
         max(timestamp) AS latest_timestamp,
         count() AS total_events_for_account
       FROM events 
       WHERE event = 'account_state' 
-        AND properties.network = 'mainnet'
-        AND properties.account_id IS NOT NULL
-        AND properties.account_id != ''
-      GROUP BY properties.account_id
+        AND ${prop('network')} = 'mainnet'
+        AND ${prop('account_id')} IS NOT NULL
+        AND ${prop('account_id')} != ''
+      GROUP BY ${prop('account_id')}
     ),
     converted_values AS (
       SELECT 

@@ -23,14 +23,40 @@ function buildExclusions(): string {
   return clauses.length ? clauses.join(' AND ') : '1';
 }
 
-async function hogql<T = any>(query: string): Promise<T> {
+async function hogql<T = any>(query: string, retries = 3): Promise<T> {
   const url = `${cfg.POSTHOG_BASE_URL.replace(/\/$/, '')}/api/projects/${cfg.POSTHOG_PROJECT_ID}/query/`;
-  const { data } = await axios.post(
-    url,
-    { query: { kind: 'HogQLQuery', query } },
-    { headers: { Authorization: `Bearer ${cfg.POSTHOG_API_KEY}` } }
-  );
-  return data;
+  
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const { data } = await axios.post(
+        url,
+        { query: { kind: 'HogQLQuery', query } },
+        { 
+          headers: { Authorization: `Bearer ${cfg.POSTHOG_API_KEY}` },
+          timeout: 60000 // 60 second timeout
+        }
+      );
+      return data;
+    } catch (error: any) {
+      const isRetryable = error?.response?.status === 500 || 
+                          error?.response?.data?.detail?.includes('ClickHouse') ||
+                          error.code === 'ECONNABORTED';
+      
+      if (attempt < retries && isRetryable) {
+        const delay = Math.pow(2, attempt) * 1000; // Exponential backoff: 2s, 4s, 8s
+        console.log(`PostHog query failed (attempt ${attempt}/${retries}), retrying in ${delay/1000}s...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        continue;
+      }
+      throw error;
+    }
+  }
+  throw new Error('PostHog query failed after all retries');
+}
+
+// Helper to extract property from JSON using ClickHouse JSONExtractString
+function prop(field: string): string {
+  return `JSONExtractString(properties, '${field}')`;
 }
 
 /**
@@ -39,7 +65,7 @@ async function hogql<T = any>(query: string): Promise<T> {
 export async function fetchSwapBatch(offset: number, limit: number): Promise<SwapEventRow[]> {
   const where = [
     `event = ${q(cfg.SWAP_EVENT_NAME)}`,
-    `properties.network = ${q(cfg.NETWORK_FILTER)}`,
+    `${prop('network')} = ${q(cfg.NETWORK_FILTER)}`,
     buildExclusions()
   ].join(' AND ');
 
@@ -47,11 +73,11 @@ export async function fetchSwapBatch(offset: number, limit: number): Promise<Swa
     SELECT
       uuid,
       toString(timestamp) AS timestamp,
-      properties.account_id AS account_id,
-      properties.${cfg.VOLUME_PROP_IN} AS amount_in,
-      properties.${cfg.VOLUME_PROP_OUT} AS amount_out,
-      properties.token_in_id AS token_in_id,
-      properties.token_out_id AS token_out_id
+      ${prop('account_id')} AS account_id,
+      ${prop(cfg.VOLUME_PROP_IN)} AS amount_in,
+      ${prop(cfg.VOLUME_PROP_OUT)} AS amount_out,
+      ${prop('token_in_id')} AS token_in_id,
+      ${prop('token_out_id')} AS token_out_id
     FROM events
     WHERE ${where}
     ORDER BY timestamp ASC
