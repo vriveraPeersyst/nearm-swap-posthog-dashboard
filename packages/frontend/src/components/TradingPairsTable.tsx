@@ -9,13 +9,15 @@ interface TradingPairsTableProps {
   pairs: AnyTradingPair[];
   showLast24h?: boolean;
   periodLabel?: string; // e.g., "7d" or "30d" for period-based tables
+  hideHeader?: boolean; // Hide the title header when using external header
 }
 
 const TradingPairsTable: React.FC<TradingPairsTableProps> = ({ 
   title, 
   pairs, 
   showLast24h = false,
-  periodLabel
+  periodLabel,
+  hideHeader = false
 }) => {
   const formatNumber = (num: number) => {
     if (num >= 1000000) {
@@ -62,10 +64,12 @@ const TradingPairsTable: React.FC<TradingPairsTableProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-      <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
-        <h3 className="text-sm sm:text-base font-semibold text-gray-800">{title}</h3>
-      </div>
+    <div className={hideHeader ? '' : 'bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden'}>
+      {!hideHeader && (
+        <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
+          <h3 className="text-sm sm:text-base font-semibold text-gray-800">{title}</h3>
+        </div>
+      )}
       
       <div className="overflow-x-auto">
         <table className="w-full text-sm">

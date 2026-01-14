@@ -51,6 +51,22 @@ export interface AccountValueSummary {
   total_account_state_events: number;
 }
 
+export interface ValidatorStats {
+  validator_id: string;
+  total_delegators: number;
+  total_near_staked: number;
+  near_staked_24h_change: number;
+  near_staked_24h_change_percent: number;
+  near_staked_7d_change: number;
+  near_staked_7d_change_percent: number;
+  near_staked_30d_change: number;
+  near_staked_30d_change_percent: number;
+  delegators_24h_change: number;
+  delegators_7d_change: number;
+  delegators_30d_change: number;
+  latest_update: string;
+}
+
 export interface TopAccountData {
   account_id: string;
   near_balance: number;

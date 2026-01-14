@@ -6,13 +6,15 @@ interface TopSwappersTableProps {
   swappers: SwapperData[];
   sortBy?: 'volume' | 'count' | 'feeVolume' | 'period';
   periodLabel?: string;
+  hideHeader?: boolean;
 }
 
 const TopSwappersTable: React.FC<TopSwappersTableProps> = ({ 
   title, 
   swappers,
   sortBy = 'volume',
-  periodLabel
+  periodLabel,
+  hideHeader = false
 }) => {
   const formatNumber = (num: number) => {
     if (num >= 1000000) {
@@ -42,10 +44,12 @@ const TopSwappersTable: React.FC<TopSwappersTableProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-      <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
-        <h3 className="text-sm sm:text-base font-semibold text-gray-800">{title}</h3>
-      </div>
+    <div className={hideHeader ? '' : 'bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden'}>
+      {!hideHeader && (
+        <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
+          <h3 className="text-sm sm:text-base font-semibold text-gray-800">{title}</h3>
+        </div>
+      )}
       
       <div className="overflow-x-auto">
         <table className="w-full text-sm">

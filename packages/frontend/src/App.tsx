@@ -1,34 +1,32 @@
 import { useState, useEffect } from 'react';
 import { Database, RefreshCw } from 'lucide-react';
-import type { SwapMetrics, AccountValueSummary, TopAccountsResponse } from './types';
+import type { SwapMetrics, ValidatorStats } from './types';
 import MetricsCard from './components/MetricsCard';
 import TradingPairsTable from './components/TradingPairsTable';
 import TopSwappersTable from './components/TopSwappersTable';
-import AccountValuesCard from './components/AccountValuesCard';
-import TopAccountsTable from './components/TopAccountsTable';
+import ValidatorStatsCard from './components/ValidatorStatsCard';
 import { apiCall } from './utils/api';
 import logoSvg from './assets/NEARMobile_Logo.svg';
 import './App.css';
 
 function App() {
   const [data, setData] = useState<SwapMetrics | null>(null);
-  const [accountValues, setAccountValues] = useState<AccountValueSummary | null>(null);
-  const [topAccounts, setTopAccounts] = useState<TopAccountsResponse | null>(null);
+  const [validatorStats, setValidatorStats] = useState<ValidatorStats | null>(null);
   const [nearPriceUSD, setNearPriceUSD] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingAccountValues, setIsLoadingAccountValues] = useState(false);
-  const [isLoadingTopAccounts, setIsLoadingTopAccounts] = useState(false);
+  const [isLoadingValidatorStats, setIsLoadingValidatorStats] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [error, setError] = useState<string | null>(null);
+  const [feeSwapsPeriod, setFeeSwapsPeriod] = useState<'allTime' | '24h' | '7d' | '30d'>('allTime');
+  const [tradingPairsPeriod, setTradingPairsPeriod] = useState<'allTime' | '24h' | '7d' | '30d'>('allTime');
+  const [swappersPeriod, setSwappersPeriod] = useState<'allTime' | '24h' | '7d' | '30d' | 'byCount' | 'byFeeVolume'>('allTime');
 
   // Load data from localStorage on component mount
   useEffect(() => {
     const savedData = localStorage.getItem('swapMetrics');
     const savedTimestamp = localStorage.getItem('swapMetricsTimestamp');
-    const savedAccountValues = localStorage.getItem('accountValues');
-    const savedAccountValuesTimestamp = localStorage.getItem('accountValuesTimestamp');
-    const savedTopAccounts = localStorage.getItem('topAccounts');
-    const savedTopAccountsTimestamp = localStorage.getItem('topAccountsTimestamp');
+    const savedValidatorStats = localStorage.getItem('validatorStats');
+    const savedValidatorStatsTimestamp = localStorage.getItem('validatorStatsTimestamp');
     const savedNearPrice = localStorage.getItem('nearPriceUSD');
     const savedNearPriceTimestamp = localStorage.getItem('nearPriceTimestamp');
     
@@ -46,27 +44,15 @@ function App() {
       }
     }
 
-    if (savedAccountValues && savedAccountValuesTimestamp) {
+    if (savedValidatorStats && savedValidatorStatsTimestamp) {
       try {
-        const parsedAccountValues = JSON.parse(savedAccountValues);
-        setAccountValues(parsedAccountValues);
+        const parsedValidatorStats = JSON.parse(savedValidatorStats);
+        setValidatorStats(parsedValidatorStats);
       } catch (error) {
-        console.error('Error loading saved account values:', error);
+        console.error('Error loading saved validator stats:', error);
         // Clear corrupted data
-        localStorage.removeItem('accountValues');
-        localStorage.removeItem('accountValuesTimestamp');
-      }
-    }
-
-    if (savedTopAccounts && savedTopAccountsTimestamp) {
-      try {
-        const parsedTopAccounts = JSON.parse(savedTopAccounts);
-        setTopAccounts(parsedTopAccounts);
-      } catch (error) {
-        console.error('Error loading saved top accounts:', error);
-        // Clear corrupted data
-        localStorage.removeItem('topAccounts');
-        localStorage.removeItem('topAccountsTimestamp');
+        localStorage.removeItem('validatorStats');
+        localStorage.removeItem('validatorStatsTimestamp');
       }
     }
 
@@ -119,51 +105,27 @@ function App() {
     }
   };
 
-  const fetchAccountValues = async () => {
-    setIsLoadingAccountValues(true);
+  const fetchValidatorStats = async () => {
+    setIsLoadingValidatorStats(true);
     try {
-      const response = await apiCall('/api/account-values');
+      const response = await apiCall('/api/validator-stats');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      const newAccountValues = await response.json();
+      const newValidatorStats = await response.json();
       const timestamp = new Date();
       
       // Save to state
-      setAccountValues(newAccountValues);
+      setValidatorStats(newValidatorStats);
       
       // Save to localStorage for persistence
-      localStorage.setItem('accountValues', JSON.stringify(newAccountValues));
-      localStorage.setItem('accountValuesTimestamp', timestamp.toISOString());
+      localStorage.setItem('validatorStats', JSON.stringify(newValidatorStats));
+      localStorage.setItem('validatorStatsTimestamp', timestamp.toISOString());
     } catch (error) {
-      console.error('Failed to fetch account values:', error);
-      // Don't set main error for account values failure
+      console.error('Failed to fetch validator stats:', error);
+      // Don't set main error for validator stats failure
     } finally {
-      setIsLoadingAccountValues(false);
-    }
-  };
-
-  const fetchTopAccounts = async () => {
-    setIsLoadingTopAccounts(true);
-    try {
-      const response = await apiCall('/api/top-accounts');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const newTopAccounts = await response.json();
-      const timestamp = new Date();
-      
-      // Save to state
-      setTopAccounts(newTopAccounts);
-      
-      // Save to localStorage for persistence
-      localStorage.setItem('topAccounts', JSON.stringify(newTopAccounts));
-      localStorage.setItem('topAccountsTimestamp', timestamp.toISOString());
-    } catch (error) {
-      console.error('Failed to fetch top accounts:', error);
-      // Don't set main error for top accounts failure
-    } finally {
-      setIsLoadingTopAccounts(false);
+      setIsLoadingValidatorStats(false);
     }
   };
 
@@ -187,19 +149,16 @@ function App() {
   };
 
   const refreshData = async () => {
-    await Promise.all([fetchData(), fetchAccountValues(), fetchTopAccounts(), fetchNearPrice()]);
+    await Promise.all([fetchData(), fetchValidatorStats(), fetchNearPrice()]);
   };
 
   const clearCache = () => {
     localStorage.removeItem('swapMetrics');
     localStorage.removeItem('swapMetricsTimestamp');
-    localStorage.removeItem('accountValues');
-    localStorage.removeItem('accountValuesTimestamp');
-    localStorage.removeItem('topAccounts');
-    localStorage.removeItem('topAccountsTimestamp');
+    localStorage.removeItem('validatorStats');
+    localStorage.removeItem('validatorStatsTimestamp');
     setData(null);
-    setAccountValues(null);
-    setTopAccounts(null);
+    setValidatorStats(null);
     setError(null);
   };
 
@@ -313,11 +272,11 @@ function App() {
                 </button>
                 <button
                   onClick={refreshData}
-                  disabled={isLoading || isLoadingAccountValues || isLoadingTopAccounts}
+                  disabled={isLoading || isLoadingValidatorStats}
                   className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
                 >
-                  <RefreshCw className={`h-4 w-4 ${(isLoading || isLoadingAccountValues || isLoadingTopAccounts) ? 'animate-spin' : ''}`} />
-                  <span className="hidden sm:inline">{isLoading || isLoadingAccountValues || isLoadingTopAccounts ? 'Refreshing...' : 'Refresh Data'}</span>
+                  <RefreshCw className={`h-4 w-4 ${(isLoading || isLoadingValidatorStats) ? 'animate-spin' : ''}`} />
+                  <span className="hidden sm:inline">{isLoading || isLoadingValidatorStats ? 'Refreshing...' : 'Refresh Data'}</span>
                   <span className="sm:hidden">Refresh</span>
                 </button>
               </div>
@@ -352,56 +311,16 @@ function App() {
             />
           </div>
 
-          {/* Account Values */}
-          {accountValues && <AccountValuesCard data={accountValues} nearPriceUSD={nearPriceUSD || undefined} />}
-          {isLoadingAccountValues && (
+          {/* Validator Stats */}
+          {validatorStats && <ValidatorStatsCard data={validatorStats} nearPriceUSD={nearPriceUSD || undefined} />}
+          {isLoadingValidatorStats && (
             <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
               <div className="flex items-center justify-center">
                 <RefreshCw className="h-6 w-6 animate-spin text-blue-600 mr-2" />
-                <span className="text-gray-600">Loading account values...</span>
+                <span className="text-gray-600">Loading validator stats...</span>
               </div>
             </div>
           )}
-
-          {/* Top Accounts */}
-          {topAccounts && <TopAccountsTable data={topAccounts} />}
-          {isLoadingTopAccounts && (
-            <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
-              <div className="flex items-center justify-center">
-                <RefreshCw className="h-6 w-6 animate-spin text-blue-600 mr-2" />
-                <span className="text-gray-600">Loading top accounts...</span>
-              </div>
-            </div>
-          )}
-
-          {/* Trading Pairs Tables */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 sm:gap-8">
-            <TradingPairsTable 
-              title="Top Trading Pairs (All Time)"
-              pairs={data.topTradingPairs.allTime.slice(0, 30)}
-              showLast24h={true}
-            />
-            
-            <TradingPairsTable 
-              title="Most Active Pairs (Last 24h)"
-              pairs={data.topTradingPairs.last24h.slice(0, 30)}
-              showLast24h={true}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 sm:gap-8">
-            <TradingPairsTable 
-              title="Most Active Pairs (Last 7 Days)"
-              pairs={(data.topTradingPairs.last7d ?? []).slice(0, 30)}
-              periodLabel="7d"
-            />
-            
-            <TradingPairsTable 
-              title="Most Active Pairs (Last 30 Days)"
-              pairs={(data.topTradingPairs.last30d ?? []).slice(0, 30)}
-              periodLabel="30d"
-            />
-          </div>
 
           {/* Fee Swaps Section - Excludes Deposits/Withdraws */}
           {data.feeSwaps && (
@@ -435,35 +354,74 @@ function App() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 sm:gap-8">
-                <TradingPairsTable 
-                  title="Top Fee Swaps (All Time)"
-                  pairs={(data.feeSwaps.topPairs.allTime ?? []).slice(0, 30)}
-                  showLast24h={true}
-                />
-                
-                <TradingPairsTable 
-                  title="Top Fee Swaps (Last 24h)"
-                  pairs={(data.feeSwaps.topPairs.last24h ?? []).slice(0, 30)}
-                  showLast24h={true}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 sm:gap-8">
-                <TradingPairsTable 
-                  title="Top Fee Swaps (Last 7 Days)"
-                  pairs={(data.feeSwaps.topPairs.last7d ?? []).slice(0, 30)}
-                  periodLabel="7d"
-                />
-                
-                <TradingPairsTable 
-                  title="Top Fee Swaps (Last 30 Days)"
-                  pairs={(data.feeSwaps.topPairs.last30d ?? []).slice(0, 30)}
-                  periodLabel="30d"
+              <div className="bg-white rounded-lg shadow-md border border-gray-200 p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Top Fee Swap Pairs</h3>
+                  <div className="flex gap-2">
+                    {(['allTime', '24h', '7d', '30d'] as const).map((period) => (
+                      <button
+                        key={period}
+                        onClick={() => setFeeSwapsPeriod(period)}
+                        className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                          feeSwapsPeriod === period
+                            ? 'bg-purple-600 text-white'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                      >
+                        {period === 'allTime' ? 'All Time' : period === '24h' ? '24h' : period === '7d' ? '7 Days' : '30 Days'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <TradingPairsTable
+                  title=""
+                  pairs={(
+                    feeSwapsPeriod === 'allTime' ? data.feeSwaps.topPairs.allTime :
+                    feeSwapsPeriod === '24h' ? data.feeSwaps.topPairs.last24h :
+                    feeSwapsPeriod === '7d' ? data.feeSwaps.topPairs.last7d :
+                    data.feeSwaps.topPairs.last30d
+                  )?.slice(0, 10) ?? []}
+                  showLast24h={feeSwapsPeriod === 'allTime' || feeSwapsPeriod === '24h'}
+                  periodLabel={feeSwapsPeriod === '7d' ? '7d' : feeSwapsPeriod === '30d' ? '30d' : undefined}
+                  hideHeader={true}
                 />
               </div>
             </>
           )}
+
+          {/* Trading Pairs Table */}
+          <div className="bg-white rounded-lg shadow-md border border-gray-200 p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Trading Pairs (Including Deposits/Withdrawals)</h3>
+              <div className="flex gap-2">
+                {(['allTime', '24h', '7d', '30d'] as const).map((period) => (
+                  <button
+                    key={period}
+                    onClick={() => setTradingPairsPeriod(period)}
+                    className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                      tradingPairsPeriod === period
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    {period === 'allTime' ? 'All Time' : period === '24h' ? '24h' : period === '7d' ? '7 Days' : '30 Days'}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <TradingPairsTable
+              title=""
+              pairs={(
+                tradingPairsPeriod === 'allTime' ? data.topTradingPairs.allTime :
+                tradingPairsPeriod === '24h' ? data.topTradingPairs.last24h :
+                tradingPairsPeriod === '7d' ? data.topTradingPairs.last7d :
+                data.topTradingPairs.last30d
+              )?.slice(0, 10) ?? []}
+              showLast24h={tradingPairsPeriod === 'allTime' || tradingPairsPeriod === '24h'}
+              periodLabel={tradingPairsPeriod === '7d' ? '7d' : tradingPairsPeriod === '30d' ? '30d' : undefined}
+              hideHeader={true}
+            />
+          </div>
 
           {/* Top Swappers Section */}
           {data.topSwappers && (
@@ -475,45 +433,38 @@ function App() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 sm:gap-8">
-                <TopSwappersTable 
-                  title="Top Swappers by Volume (All Time)"
-                  swappers={(data.topSwappers.byVolume ?? []).slice(0, 30)}
-                  sortBy="volume"
-                />
-                
-                <TopSwappersTable 
-                  title="Top Swappers by Fee Volume"
-                  swappers={(data.topSwappers.byFeeVolume ?? []).slice(0, 30)}
-                  sortBy="feeVolume"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 sm:gap-8">
-                <TopSwappersTable 
-                  title="Top Swappers (Last 24h)"
-                  swappers={(data.topSwappers.last24h ?? []).slice(0, 30)}
-                  periodLabel="24h"
-                />
-                
-                <TopSwappersTable 
-                  title="Top Swappers (Last 7 Days)"
-                  swappers={(data.topSwappers.last7d ?? []).slice(0, 30)}
-                  periodLabel="7d"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 sm:gap-8">
-                <TopSwappersTable 
-                  title="Top Swappers (Last 30 Days)"
-                  swappers={(data.topSwappers.last30d ?? []).slice(0, 30)}
-                  periodLabel="30d"
-                />
-                
-                <TopSwappersTable 
-                  title="Top Swappers by Swap Count"
-                  swappers={(data.topSwappers.byCount ?? []).slice(0, 30)}
-                  sortBy="count"
+              <div className="bg-white rounded-lg shadow-md border border-gray-200 p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Top Swappers</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {(['allTime', '24h', '7d', '30d', 'byCount', 'byFeeVolume'] as const).map((period) => (
+                      <button
+                        key={period}
+                        onClick={() => setSwappersPeriod(period)}
+                        className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                          swappersPeriod === period
+                            ? 'bg-green-600 text-white'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                      >
+                        {period === 'allTime' ? 'All Time' : period === '24h' ? '24h' : period === '7d' ? '7 Days' : period === '30d' ? '30 Days' : period === 'byCount' ? 'By Count' : 'By Fee Vol'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <TopSwappersTable
+                  title=""
+                  swappers={(
+                    swappersPeriod === 'allTime' ? data.topSwappers.byVolume :
+                    swappersPeriod === '24h' ? data.topSwappers.last24h :
+                    swappersPeriod === '7d' ? data.topSwappers.last7d :
+                    swappersPeriod === '30d' ? data.topSwappers.last30d :
+                    swappersPeriod === 'byCount' ? data.topSwappers.byCount :
+                    data.topSwappers.byFeeVolume
+                  )?.slice(0, 10) ?? []}
+                  sortBy={swappersPeriod === 'byCount' ? 'count' : swappersPeriod === 'byFeeVolume' ? 'feeVolume' : 'volume'}
+                  periodLabel={swappersPeriod === '24h' ? '24h' : swappersPeriod === '7d' ? '7d' : swappersPeriod === '30d' ? '30d' : undefined}
+                  hideHeader={true}
                 />
               </div>
             </>

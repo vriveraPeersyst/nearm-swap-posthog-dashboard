@@ -1,4 +1,4 @@
-import type { SwapMetrics, AccountValueSummary, TopAccountsResponse } from '../types';
+import type { SwapMetrics, AccountValueSummary, TopAccountsResponse, ValidatorStats } from '../types';
 
 // API configuration utility
 const getApiBaseUrl = (): string => {
@@ -56,10 +56,22 @@ export const fetchTopAccountsByValue = async (): Promise<TopAccountsResponse> =>
   return response.json();
 };
 
+// Fetch validator stats for npro.poolv1.near
+export const fetchValidatorStats = async (): Promise<ValidatorStats> => {
+  const response = await apiCall('/api/validator-stats');
+  
+  if (!response.ok) {
+    throw new Error(`Failed to fetch validator stats: ${response.statusText}`);
+  }
+  
+  return response.json();
+};
+
 export default {
   getApiBaseUrl,
   apiCall,
   fetchSwapMetrics,
   fetchAccountValues,
   fetchTopAccountsByValue,
+  fetchValidatorStats,
 };

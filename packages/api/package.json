@@ -5,7 +5,8 @@
   "license": "MIT",
   "description": "PostHog metrics collection and analysis for NEAR swaps",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "tsx watch src/devServer.ts",
+    "dev:server": "tsx watch src/devServer.ts",
     "run": "tsx src/index.ts",
     "total-values": "tsx src/getTotalAccountValues.ts",
     "top-accounts": "tsx src/getTopAccountsByValue.ts",
