@@ -98,9 +98,15 @@ const TopSwappersTable: React.FC<TopSwappersTableProps> = ({
                     {index + 1}
                   </td>
                   <td className="px-2 sm:px-3 py-2 min-w-0">
-                    <span className="text-xs font-mono text-blue-600 truncate" title={swapper.accountId}>
+                    <a 
+                      href={`https://nearblocks.io/address/${swapper.accountId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs font-mono text-blue-600 hover:text-blue-800 hover:underline truncate" 
+                      title={swapper.accountId}
+                    >
                       {formatAccountId(swapper.accountId)}
-                    </span>
+                    </a>
                   </td>
                   <td className="px-1 sm:px-2 py-2 text-xs text-gray-900 whitespace-nowrap">
                     {swapper.totalSwaps.toLocaleString()}
