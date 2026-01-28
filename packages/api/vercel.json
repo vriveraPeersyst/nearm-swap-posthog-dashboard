@@ -1,4 +1,5 @@
 {
+  "outputDirectory": ".",
   "functions": {
     "api/health.ts": {
       "maxDuration": 30
@@ -11,6 +12,9 @@
     },
     "api/top-accounts.ts": {
       "maxDuration": 60
+    },
+    "api/validator-stats.ts": {
+      "maxDuration": 120
     }
   }
 }

@@ -14,6 +14,14 @@ export interface ValidatorStats {
   latest_update: string;
 }
 
+export interface TradingPair {
+  pair: string;
+  totalSwaps: number;
+  totalVolumeUSD: number;
+  last24hSwaps: number;
+  last24hVolumeUSD: number;
+}
+
 export interface PeriodTradingPair {
   pair: string;
   totalSwaps: number;
