@@ -2,8 +2,7 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "rootDir": "..",
-    "outDir": "../.vercel/output",
-    "noEmit": true,
+    "outDir": "../dist",
     "moduleResolution": "nodenext"
   },
   "include": [

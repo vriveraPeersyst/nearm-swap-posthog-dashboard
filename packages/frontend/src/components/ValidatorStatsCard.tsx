@@ -7,11 +7,41 @@ interface ValidatorStatsCardProps {
   nearPriceUSD?: number;
 }
 
-type TimePeriod = '24h' | '7d' | '30d';
+type TimePeriod = '3d' | '7d' | '30d';
 
 const ValidatorStatsCard: React.FC<ValidatorStatsCardProps> = ({ data, nearPriceUSD }) => {
-  const [stakedChangePeriod, setStakedChangePeriod] = useState<TimePeriod>('24h');
-  const [delegatorsChangePeriod, setDelegatorsChangePeriod] = useState<TimePeriod>('24h');
+  // Provide default values for all data fields
+  const safeData = {
+    validator_id: data?.validator_id || 'npro.poolv1.near',
+    total_delegators: data?.total_delegators || 0,
+    total_near_staked: data?.total_near_staked || 0,
+    near_staked_3d_change: data?.near_staked_3d_change || 0,
+    near_staked_3d_change_percent: data?.near_staked_3d_change_percent || 0,
+    near_staked_7d_change: data?.near_staked_7d_change || 0,
+    near_staked_7d_change_percent: data?.near_staked_7d_change_percent || 0,
+    near_staked_30d_change: data?.near_staked_30d_change || 0,
+    near_staked_30d_change_percent: data?.near_staked_30d_change_percent || 0,
+    delegators_3d_change: data?.delegators_3d_change || 0,
+    delegators_7d_change: data?.delegators_7d_change || 0,
+    delegators_30d_change: data?.delegators_30d_change || 0,
+    latest_update: data?.latest_update || new Date().toISOString(),
+  };
+
+  // Check if data is valid (has required fields or is an error)
+  if (!data || typeof data !== 'object' || 'error' in data || !data.validator_id) {
+    return (
+      <div className="bg-white rounded-lg shadow-md border border-gray-200 p-4 sm:p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600 flex-shrink-0" />
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Validator Stats</h2>
+        </div>
+        <p className="text-center text-gray-500">Loading validator stats...</p>
+      </div>
+    );
+  }
+
+  const [stakedChangePeriod, setStakedChangePeriod] = useState<TimePeriod>('3d');
+  const [delegatorsChangePeriod, setDelegatorsChangePeriod] = useState<TimePeriod>('3d');
 
   const formatNEAR = (amount: number) => {
     if (amount >= 1000000) {
@@ -45,23 +75,32 @@ const ValidatorStatsCard: React.FC<ValidatorStatsCardProps> = ({ data, nearPrice
 
   const getStakedChange = () => {
     switch (stakedChangePeriod) {
-      case '24h':
-        return { change: data.near_staked_24h_change, percent: data.near_staked_24h_change_percent };
+      case '3d':
+        return { 
+          change: safeData.near_staked_3d_change, 
+          percent: safeData.near_staked_3d_change_percent 
+        };
       case '7d':
-        return { change: data.near_staked_7d_change, percent: data.near_staked_7d_change_percent };
+        return { 
+          change: safeData.near_staked_7d_change, 
+          percent: safeData.near_staked_7d_change_percent 
+        };
       case '30d':
-        return { change: data.near_staked_30d_change, percent: data.near_staked_30d_change_percent };
+        return { 
+          change: safeData.near_staked_30d_change, 
+          percent: safeData.near_staked_30d_change_percent 
+        };
     }
   };
 
   const getDelegatorsChange = () => {
     switch (delegatorsChangePeriod) {
-      case '24h':
-        return data.delegators_24h_change;
+      case '3d':
+        return safeData.delegators_3d_change;
       case '7d':
-        return data.delegators_7d_change;
+        return safeData.delegators_7d_change;
       case '30d':
-        return data.delegators_30d_change;
+        return safeData.delegators_30d_change;
     }
   };
 
@@ -73,7 +112,7 @@ const ValidatorStatsCard: React.FC<ValidatorStatsCardProps> = ({ data, nearPrice
     onChange: (period: TimePeriod) => void;
   }> = ({ value, onChange }) => (
     <div className="flex gap-1 mt-2">
-      {(['24h', '7d', '30d'] as TimePeriod[]).map((period) => (
+      {(['3d', '7d', '30d'] as TimePeriod[]).map((period) => (
         <button
           key={period}
           onClick={() => onChange(period)}
@@ -95,7 +134,7 @@ const ValidatorStatsCard: React.FC<ValidatorStatsCardProps> = ({ data, nearPrice
         <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600 flex-shrink-0" />
         <div>
           <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Validator Stats</h2>
-          <p className="text-xs sm:text-sm text-gray-500 font-mono">{data.validator_id}</p>
+          <p className="text-xs sm:text-sm text-gray-500 font-mono">{safeData.validator_id}</p>
         </div>
       </div>
 
@@ -107,7 +146,7 @@ const ValidatorStatsCard: React.FC<ValidatorStatsCardProps> = ({ data, nearPrice
           </div>
           <p className="text-xs sm:text-sm text-blue-600 font-medium text-center mb-1">Total Delegators</p>
           <p className="text-xl sm:text-2xl font-bold text-blue-800 text-center">
-            {data.total_delegators.toLocaleString()}
+            {safeData.total_delegators.toLocaleString()}
           </p>
         </div>
 
@@ -118,11 +157,11 @@ const ValidatorStatsCard: React.FC<ValidatorStatsCardProps> = ({ data, nearPrice
           </div>
           <p className="text-xs sm:text-sm text-purple-600 font-medium text-center mb-1">NEAR Staked</p>
           <p className="text-xl sm:text-2xl font-bold text-purple-800 text-center">
-            {formatNEAR(data.total_near_staked)}
+            {formatNEAR(safeData.total_near_staked)}
           </p>
           {nearPriceUSD && (
             <p className="text-xs sm:text-sm text-purple-600 text-center mt-1">
-              {formatUSD(data.total_near_staked)}
+              {formatUSD(safeData.total_near_staked)}
             </p>
           )}
         </div>
@@ -188,7 +227,7 @@ const ValidatorStatsCard: React.FC<ValidatorStatsCardProps> = ({ data, nearPrice
       {/* Last Updated */}
       <div className="mt-4 pt-4 border-t border-gray-200 text-center">
         <p className="text-xs text-gray-500">
-          Last updated: {new Date(data.latest_update).toLocaleString()}
+          Last updated: {new Date(safeData.latest_update).toLocaleString()}
         </p>
       </div>
     </div>

@@ -1,9 +1,17 @@
-export interface TradingPair {
-  pair: string;
-  totalSwaps: number;
-  totalVolumeUSD: number;
-  last24hSwaps: number;
-  last24hVolumeUSD: number;
+export interface ValidatorStats {
+  validator_id: string;
+  total_delegators: number;
+  total_near_staked: number;
+  near_staked_3d_change: number;
+  near_staked_3d_change_percent: number;
+  near_staked_7d_change: number;
+  near_staked_7d_change_percent: number;
+  near_staked_30d_change: number;
+  near_staked_30d_change_percent: number;
+  delegators_3d_change: number;
+  delegators_7d_change: number;
+  delegators_30d_change: number;
+  latest_update: string;
 }
 
 export interface PeriodTradingPair {

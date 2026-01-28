@@ -4,7 +4,7 @@ import { getTotalAccountValues } from './getTotalAccountValues.js';
 import { getTopAccountsByValue } from './getTopAccountsByValue.js';
 import { getValidatorStats } from './getValidatorStats.js';
 
-const PORT = 3001;
+const PORT = 3002;
 
 // CORS headers
 const corsHeaders: Record<string, string> = {
