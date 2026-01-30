@@ -5,16 +5,16 @@
       "maxDuration": 30
     },
     "api/swap-metrics.ts": {
-      "maxDuration": 60
+      "maxDuration": 180
     },
     "api/account-values.ts": {
-      "maxDuration": 60
+      "maxDuration": 180
     },
     "api/top-accounts.ts": {
-      "maxDuration": 60
+      "maxDuration": 180
     },
     "api/validator-stats.ts": {
-      "maxDuration": 120
+      "maxDuration": 180
     }
   }
 }
