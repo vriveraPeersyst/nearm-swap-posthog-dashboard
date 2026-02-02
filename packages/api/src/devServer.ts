@@ -4,7 +4,9 @@ import { getTotalAccountValues } from './getTotalAccountValues.js';
 import { getTopAccountsByValue } from './getTopAccountsByValue.js';
 import { getValidatorStats } from './getValidatorStats.js';
 
-const PORT = 3002;
+const PORT = 3001;
+
+const NPRO_API_BASE_URL = 'https://npro-stats-api-production.up.railway.app';
 
 // CORS headers
 const corsHeaders: Record<string, string> = {
@@ -69,6 +71,26 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    if (url === '/api/npro-summary' || url === '/api/npro-summary/') {
+      console.log('Fetching NPRO summary...');
+      try {
+        const response = await fetch(`${NPRO_API_BASE_URL}/v1/npro/summary`, {
+          headers: { 'Content-Type': 'application/json' },
+        });
+        if (!response.ok) {
+          throw new Error(`NPRO API error: ${response.status}`);
+        }
+        const data = await response.json();
+        res.writeHead(200);
+        res.end(JSON.stringify(data));
+      } catch (error: any) {
+        console.error('Error fetching NPRO summary:', error);
+        res.writeHead(500);
+        res.end(JSON.stringify({ error: 'Failed to fetch NPRO summary', message: error?.message }));
+      }
+      return;
+    }
+
     // 404 for unknown routes
     res.writeHead(404);
     res.end(JSON.stringify({ error: 'Not Found', path: url }));
@@ -90,5 +112,6 @@ server.listen(PORT, () => {
   console.log('  GET /api/account-values');
   console.log('  GET /api/top-accounts');
   console.log('  GET /api/validator-stats');
+  console.log('  GET /api/npro-summary');
   console.log('\n');
 });

@@ -60,6 +60,11 @@ const baseMap: Record<string, string> = {
   wbtc: "wrapped-bitcoin",
   ltc: "litecoin",
   itlx: "itlx",
+  adi: "adi-token",
+  astar: "astar",
+  avax: "avalanche-2",
+  bch: "bitcoin-cash",
+  ton: "the-open-network",
   
   // NEAR ecosystem direct mappings (non-intents format)
   "near-native": "near",
@@ -89,6 +94,7 @@ const baseMap: Record<string, string> = {
   "17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1": "17208628f84f5d6ad33f0da3bbbeb27ffcb398eac501a31bd6ad2011e36133a1",
   "aaaaaa20d9e0e2461697782ef11675f668207961.factory.bridge.near": "aaaaaa20d9e0e2461697782ef11675f668207961.factory.bridge.near",
   "d9c2d319cd7e6177336b0a9c93c21cb48d84fb54.factory.bridge.near": "d9c2d319cd7e6177336b0a9c93c21cb48d84fb54.factory.bridge.near",
+  "2260fac5e5542a773aa44fbcfedf7c193bc2c599.factory.bridge.near": "wrapped-bitcoin",
 };
 
 /**

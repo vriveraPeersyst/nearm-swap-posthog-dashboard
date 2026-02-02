@@ -145,3 +145,192 @@ export interface SwapMetrics {
     badAmounts: number;
   };
 }
+
+// NPRO Stats Types
+export interface NPROBalanceValue {
+  raw: string;
+  formatted: string;
+  number: number;
+  usdValue?: number;
+}
+
+export interface NPROTokenPrice {
+  usd: number;
+  change24h: number;
+  change7d: number;
+  change30d: number;
+  fdv?: number;
+  marketCap?: number;
+  circulatingSupply?: number;
+}
+
+export interface NPROValidatorStats {
+  staked: NPROBalanceValue;
+  unstaked: NPROBalanceValue;
+  total: NPROBalanceValue;
+  rpcUrlUsed: string;
+}
+
+export interface NPRONearblocks {
+  holders: {
+    count: number;
+    delta24h: number;
+  };
+  transfers: {
+    count: number;
+    delta24h: number;
+  };
+}
+
+export interface NPROAccountBalance {
+  raw: string;
+  number: number;
+  usdValue: number;
+  formatted: string;
+}
+
+export interface NPROAccounts {
+  team: NPROAccountBalance;
+  intents: NPROAccountBalance;
+  premium: NPROAccountBalance;
+  staking: NPROAccountBalance;
+  treasury: NPROAccountBalance;
+  liquidity: NPROAccountBalance;
+  marketing: NPROAccountBalance;
+  distribution: NPROAccountBalance;
+  rpcUrlUsed: string;
+}
+
+export interface NPROPoolToken {
+  symbol: string;
+  address: string;
+  amount: number;
+  usdValue: number;
+  pct: number;
+}
+
+export interface NPRORheaLiquidity {
+  tvlUsd: number;
+  delta24h: number;
+  volume24h: number;
+  deltaVolume24h: number;
+  buys24h: number;
+  sells24h: number;
+  totalTxns24h: number;
+  baseNpro: number;
+  quoteNear: number;
+  pool: {
+    base: NPROPoolToken;
+    quote: NPROPoolToken;
+  };
+  priceUsd: number;
+  priceNative: number;
+  priceChange24hPct: number;
+  pairUrl: string;
+  marketCap: number;
+  fdv: number;
+}
+
+export interface NPROLiquidity {
+  rhea: NPRORheaLiquidity;
+  intents: {
+    raw: string;
+    formatted: number;
+    usdValue: number;
+  };
+}
+
+export interface NPROLockedTokens {
+  premium: number;
+  ambassador: number;
+  total: number;
+}
+
+export interface NPROLockedUsdValue {
+  premium: number;
+  ambassador: number;
+  total: number;
+}
+
+export interface NPROPremium {
+  premiumUsers: number;
+  premiumUsersChange24h: number;
+  ambassadorUsers: number;
+  ambassadorUsersChange24h: number;
+  premiumSubscriptions24h: number;
+  ambassadorSubscriptions24h: number;
+  upgrades24h: number;
+  unsubscribes24h: number;
+  paidUsers: number;
+  totalTransactions: number;
+  locked: NPROLockedTokens;
+  lockedUsdValue: NPROLockedUsdValue;
+}
+
+export interface NPRORichListEntry {
+  rank: number;
+  account: string;
+  balance: NPROBalanceValue;
+}
+
+export interface NPROSummary {
+  asOf: {
+    fast: string;
+    slow: string;
+    premium: string;
+  };
+  token: {
+    near: NPROTokenPrice;
+    npro: NPROTokenPrice;
+    nproInNear: number;
+    nproInNearChange24h: number;
+  };
+  validator: NPROValidatorStats;
+  nearblocks: NPRONearblocks;
+  accounts: NPROAccounts;
+  liquidity: NPROLiquidity;
+  premium: NPROPremium;
+  richList: NPRORichListEntry[];
+}
+
+// Fee Leaders Types
+export interface FeeLeaderEntry {
+  accountId: string;
+  tier: 'basic' | 'premium' | 'ambassador';
+  feesPaid: string;
+  volumeUSD: string;
+  swaps: number;
+}
+
+export interface FeeTotals {
+  basic: string;
+  premium: string;
+  ambassador: string;
+  total: string;
+}
+
+export interface FeeLeadersResponse {
+  leaderboards: {
+    allTime: FeeLeaderEntry[];
+    last24h: FeeLeaderEntry[];
+    last7d: FeeLeaderEntry[];
+    last30d: FeeLeaderEntry[];
+  };
+  totals: {
+    allTime: FeeTotals;
+    last24h: FeeTotals;
+    last7d: FeeTotals;
+    last30d: FeeTotals;
+  };
+  userCounts: {
+    premium: number;
+    ambassador: number;
+  };
+  feeRates: {
+    basic: string;
+    ambassador: string;
+    premium: string;
+  };
+  generatedAt: string;
+}
+

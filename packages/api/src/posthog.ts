@@ -28,7 +28,7 @@ function buildExclusions(): string {
   return clauses.length ? clauses.join(' AND ') : '1';
 }
 
-async function hogql<T = any>(query: string, retries = 3): Promise<T> {
+async function hogql<T = any>(query: string, retries = 5): Promise<T> {
   const url = `${cfg.POSTHOG_BASE_URL.replace(/\/$/, '')}/api/projects/${cfg.POSTHOG_PROJECT_ID}/query/`;
   
   for (let attempt = 1; attempt <= retries; attempt++) {
@@ -43,13 +43,24 @@ async function hogql<T = any>(query: string, retries = 3): Promise<T> {
       );
       return data;
     } catch (error: any) {
-      const isRetryable = error?.response?.status === 500 || 
+      const status = error?.response?.status;
+      const isThrottled = status === 429;
+      const isRetryable = isThrottled ||
+                          status === 500 || 
                           error?.response?.data?.detail?.includes('ClickHouse') ||
                           error.code === 'ECONNABORTED';
       
       if (attempt < retries && isRetryable) {
-        const delay = Math.pow(2, attempt) * 1000; // Exponential backoff: 2s, 4s, 8s
-        console.log(`PostHog query failed (attempt ${attempt}/${retries}), retrying in ${delay/1000}s...`);
+        // For 429, respect Retry-After header if present, otherwise use exponential backoff
+        let delay: number;
+        if (isThrottled) {
+          const retryAfter = parseInt(error?.response?.headers?.['retry-after'] || '0', 10);
+          delay = (retryAfter > 0 ? retryAfter : Math.pow(2, attempt) * 2) * 1000; // Add extra buffer
+          console.log(`PostHog rate limited (attempt ${attempt}/${retries}), waiting ${delay/1000}s...`);
+        } else {
+          delay = Math.pow(2, attempt) * 1000; // Exponential backoff: 2s, 4s, 8s, 16s
+          console.log(`PostHog query failed (attempt ${attempt}/${retries}), retrying in ${delay/1000}s...`);
+        }
         await new Promise(resolve => setTimeout(resolve, delay));
         continue;
       }

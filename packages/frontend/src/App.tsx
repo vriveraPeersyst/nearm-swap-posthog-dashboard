@@ -1,20 +1,30 @@
 import { useState, useEffect } from 'react';
-import { Database, RefreshCw } from 'lucide-react';
-import type { SwapMetrics, ValidatorStats } from './types';
+import { Database, RefreshCw, BarChart3, Coins, DollarSign } from 'lucide-react';
+import type { SwapMetrics, ValidatorStats, NPROSummary, FeeLeadersResponse } from './types';
 import MetricsCard from './components/MetricsCard';
 import TradingPairsTable from './components/TradingPairsTable';
 import TopSwappersTable from './components/TopSwappersTable';
 import ValidatorStatsCard from './components/ValidatorStatsCard';
-import { apiCall } from './utils/api';
+import NPROStatsTab from './components/NPROStatsTab';
+import FeeLeadersCard from './components/FeeLeadersCard';
+import { apiCall, fetchNPROSummary, fetchFeeLeaders } from './utils/api';
 import logoSvg from './assets/NEARMobile_Logo.svg';
 import './App.css';
 
+type TabType = 'swaps' | 'npro' | 'fees';
+
 function App() {
+  const [activeTab, setActiveTab] = useState<TabType>('swaps');
   const [data, setData] = useState<SwapMetrics | null>(null);
   const [validatorStats, setValidatorStats] = useState<ValidatorStats | null>(null);
+  const [nproData, setNproData] = useState<NPROSummary | null>(null);
   const [nearPriceUSD, setNearPriceUSD] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingValidatorStats, setIsLoadingValidatorStats] = useState(false);
+  const [isLoadingNpro, setIsLoadingNpro] = useState(false);
+  const [isLoadingFees, setIsLoadingFees] = useState(false);
+  const [feeLeadersData, setFeeLeadersData] = useState<FeeLeadersResponse | null>(null);
+  const [feeLeadersError, setFeeLeadersError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [error, setError] = useState<string | null>(null);
   const [feeSwapsPeriod, setFeeSwapsPeriod] = useState<'allTime' | '24h' | '7d' | '30d'>('allTime');
@@ -29,6 +39,8 @@ function App() {
     const savedValidatorStatsTimestamp = localStorage.getItem('validatorStatsTimestamp');
     const savedNearPrice = localStorage.getItem('nearPriceUSD');
     const savedNearPriceTimestamp = localStorage.getItem('nearPriceTimestamp');
+    const savedNproData = localStorage.getItem('nproData');
+    const savedNproTimestamp = localStorage.getItem('nproDataTimestamp');
     
     if (savedData && savedTimestamp) {
       try {
@@ -53,6 +65,31 @@ function App() {
         // Clear corrupted data
         localStorage.removeItem('validatorStats');
         localStorage.removeItem('validatorStatsTimestamp');
+      }
+    }
+
+    if (savedNproData && savedNproTimestamp) {
+      try {
+        const parsedNproData = JSON.parse(savedNproData);
+        setNproData(parsedNproData);
+      } catch (error) {
+        console.error('Error loading saved NPRO data:', error);
+        localStorage.removeItem('nproData');
+        localStorage.removeItem('nproDataTimestamp');
+      }
+    }
+
+    // Load fee leaders from localStorage
+    const savedFeeLeaders = localStorage.getItem('feeLeadersData');
+    const savedFeeLeadersTimestamp = localStorage.getItem('feeLeadersDataTimestamp');
+    if (savedFeeLeaders && savedFeeLeadersTimestamp) {
+      try {
+        const parsedFeeLeaders = JSON.parse(savedFeeLeaders);
+        setFeeLeadersData(parsedFeeLeaders);
+      } catch (error) {
+        console.error('Error loading saved fee leaders data:', error);
+        localStorage.removeItem('feeLeadersData');
+        localStorage.removeItem('feeLeadersDataTimestamp');
       }
     }
 
@@ -148,8 +185,44 @@ function App() {
     }
   };
 
+  const fetchNproData = async () => {
+    setIsLoadingNpro(true);
+    try {
+      const newNproData = await fetchNPROSummary();
+      const timestamp = new Date();
+      
+      setNproData(newNproData);
+      
+      localStorage.setItem('nproData', JSON.stringify(newNproData));
+      localStorage.setItem('nproDataTimestamp', timestamp.toISOString());
+    } catch (error) {
+      console.error('Failed to fetch NPRO data:', error);
+    } finally {
+      setIsLoadingNpro(false);
+    }
+  };
+
+  const fetchFeeLeadersData = async () => {
+    setIsLoadingFees(true);
+    setFeeLeadersError(null);
+    try {
+      const newFeeLeaders = await fetchFeeLeaders();
+      const timestamp = new Date();
+      
+      setFeeLeadersData(newFeeLeaders);
+      
+      localStorage.setItem('feeLeadersData', JSON.stringify(newFeeLeaders));
+      localStorage.setItem('feeLeadersDataTimestamp', timestamp.toISOString());
+    } catch (error: any) {
+      console.error('Failed to fetch fee leaders:', error);
+      setFeeLeadersError(error?.message || 'Failed to fetch fee leaders');
+    } finally {
+      setIsLoadingFees(false);
+    }
+  };
+
   const refreshData = async () => {
-    await Promise.all([fetchData(), fetchValidatorStats(), fetchNearPrice()]);
+    await Promise.all([fetchData(), fetchValidatorStats(), fetchNearPrice(), fetchNproData(), fetchFeeLeadersData()]);
   };
 
   const clearCache = () => {
@@ -157,15 +230,65 @@ function App() {
     localStorage.removeItem('swapMetricsTimestamp');
     localStorage.removeItem('validatorStats');
     localStorage.removeItem('validatorStatsTimestamp');
+    localStorage.removeItem('nproData');
+    localStorage.removeItem('nproDataTimestamp');
+    localStorage.removeItem('feeLeadersData');
+    localStorage.removeItem('feeLeadersDataTimestamp');
     setData(null);
     setValidatorStats(null);
+    setNproData(null);
+    setFeeLeadersData(null);
+    setFeeLeadersError(null);
     setError(null);
   };
 
   // Load saved data from localStorage on component mount
   // New data is only fetched when user clicks Load/Refresh button
 
-  if (!data && !isLoading) {
+  // Tab navigation component
+  const TabNavigation = () => (
+    <div className="flex gap-2 border-b border-gray-200 pb-0">
+      <button
+        onClick={() => setActiveTab('swaps')}
+        className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+          activeTab === 'swaps'
+            ? 'bg-white text-blue-600 border border-gray-200 border-b-white -mb-px'
+            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+        }`}
+      >
+        <BarChart3 className="h-4 w-4" />
+        Swap Metrics
+      </button>
+      <button
+        onClick={() => setActiveTab('fees')}
+        className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+          activeTab === 'fees'
+            ? 'bg-white text-green-600 border border-gray-200 border-b-white -mb-px'
+            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+        }`}
+      >
+        <DollarSign className="h-4 w-4" />
+        Earned fees
+      </button>
+      <button
+        onClick={() => setActiveTab('npro')}
+        className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+          activeTab === 'npro'
+            ? 'bg-white text-purple-600 border border-gray-200 border-b-white -mb-px'
+            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+        }`}
+      >
+        <Coins className="h-4 w-4" />
+        NPRO Stats
+      </button>
+    </div>
+  );
+
+  // Check if there's any data loaded based on active tab
+  const hasDataForCurrentTab = activeTab === 'swaps' ? !!data : activeTab === 'npro' ? !!nproData : activeTab === 'fees' ? !!feeLeadersData : true;
+  const isLoadingCurrentTab = activeTab === 'swaps' ? isLoading : activeTab === 'npro' ? isLoadingNpro : activeTab === 'fees' ? isLoadingFees : false;
+
+  if (!hasDataForCurrentTab && !isLoadingCurrentTab) {
     return (
       <div className="min-h-screen bg-gray-100">
         {/* Header */}
@@ -175,8 +298,8 @@ function App() {
               <div className="flex items-center gap-3">
                 <img src={logoSvg} alt="NEARMobile Logo" className="h-8 w-8 flex-shrink-0" />
                 <div>
-                  <h1 className="text-lg sm:text-xl font-semibold text-gray-900">NEARMobile PostHog Analytics</h1>
-                  <p className="text-xs sm:text-sm text-gray-500">PostHog Data Dashboard</p>
+                  <h1 className="text-lg sm:text-xl font-semibold text-gray-900">NEARMobile Analytics</h1>
+                  <p className="text-xs sm:text-sm text-gray-500">Dashboard</p>
                 </div>
               </div>
               
@@ -194,18 +317,39 @@ function App() {
           </div>
         </header>
 
+        {/* Tab Navigation */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+          <TabNavigation />
+        </div>
+
         {/* Main Content - Empty State */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
           <div className="text-center py-8 sm:py-16">
-            <Database className="h-12 w-12 sm:h-16 sm:w-16 text-gray-400 mx-auto mb-4" />
-            <h2 className="text-xl sm:text-2xl font-semibold text-gray-600 mb-2">No Data Loaded</h2>
-            <p className="text-sm sm:text-base text-gray-500 mb-6 px-4">Click "Load Data" to fetch the latest swap metrics from PostHog</p>
+            {activeTab === 'swaps' ? (
+              <>
+                <Database className="h-12 w-12 sm:h-16 sm:w-16 text-gray-400 mx-auto mb-4" />
+                <h2 className="text-xl sm:text-2xl font-semibold text-gray-600 mb-2">No Swap Data Loaded</h2>
+                <p className="text-sm sm:text-base text-gray-500 mb-6 px-4">Click "Load Data" to fetch the latest swap metrics from PostHog</p>
+              </>
+            ) : activeTab === 'fees' ? (
+              <>
+                <DollarSign className="h-12 w-12 sm:h-16 sm:w-16 text-gray-400 mx-auto mb-4" />
+                <h2 className="text-xl sm:text-2xl font-semibold text-gray-600 mb-2">No Fee Data Loaded</h2>
+                <p className="text-sm sm:text-base text-gray-500 mb-6 px-4">Click "Load Data" to fetch the latest earned fees data</p>
+              </>
+            ) : (
+              <>
+                <Coins className="h-12 w-12 sm:h-16 sm:w-16 text-gray-400 mx-auto mb-4" />
+                <h2 className="text-xl sm:text-2xl font-semibold text-gray-600 mb-2">No NPRO Data Loaded</h2>
+                <p className="text-sm sm:text-base text-gray-500 mb-6 px-4">Click "Load Data" to fetch the latest NPRO stats</p>
+              </>
+            )}
             <button
               onClick={refreshData}
               className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors mx-auto text-sm sm:text-base"
             >
               <Database className="h-4 w-4 sm:h-5 sm:w-5" />
-              Load Swap Metrics
+              Load Data
             </button>
           </div>
         </main>
@@ -213,19 +357,21 @@ function App() {
     );
   }
 
-  if (isLoading && !data) {
+  if (isLoadingCurrentTab && !hasDataForCurrentTab) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
           <RefreshCw className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Fetching swap metrics from PostHog...</p>
+          <p className="text-gray-600">
+            {activeTab === 'swaps' ? 'Fetching swap metrics from PostHog...' : activeTab === 'npro' ? 'Fetching NPRO stats...' : 'Fetching earned fees data...'}
+          </p>
           <p className="text-sm text-gray-500 mt-2">This may take a few seconds</p>
         </div>
       </div>
     );
   }
 
-  if (error && !data) {
+  if (error && !data && activeTab === 'swaps') {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="text-center">
@@ -241,8 +387,6 @@ function App() {
     );
   }
 
-  if (!data) return null;
-
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Header */}
@@ -252,8 +396,8 @@ function App() {
             <div className="flex items-center gap-3">
               <img src={logoSvg} alt="NEARMobile Logo" className="h-8 w-8 flex-shrink-0" />
               <div>
-                <h1 className="text-lg sm:text-xl font-semibold text-gray-900">NEARMobile PostHog Analytics</h1>
-                <p className="text-xs sm:text-sm text-gray-500">PostHog Data Dashboard</p>
+                <h1 className="text-lg sm:text-xl font-semibold text-gray-900">NEARMobile Analytics</h1>
+                <p className="text-xs sm:text-sm text-gray-500">Dashboard</p>
               </div>
             </div>
             
@@ -272,11 +416,11 @@ function App() {
                 </button>
                 <button
                   onClick={refreshData}
-                  disabled={isLoading || isLoadingValidatorStats}
+                  disabled={isLoading || isLoadingValidatorStats || isLoadingNpro}
                   className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
                 >
-                  <RefreshCw className={`h-4 w-4 ${(isLoading || isLoadingValidatorStats) ? 'animate-spin' : ''}`} />
-                  <span className="hidden sm:inline">{isLoading || isLoadingValidatorStats ? 'Refreshing...' : 'Refresh Data'}</span>
+                  <RefreshCw className={`h-4 w-4 ${(isLoading || isLoadingValidatorStats || isLoadingNpro) ? 'animate-spin' : ''}`} />
+                  <span className="hidden sm:inline">{isLoading || isLoadingValidatorStats || isLoadingNpro ? 'Refreshing...' : 'Refresh Data'}</span>
                   <span className="sm:hidden">Refresh</span>
                 </button>
               </div>
@@ -285,8 +429,27 @@ function App() {
         </div>
       </header>
 
+      {/* Tab Navigation */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 bg-gray-100">
+        <TabNavigation />
+      </div>
+
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+        {activeTab === 'npro' ? (
+          <NPROStatsTab 
+            data={nproData} 
+            isLoading={isLoadingNpro} 
+            onRefresh={fetchNproData} 
+          />
+        ) : activeTab === 'fees' ? (
+          <FeeLeadersCard 
+            data={feeLeadersData}
+            isLoading={isLoadingFees}
+            error={feeLeadersError}
+            onRefresh={fetchFeeLeadersData}
+          />
+        ) : data && (
         <div className="space-y-6 sm:space-y-8">
           {/* Overview Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
@@ -476,20 +639,35 @@ function App() {
             data.notes.badAmounts > 0) && (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
               <h3 className="text-lg font-semibold text-yellow-800 mb-4">Data Quality Notes</h3>
-              <div className="space-y-2 text-sm text-yellow-700">
+              <div className="space-y-3 text-sm text-yellow-700">
                 {data.notes.badAmounts > 0 && (
                   <p>• {data.notes.badAmounts} events with invalid amounts were skipped</p>
                 )}
                 {data.notes.unmappedIntentTokenIds.length > 0 && (
-                  <p>• {data.notes.unmappedIntentTokenIds.length} unmapped intent token IDs found</p>
+                  <div>
+                    <p className="font-medium">• {data.notes.unmappedIntentTokenIds.length} unmapped intent token IDs:</p>
+                    <ul className="ml-4 mt-1 space-y-1 font-mono text-xs">
+                      {data.notes.unmappedIntentTokenIds.map((id, idx) => (
+                        <li key={idx} className="text-yellow-600">{id}</li>
+                      ))}
+                    </ul>
+                  </div>
                 )}
                 {data.notes.priceIdMissing.length > 0 && (
-                  <p>• {data.notes.priceIdMissing.length} price IDs are missing</p>
+                  <div>
+                    <p className="font-medium">• {data.notes.priceIdMissing.length} price IDs missing:</p>
+                    <ul className="ml-4 mt-1 space-y-1 font-mono text-xs">
+                      {data.notes.priceIdMissing.map((id, idx) => (
+                        <li key={idx} className="text-yellow-600">{id}</li>
+                      ))}
+                    </ul>
+                  </div>
                 )}
               </div>
             </div>
           )}
         </div>
+        )}
       </main>
     </div>
   );

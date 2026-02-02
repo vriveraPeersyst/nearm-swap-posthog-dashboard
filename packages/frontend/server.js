@@ -316,6 +316,93 @@ app.get('/api/validator-stats', async (req, res) => {
   }
 });
 
+// API endpoint to proxy NPRO summary (avoids CORS issues with external API)
+const NPRO_API_BASE_URL = 'https://npro-stats-api-production.up.railway.app';
+
+app.get('/api/npro-summary', async (req, res) => {
+  try {
+    console.log('Fetching NPRO summary...');
+    
+    const response = await fetch(`${NPRO_API_BASE_URL}/v1/npro/summary`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`NPRO API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    
+    console.log('Successfully fetched NPRO summary');
+    res.json(data);
+    
+  } catch (error) {
+    console.error('Error fetching NPRO summary:', error);
+    res.status(500).json({ 
+      error: 'Failed to fetch NPRO summary',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// API endpoint to get fee leaders
+app.get('/api/fee-leaders', async (req, res) => {
+  try {
+    console.log('Fetching fee leaders...');
+    
+    // Change to the API directory and run the fee leaders script
+    const apiDir = path.join(process.cwd(), '../api');
+    const { stdout, stderr } = await execAsync('npx tsx src/feeLeadersRunner.ts', { 
+      cwd: apiDir,
+      timeout: 300000 // 5 minute timeout (this is a heavy query)
+    });
+    
+    if (stderr) {
+      console.warn('Script warnings:', stderr);
+    }
+    
+    // Clean up the output - find the JSON part
+    const lines = stdout.split('\n');
+    let jsonLines = [];
+    let insideJson = false;
+    let braceCount = 0;
+    
+    for (const line of lines) {
+      if (!insideJson && line.trim().startsWith('{')) {
+        insideJson = true;
+        jsonLines.push(line);
+        braceCount = (line.match(/{/g) || []).length - (line.match(/}/g) || []).length;
+      } else if (insideJson) {
+        jsonLines.push(line);
+        braceCount += (line.match(/{/g) || []).length - (line.match(/}/g) || []).length;
+        
+        if (braceCount === 0) {
+          break;
+        }
+      }
+    }
+    
+    if (jsonLines.length === 0) {
+      throw new Error('No JSON output found in script response');
+    }
+    
+    const jsonOutput = jsonLines.join('\n');
+    const data = JSON.parse(jsonOutput);
+    
+    console.log('Successfully fetched fee leaders');
+    res.json(data);
+    
+  } catch (error) {
+    console.error('Error fetching fee leaders:', error);
+    res.status(500).json({ 
+      error: 'Failed to fetch fee leaders',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
@@ -325,6 +412,8 @@ app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🚀 API available at http://localhost:${PORT}/api/swap-metrics`);
+  console.log(`📊 NPRO stats at http://localhost:${PORT}/api/npro-summary`);
+  console.log(`💰 Fee leaders at http://localhost:${PORT}/api/fee-leaders`);
   console.log(`❤️  Health check at http://localhost:${PORT}/health`);
 });
 

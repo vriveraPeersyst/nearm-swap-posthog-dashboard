@@ -1,4 +1,4 @@
-import type { SwapMetrics, AccountValueSummary, TopAccountsResponse, ValidatorStats } from '../types';
+import type { SwapMetrics, AccountValueSummary, TopAccountsResponse, ValidatorStats, NPROSummary, FeeLeadersResponse } from '../types';
 
 // API configuration utility
 const getApiBaseUrl = (): string => {
@@ -67,6 +67,28 @@ export const fetchValidatorStats = async (): Promise<ValidatorStats> => {
   return response.json();
 };
 
+// Fetch NPRO summary stats via our proxy endpoint (avoids CORS issues)
+export const fetchNPROSummary = async (): Promise<NPROSummary> => {
+  const response = await apiCall('/api/npro-summary');
+  
+  if (!response.ok) {
+    throw new Error(`Failed to fetch NPRO summary: ${response.statusText}`);
+  }
+  
+  return response.json();
+};
+
+// Fetch fee leaders data
+export const fetchFeeLeaders = async (): Promise<FeeLeadersResponse> => {
+  const response = await apiCall('/api/fee-leaders');
+  
+  if (!response.ok) {
+    throw new Error(`Failed to fetch fee leaders: ${response.statusText}`);
+  }
+  
+  return response.json();
+};
+
 export default {
   getApiBaseUrl,
   apiCall,
@@ -74,4 +96,6 @@ export default {
   fetchAccountValues,
   fetchTopAccountsByValue,
   fetchValidatorStats,
+  fetchNPROSummary,
+  fetchFeeLeaders,
 };
