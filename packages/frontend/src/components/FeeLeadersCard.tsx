@@ -158,7 +158,7 @@ export function FeeLeadersCard({ data, isLoading, error, onRefresh }: FeeLeaders
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <DollarSign className="h-6 w-6 text-green-600" />
-          <h2 className="text-xl font-bold text-gray-900">Top Fee Payers</h2>
+          <h2 className="text-xl font-bold text-gray-900">Earned Fees</h2>
         </div>
         {onRefresh && (
           <button
