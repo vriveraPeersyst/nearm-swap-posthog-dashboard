@@ -86,6 +86,7 @@ const formatPercentChange = (value: number): React.ReactNode => {
 const StatCard = ({ 
   title, 
   value, 
+  valueNode,
   subValue, 
   subValueNode,
   change,
@@ -94,7 +95,8 @@ const StatCard = ({
   href 
 }: { 
   title: string; 
-  value: string | number; 
+  value?: string | number; 
+  valueNode?: React.ReactNode;
   subValue?: string;
   subValueNode?: React.ReactNode;
   change?: number;
@@ -108,7 +110,9 @@ const StatCard = ({
       {Icon && <Icon className="h-4 w-4 text-gray-400" />}
     </div>
     <div className="flex items-baseline gap-2">
-      {href ? (
+      {valueNode ? (
+        <span className="text-lg font-bold">{valueNode}</span>
+      ) : href ? (
         <a 
           href={href} 
           target="_blank" 
@@ -428,7 +432,7 @@ export default function NPROStatsTab({ data, isLoading, onRefresh }: NPROStatsTa
         />
         <StatCard
           title="Price Change 24h"
-          value={formatPercentChange(data.liquidity.rhea.priceChange24hPct)}
+          valueNode={formatPercentChange(data.liquidity.rhea.priceChange24hPct)}
           subValue={`$${data.liquidity.rhea.priceUsd.toFixed(4)} / ${data.liquidity.rhea.priceNative.toFixed(4)} NEAR`}
         />
       </div>
