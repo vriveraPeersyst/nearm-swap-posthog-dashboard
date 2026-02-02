@@ -48,11 +48,46 @@ const ChangeIndicator = ({ value, suffix = '' }: { value: number; suffix?: strin
   );
 };
 
+// Format change value with color
+const formatChange24h = (value: number, label: string = '24h'): React.ReactNode => {
+  if (value === 0) return <span className="text-gray-500">0 ({label})</span>;
+  const isPositive = value > 0;
+  return (
+    <span className={isPositive ? 'text-green-600' : 'text-red-600'}>
+      {isPositive ? '+' : ''}{value.toLocaleString()} ({label})
+    </span>
+  );
+};
+
+// Format USD change with color
+const formatUSDChange = (value: number, label: string = '24h'): React.ReactNode => {
+  if (value === 0) return <span className="text-gray-500">$0 ({label})</span>;
+  const isPositive = value > 0;
+  const formatted = formatUSD(Math.abs(value));
+  return (
+    <span className={isPositive ? 'text-green-600' : 'text-red-600'}>
+      {isPositive ? '+' : '-'}{formatted} ({label})
+    </span>
+  );
+};
+
+// Format percentage change with color
+const formatPercentChange = (value: number): React.ReactNode => {
+  if (value === 0) return <span className="text-gray-500">0%</span>;
+  const isPositive = value > 0;
+  return (
+    <span className={isPositive ? 'text-green-600' : 'text-red-600'}>
+      {isPositive ? '+' : ''}{value.toFixed(2)}%
+    </span>
+  );
+};
+
 // Stat card component
 const StatCard = ({ 
   title, 
   value, 
   subValue, 
+  subValueNode,
   change,
   changeLabel = '24h',
   icon: Icon,
@@ -60,7 +95,8 @@ const StatCard = ({
 }: { 
   title: string; 
   value: string | number; 
-  subValue?: string; 
+  subValue?: string;
+  subValueNode?: React.ReactNode;
   change?: number;
   changeLabel?: string;
   icon?: React.ElementType;
@@ -86,7 +122,8 @@ const StatCard = ({
         <span className="text-lg font-bold text-gray-900">{value}</span>
       )}
     </div>
-    {subValue && <div className="text-sm text-gray-600">{subValue}</div>}
+    {subValueNode && <div className="text-sm">{subValueNode}</div>}
+    {subValue && !subValueNode && <div className="text-sm text-gray-600">{subValue}</div>}
     {change !== undefined && (
       <div className="mt-1 text-xs flex items-center gap-1">
         <span className="text-gray-500">{changeLabel}:</span>
@@ -200,13 +237,13 @@ export default function NPROStatsTab({ data, isLoading, onRefresh }: NPROStatsTa
         <StatCard
           title="Holders"
           value={data.nearblocks.holders.count.toLocaleString()}
-          subValue={`+${data.nearblocks.holders.delta24h} (24h)`}
+          subValueNode={formatChange24h(data.nearblocks.holders.delta24h)}
           icon={Users}
         />
         <StatCard
           title="Transfers"
           value={data.nearblocks.transfers.count.toLocaleString()}
-          subValue={`+${data.nearblocks.transfers.delta24h} (24h)`}
+          subValueNode={formatChange24h(data.nearblocks.transfers.delta24h)}
           icon={ArrowUpDown}
         />
       </div>
@@ -316,13 +353,13 @@ export default function NPROStatsTab({ data, isLoading, onRefresh }: NPROStatsTa
         <StatCard
           title="Premium Users"
           value={data.premium.premiumUsers.toLocaleString()}
-          subValue={`+${data.premium.premiumUsersChange24h} (24h)`}
+          subValueNode={formatChange24h(data.premium.premiumUsersChange24h)}
           icon={Crown}
         />
         <StatCard
           title="Ambassador Users"
           value={data.premium.ambassadorUsers.toLocaleString()}
-          subValue={`+${data.premium.ambassadorUsersChange24h} (24h)`}
+          subValueNode={formatChange24h(data.premium.ambassadorUsersChange24h)}
           icon={Users}
         />
         <StatCard
@@ -370,14 +407,14 @@ export default function NPROStatsTab({ data, isLoading, onRefresh }: NPROStatsTa
         <StatCard
           title="TVL (Rhea)"
           value={formatUSD(data.liquidity.rhea.tvlUsd)}
-          subValue={`${data.liquidity.rhea.delta24h >= 0 ? '+' : ''}${formatUSD(data.liquidity.rhea.delta24h)} (24h)`}
+          subValueNode={formatUSDChange(data.liquidity.rhea.delta24h)}
           icon={Droplets}
           href={data.liquidity.rhea.pairUrl}
         />
         <StatCard
           title="Volume 24h"
           value={formatUSD(data.liquidity.rhea.volume24h)}
-          subValue={`${data.liquidity.rhea.deltaVolume24h >= 0 ? '+' : ''}${formatUSD(data.liquidity.rhea.deltaVolume24h)} change`}
+          subValueNode={formatUSDChange(data.liquidity.rhea.deltaVolume24h, 'change')}
         />
         <StatCard
           title="Transactions 24h"
@@ -391,7 +428,7 @@ export default function NPROStatsTab({ data, isLoading, onRefresh }: NPROStatsTa
         />
         <StatCard
           title="Price Change 24h"
-          value={`${data.liquidity.rhea.priceChange24hPct >= 0 ? '+' : ''}${data.liquidity.rhea.priceChange24hPct.toFixed(2)}%`}
+          value={formatPercentChange(data.liquidity.rhea.priceChange24hPct)}
           subValue={`$${data.liquidity.rhea.priceUsd.toFixed(4)} / ${data.liquidity.rhea.priceNative.toFixed(4)} NEAR`}
         />
       </div>
