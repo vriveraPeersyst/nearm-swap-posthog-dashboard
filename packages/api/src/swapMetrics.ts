@@ -169,6 +169,12 @@ export async function getSwapMetrics() {
           diags.priceIdMissing.add(priceId);
         } else {
           volumeContribution = amount.times(price);
+          // TON decimals are off by 3 (shows 1000x higher), so divide by 1000
+          // Only apply for events before Feb 5, 2026 when the fix was deployed
+          const tonFixDate = new Date('2026-02-05T00:00:00Z').getTime();
+          if (priceId === 'the-open-network' && eventTime < tonFixDate) {
+            volumeContribution = volumeContribution.dividedBy(1000);
+          }
         }
       }
 

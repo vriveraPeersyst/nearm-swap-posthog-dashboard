@@ -217,15 +217,19 @@ async function computeFeeLeaders() {
       const price = prices[priceId];
       if (!price) continue;
 
-      const volumeUSD = amount.times(price);
+      let volumeUSD = amount.times(price);
+      // TON decimals are off by 3 (shows 1000x higher), so divide by 1000
+      // Only apply for events before Feb 5, 2026 when the fix was deployed
+      const tonFixDate = new Date('2026-02-05T00:00:00Z').getTime();
+      const eventTime = new Date(ev.timestamp).getTime();
+      if (priceId === 'the-open-network' && eventTime < tonFixDate) {
+        volumeUSD = volumeUSD.dividedBy(1000);
+      }
 
       // Get account data and calculate fee
       const acctData = getAccountData(accountId);
       const feeRate = FEE_RATES[acctData.tier];
       const feeUSD = volumeUSD.times(feeRate);
-
-      // Parse event timestamp
-      const eventTime = new Date(ev.timestamp).getTime();
 
       // Update all-time
       acctData.fees.allTime = acctData.fees.allTime.plus(feeUSD);

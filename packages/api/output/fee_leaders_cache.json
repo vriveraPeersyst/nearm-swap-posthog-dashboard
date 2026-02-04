@@ -4,425 +4,425 @@
       {
         "accountId": "76772132a3bfa2299db6397e20a3d11ee2857b3c819be067586544082c40baf8",
         "tier": "basic",
-        "feesPaid": "10778.45",
-        "volumeUSD": "1224823.54",
+        "feesPaid": "10281.92",
+        "volumeUSD": "1168400.10",
         "swaps": 14
       },
       {
         "accountId": "bichiveneno.near",
         "tier": "basic",
-        "feesPaid": "2183.39",
-        "volumeUSD": "248112.11",
-        "swaps": 22
+        "feesPaid": "2254.73",
+        "volumeUSD": "256219.20",
+        "swaps": 24
       },
       {
         "accountId": "fvdw.near",
         "tier": "basic",
-        "feesPaid": "1002.56",
-        "volumeUSD": "113927.35",
+        "feesPaid": "938.93",
+        "volumeUSD": "106696.47",
         "swaps": 62
       },
       {
         "accountId": "2634f53c7c3827e661b68e42a6db1a826dbc4e8c75557a3d2c78c444825b63cf",
         "tier": "basic",
-        "feesPaid": "973.14",
-        "volumeUSD": "110584.38",
+        "feesPaid": "909.13",
+        "volumeUSD": "103310.34",
         "swaps": 72
-      },
-      {
-        "accountId": "00757f5bf358c02ba2e4a18d51f92cb3dd937adc676610e973399977386243ec",
-        "tier": "basic",
-        "feesPaid": "784.47",
-        "volumeUSD": "89144.23",
-        "swaps": 8
       },
       {
         "accountId": "mikijanus.near",
         "tier": "basic",
-        "feesPaid": "744.88",
-        "volumeUSD": "84645.75",
+        "feesPaid": "732.52",
+        "volumeUSD": "83240.62",
         "swaps": 6
+      },
+      {
+        "accountId": "00757f5bf358c02ba2e4a18d51f92cb3dd937adc676610e973399977386243ec",
+        "tier": "basic",
+        "feesPaid": "718.45",
+        "volumeUSD": "81642.41",
+        "swaps": 8
       },
       {
         "accountId": "patclass.near",
         "tier": "basic",
-        "feesPaid": "703.28",
-        "volumeUSD": "79918.22",
+        "feesPaid": "628.74",
+        "volumeUSD": "71447.51",
         "swaps": 34
       },
       {
         "accountId": "72f07c6a74f7eab6e0d1fc35eeb37dd06f7c2f9988d1cc142d038cb833947bff",
         "tier": "basic",
-        "feesPaid": "614.40",
-        "volumeUSD": "69818.05",
+        "feesPaid": "592.25",
+        "volumeUSD": "67301.37",
         "swaps": 11
       },
       {
         "accountId": "92fcb40539f36ba1f03cfc281509d864e86e61a05e5127901bda416bee150cd1",
         "tier": "premium",
-        "feesPaid": "563.27",
-        "volumeUSD": "256031.29",
+        "feesPaid": "533.97",
+        "volumeUSD": "242715.19",
         "swaps": 73
       },
       {
         "accountId": "phrederique.near",
         "tier": "basic",
-        "feesPaid": "530.97",
-        "volumeUSD": "60337.63",
+        "feesPaid": "530.91",
+        "volumeUSD": "60331.17",
         "swaps": 8
       },
       {
         "accountId": "670b3e447af8e4f8e33664ac89f3d0d3bde3a2894fefce163a8a6170e7e6c1e3",
         "tier": "basic",
-        "feesPaid": "508.44",
-        "volumeUSD": "57776.82",
+        "feesPaid": "479.71",
+        "volumeUSD": "54512.72",
         "swaps": 13
       },
       {
         "accountId": "creampiez69.near",
         "tier": "basic",
-        "feesPaid": "461.50",
-        "volumeUSD": "52442.62",
+        "feesPaid": "432.78",
+        "volumeUSD": "49180.03",
         "swaps": 10
       },
       {
         "accountId": "92ae3674601f58c66cfd029c1bdde4d074c8dadb45b10c352329f60ee96704b2",
         "tier": "premium",
-        "feesPaid": "401.73",
-        "volumeUSD": "182603.20",
+        "feesPaid": "384.42",
+        "volumeUSD": "174735.77",
         "swaps": 57
       },
       {
         "accountId": "near_mobile.near",
         "tier": "premium",
-        "feesPaid": "373.73",
-        "volumeUSD": "169877.92",
+        "feesPaid": "368.57",
+        "volumeUSD": "167530.75",
         "swaps": 91
-      },
-      {
-        "accountId": "d9179f438ab98d91d3a9a1d752b0934352864cdbf88a8d3b1e1782f4ef55c440",
-        "tier": "basic",
-        "feesPaid": "372.52",
-        "volumeUSD": "42331.64",
-        "swaps": 31
       },
       {
         "accountId": "rasfi.near",
         "tier": "basic",
-        "feesPaid": "361.49",
-        "volumeUSD": "41078.25",
+        "feesPaid": "339.48",
+        "volumeUSD": "38577.45",
         "swaps": 7
+      },
+      {
+        "accountId": "d9179f438ab98d91d3a9a1d752b0934352864cdbf88a8d3b1e1782f4ef55c440",
+        "tier": "basic",
+        "feesPaid": "337.13",
+        "volumeUSD": "38309.82",
+        "swaps": 31
       },
       {
         "accountId": "2ffffexy.near",
         "tier": "basic",
-        "feesPaid": "354.47",
-        "volumeUSD": "40281.08",
+        "feesPaid": "313.02",
+        "volumeUSD": "35570.75",
         "swaps": 2
       },
       {
         "accountId": "4f2424507254462f701360d03c38f84df29dcbf9cf1b1841b7f104724cbe1279",
         "tier": "basic",
-        "feesPaid": "291.37",
-        "volumeUSD": "33110.13",
+        "feesPaid": "286.26",
+        "volumeUSD": "32529.84",
         "swaps": 12
       },
       {
         "accountId": "ecb7782d5a1271b7daa5e509dbf10a8edf64ac4514b4212ae512a0669b92f643",
         "tier": "basic",
-        "feesPaid": "229.42",
-        "volumeUSD": "26070.29",
+        "feesPaid": "209.17",
+        "volumeUSD": "23768.98",
         "swaps": 13
       },
       {
         "accountId": "c1802c693674c90c95cd9d6a7e8f249d08da3fbe25d74e56cb35dc17cf7983f9",
         "tier": "ambassador",
-        "feesPaid": "224.99",
-        "volumeUSD": "34088.85",
+        "feesPaid": "201.39",
+        "volumeUSD": "30513.45",
         "swaps": 77
       }
     ],
     "last24h": [
       {
-        "accountId": "creampiez69.near",
+        "accountId": "hocj.near",
         "tier": "basic",
-        "feesPaid": "329.13",
-        "volumeUSD": "37400.67",
-        "swaps": 1
+        "feesPaid": "7.90",
+        "volumeUSD": "897.69",
+        "swaps": 2
       },
       {
-        "accountId": "rottenbananas.near",
+        "accountId": "1d06f9e79168da0abbed4c14ea4cb5daf16e1d112a5cd936f241be1c7d1658ca",
         "tier": "basic",
-        "feesPaid": "27.13",
-        "volumeUSD": "3082.96",
+        "feesPaid": "1.72",
+        "volumeUSD": "195.05",
         "swaps": 1
       },
       {
         "accountId": "finpidar.near",
         "tier": "premium",
-        "feesPaid": "12.05",
-        "volumeUSD": "5475.96",
+        "feesPaid": "1.51",
+        "volumeUSD": "686.14",
+        "swaps": 2
+      },
+      {
+        "accountId": "draining.near",
+        "tier": "basic",
+        "feesPaid": "1.38",
+        "volumeUSD": "157.18",
         "swaps": 3
       },
       {
-        "accountId": "cca62d5b7286af1c5c79a10cf264722c371460447fe6c36ce7471482fb023e2a",
+        "accountId": "roifaster555.near",
         "tier": "basic",
-        "feesPaid": "1.90",
-        "volumeUSD": "216.42",
+        "feesPaid": "0.97",
+        "volumeUSD": "110.03",
         "swaps": 1
       },
       {
-        "accountId": "40b1403b1c6f848ec48c4b40336e68ef15e4de4b13a7168eb38efdbba0724f81",
+        "accountId": "zkall.near",
         "tier": "basic",
-        "feesPaid": "1.79",
-        "volumeUSD": "202.95",
+        "feesPaid": "0.83",
+        "volumeUSD": "94.74",
         "swaps": 1
       },
       {
         "accountId": "sturtsnear.near",
-        "tier": "basic",
-        "feesPaid": "1.53",
-        "volumeUSD": "174.28",
-        "swaps": 1
-      },
-      {
-        "accountId": "near_mobile.near",
         "tier": "premium",
-        "feesPaid": "0.72",
-        "volumeUSD": "329.49",
+        "feesPaid": "0.60",
+        "volumeUSD": "274.58",
+        "swaps": 2
+      },
+      {
+        "accountId": "nileshpk.tg",
+        "tier": "ambassador",
+        "feesPaid": "0.22",
+        "volumeUSD": "33.27",
         "swaps": 1
       },
       {
-        "accountId": "digitalvolcano.near",
+        "accountId": "upthere.near",
         "tier": "basic",
-        "feesPaid": "0.55",
-        "volumeUSD": "63.03",
+        "feesPaid": "0.20",
+        "volumeUSD": "22.76",
         "swaps": 1
       },
       {
-        "accountId": "sylvain230staking.near",
+        "accountId": "f316656b1b6107bface3705acd00ef1454bb7b20229618969f4007866cd7780b",
+        "tier": "basic",
+        "feesPaid": "0.17",
+        "volumeUSD": "19.80",
+        "swaps": 1
+      },
+      {
+        "accountId": "sartofede.near",
         "tier": "premium",
-        "feesPaid": "0.19",
-        "volumeUSD": "87.33",
+        "feesPaid": "0.16",
+        "volumeUSD": "71.16",
         "swaps": 2
       },
       {
         "accountId": "young5584.near",
         "tier": "basic",
         "feesPaid": "0.09",
-        "volumeUSD": "10.17",
+        "volumeUSD": "9.73",
         "swaps": 3
       },
       {
-        "accountId": "1f2ae9db5e6ce2414c3525aa09ede9cedb483293cb3f342eefc29f22b43f51cc",
+        "accountId": "ee9138f58954653531d32caa2245c55a22a7d5472bbce4c47fd21cd6fdc4a6b9",
         "tier": "basic",
-        "feesPaid": "0.07",
-        "volumeUSD": "8.40",
+        "feesPaid": "0.08",
+        "volumeUSD": "9.29",
         "swaps": 1
       },
       {
-        "accountId": "fee6fdf9337dc1c1f976644d79438a6f242c3b60a37fba6d3102c74fd3b422b5",
-        "tier": "premium",
-        "feesPaid": "0.06",
-        "volumeUSD": "27.95",
+        "accountId": "8c0ac86ac9788cac5c89b0bc97202e9aab3cbf696c427964c1a5af74b5a8ff1d",
+        "tier": "ambassador",
+        "feesPaid": "0.08",
+        "volumeUSD": "11.50",
         "swaps": 1
       },
       {
-        "accountId": "4f178bcf7fb30d87bb88166a712a5f8badc9d0cb0194bafc3d4d0c9aeed31bb8",
-        "tier": "premium",
-        "feesPaid": "0.05",
-        "volumeUSD": "24.57",
-        "swaps": 2
-      },
-      {
-        "accountId": "6796201cfc154dff280aa3eb81e829a32156913b424b05712984064bdb19b483",
+        "accountId": "1a18df5431e2174d4bb37e1f796457e5987a9b7b9279aba62de0005547c07777",
         "tier": "ambassador",
         "feesPaid": "0.05",
-        "volumeUSD": "7.29",
+        "volumeUSD": "6.91",
         "swaps": 1
       },
       {
-        "accountId": "af959eeeb1c164d092f2fb6d998f6eaaa6e119b8c543dfac320ff80462402a57",
+        "accountId": "ac1e001a07168bc46b8b3302fde651f5549fd89426910ab02b502294bc93cded",
         "tier": "basic",
         "feesPaid": "0.04",
-        "volumeUSD": "4.74",
+        "volumeUSD": "4.69",
         "swaps": 1
       },
       {
-        "accountId": "kamalbd.near",
-        "tier": "basic",
-        "feesPaid": "0.02",
-        "volumeUSD": "1.94",
-        "swaps": 1
-      },
-      {
-        "accountId": "denslips.tg",
-        "tier": "basic",
-        "feesPaid": "0.02",
-        "volumeUSD": "1.92",
+        "accountId": "ritaisodiene.near",
+        "tier": "ambassador",
+        "feesPaid": "0.04",
+        "volumeUSD": "5.41",
         "swaps": 1
       },
       {
         "accountId": "a064e827353249edc11704513d25dcd2458bbcb12cd42fe8cb9b24da71b1a188",
         "tier": "premium",
-        "feesPaid": "0.01",
-        "volumeUSD": "6.43",
+        "feesPaid": "0.03",
+        "volumeUSD": "15.16",
         "swaps": 1
       },
       {
-        "accountId": "walmirpacheco.near",
-        "tier": "basic",
-        "feesPaid": "0.01",
-        "volumeUSD": "1.60",
-        "swaps": 2
+        "accountId": "4f178bcf7fb30d87bb88166a712a5f8badc9d0cb0194bafc3d4d0c9aeed31bb8",
+        "tier": "premium",
+        "feesPaid": "0.03",
+        "volumeUSD": "13.55",
+        "swaps": 1
       },
       {
-        "accountId": "798a26701904e154e670902004e3d5cfc80c8937adcacb75587d1fb3a974f587",
+        "accountId": "fabianjeff.near",
         "tier": "basic",
-        "feesPaid": "0.01",
-        "volumeUSD": "1.16",
-        "swaps": 4
+        "feesPaid": "0.03",
+        "volumeUSD": "3.00",
+        "swaps": 1
       }
     ],
     "last7d": [
       {
         "accountId": "creampiez69.near",
         "tier": "basic",
-        "feesPaid": "329.13",
-        "volumeUSD": "37400.67",
+        "feesPaid": "310.93",
+        "volumeUSD": "35332.57",
         "swaps": 1
       },
       {
         "accountId": "bichiveneno.near",
         "tier": "basic",
-        "feesPaid": "307.88",
-        "volumeUSD": "34986.78",
+        "feesPaid": "279.59",
+        "volumeUSD": "31771.62",
         "swaps": 3
       },
       {
         "accountId": "92fcb40539f36ba1f03cfc281509d864e86e61a05e5127901bda416bee150cd1",
         "tier": "premium",
-        "feesPaid": "267.31",
-        "volumeUSD": "121503.86",
-        "swaps": 18
+        "feesPaid": "127.78",
+        "volumeUSD": "58080.40",
+        "swaps": 11
       },
       {
         "accountId": "finpidar.near",
         "tier": "premium",
-        "feesPaid": "63.50",
-        "volumeUSD": "28862.15",
-        "swaps": 12
+        "feesPaid": "52.96",
+        "volumeUSD": "24072.54",
+        "swaps": 14
       },
       {
         "accountId": "rottenbananas.near",
         "tier": "basic",
         "feesPaid": "27.13",
-        "volumeUSD": "3082.96",
+        "volumeUSD": "3082.63",
         "swaps": 1
-      },
-      {
-        "accountId": "sturtsnear.near",
-        "tier": "basic",
-        "feesPaid": "24.09",
-        "volumeUSD": "2737.78",
-        "swaps": 4
       },
       {
         "accountId": "ktpblack.near",
         "tier": "ambassador",
-        "feesPaid": "22.05",
-        "volumeUSD": "3341.05",
-        "swaps": 2
+        "feesPaid": "14.84",
+        "volumeUSD": "2249.11",
+        "swaps": 1
       },
       {
         "accountId": "petersalomonsen.near",
         "tier": "basic",
-        "feesPaid": "12.99",
-        "volumeUSD": "1476.00",
+        "feesPaid": "12.14",
+        "volumeUSD": "1380.00",
         "swaps": 1
       },
       {
         "accountId": "8bd2ee40b7f39ef9f01200110958c2e03969ada963d8caaf22b4e5818ac5e905",
         "tier": "premium",
-        "feesPaid": "12.05",
-        "volumeUSD": "5479.26",
+        "feesPaid": "11.27",
+        "volumeUSD": "5122.89",
         "swaps": 1
       },
       {
-        "accountId": "zkall.near",
+        "accountId": "hocj.near",
         "tier": "basic",
-        "feesPaid": "6.37",
-        "volumeUSD": "724.18",
-        "swaps": 6
+        "feesPaid": "7.90",
+        "volumeUSD": "897.69",
+        "swaps": 2
+      },
+      {
+        "accountId": "draining.near",
+        "tier": "basic",
+        "feesPaid": "7.14",
+        "volumeUSD": "810.92",
+        "swaps": 4
       },
       {
         "accountId": "3a0c6252cea62c29b563a82468f5118b79da1a0b037464db0b98245ad3edd287",
         "tier": "basic",
         "feesPaid": "4.80",
-        "volumeUSD": "545.76",
+        "volumeUSD": "545.57",
         "swaps": 2
       },
       {
-        "accountId": "npronear.near",
+        "accountId": "zkall.near",
         "tier": "basic",
-        "feesPaid": "3.14",
-        "volumeUSD": "356.70",
-        "swaps": 2
-      },
-      {
-        "accountId": "romkaxorowiu.near",
-        "tier": "premium",
-        "feesPaid": "3.04",
-        "volumeUSD": "1380.00",
-        "swaps": 1
-      },
-      {
-        "accountId": "c1802c693674c90c95cd9d6a7e8f249d08da3fbe25d74e56cb35dc17cf7983f9",
-        "tier": "ambassador",
-        "feesPaid": "2.36",
-        "volumeUSD": "357.88",
+        "feesPaid": "3.97",
+        "volumeUSD": "451.63",
         "swaps": 5
       },
       {
         "accountId": "1d06f9e79168da0abbed4c14ea4cb5daf16e1d112a5cd936f241be1c7d1658ca",
         "tier": "basic",
-        "feesPaid": "2.32",
-        "volumeUSD": "263.96",
-        "swaps": 13
+        "feesPaid": "3.89",
+        "volumeUSD": "441.94",
+        "swaps": 14
+      },
+      {
+        "accountId": "sturtsnear.near",
+        "tier": "premium",
+        "feesPaid": "3.18",
+        "volumeUSD": "1447.30",
+        "swaps": 6
+      },
+      {
+        "accountId": "npronear.near",
+        "tier": "basic",
+        "feesPaid": "2.93",
+        "volumeUSD": "333.50",
+        "swaps": 2
       },
       {
         "accountId": "st24y.near",
         "tier": "premium",
-        "feesPaid": "2.22",
-        "volumeUSD": "1008.42",
+        "feesPaid": "2.11",
+        "volumeUSD": "958.80",
         "swaps": 6
       },
       {
         "accountId": "cca62d5b7286af1c5c79a10cf264722c371460447fe6c36ce7471482fb023e2a",
         "tier": "basic",
         "feesPaid": "1.90",
-        "volumeUSD": "216.42",
-        "swaps": 1
-      },
-      {
-        "accountId": "40b1403b1c6f848ec48c4b40336e68ef15e4de4b13a7168eb38efdbba0724f81",
-        "tier": "basic",
-        "feesPaid": "1.79",
-        "volumeUSD": "202.95",
+        "volumeUSD": "216.37",
         "swaps": 1
       },
       {
         "accountId": "masterdjek.near",
         "tier": "basic",
         "feesPaid": "1.76",
-        "volumeUSD": "200.25",
+        "volumeUSD": "200.09",
+        "swaps": 1
+      },
+      {
+        "accountId": "40b1403b1c6f848ec48c4b40336e68ef15e4de4b13a7168eb38efdbba0724f81",
+        "tier": "basic",
+        "feesPaid": "1.67",
+        "volumeUSD": "189.75",
         "swaps": 1
       },
       {
         "accountId": "2ca7bc95684ef4f26399140b9e6f93abc9cb1f01af9189b103df305859e5eaf8",
         "tier": "premium",
-        "feesPaid": "1.74",
-        "volumeUSD": "790.45",
+        "feesPaid": "1.63",
+        "volumeUSD": "740.91",
         "swaps": 4
       }
     ],
@@ -430,179 +430,179 @@
       {
         "accountId": "bichiveneno.near",
         "tier": "basic",
-        "feesPaid": "2183.33",
-        "volumeUSD": "248105.54",
-        "swaps": 21
+        "feesPaid": "2254.67",
+        "volumeUSD": "256212.63",
+        "swaps": 23
       },
       {
         "accountId": "92fcb40539f36ba1f03cfc281509d864e86e61a05e5127901bda416bee150cd1",
         "tier": "premium",
-        "feesPaid": "559.27",
-        "volumeUSD": "254215.11",
+        "feesPaid": "530.21",
+        "volumeUSD": "241005.14",
         "swaps": 31
       },
       {
         "accountId": "creampiez69.near",
         "tier": "basic",
-        "feesPaid": "461.50",
-        "volumeUSD": "52442.62",
+        "feesPaid": "432.78",
+        "volumeUSD": "49180.03",
         "swaps": 10
       },
       {
         "accountId": "ecb7782d5a1271b7daa5e509dbf10a8edf64ac4514b4212ae512a0669b92f643",
         "tier": "basic",
-        "feesPaid": "229.42",
-        "volumeUSD": "26070.29",
+        "feesPaid": "209.17",
+        "volumeUSD": "23768.98",
         "swaps": 13
       },
       {
         "accountId": "b90e442e96037de47a051455db49c13d7d9aabfe5fb420f4791c95274ea307ca",
         "tier": "basic",
-        "feesPaid": "176.14",
-        "volumeUSD": "20016.00",
+        "feesPaid": "176.04",
+        "volumeUSD": "20004.60",
         "swaps": 5
       },
       {
         "accountId": "finpidar.near",
         "tier": "premium",
-        "feesPaid": "109.55",
-        "volumeUSD": "49796.00",
-        "swaps": 23
+        "feesPaid": "126.87",
+        "volumeUSD": "57670.20",
+        "swaps": 31
       },
       {
         "accountId": "axelar1j2uerwj2ktjej3htxnjc2t2n7cp4l5av5vrczmswap.near",
         "tier": "basic",
-        "feesPaid": "84.74",
-        "volumeUSD": "9629.51",
+        "feesPaid": "79.74",
+        "volumeUSD": "9060.86",
         "swaps": 14
       },
       {
         "accountId": "icedog.near",
         "tier": "premium",
-        "feesPaid": "84.30",
-        "volumeUSD": "38319.38",
+        "feesPaid": "78.86",
+        "volumeUSD": "35844.97",
         "swaps": 2
       },
       {
         "accountId": "pofic.near",
         "tier": "basic",
-        "feesPaid": "83.35",
-        "volumeUSD": "9471.05",
+        "feesPaid": "77.92",
+        "volumeUSD": "8855.05",
         "swaps": 1
       },
       {
         "accountId": "rasfi.near",
         "tier": "basic",
-        "feesPaid": "76.32",
-        "volumeUSD": "8672.95",
+        "feesPaid": "71.68",
+        "volumeUSD": "8144.95",
         "swaps": 1
       },
       {
         "accountId": "d3fe6deb73417c5a659faaefd6e5b379ef471a34bf7272d320fcc015d62b9eee",
         "tier": "premium",
-        "feesPaid": "63.77",
-        "volumeUSD": "28984.33",
+        "feesPaid": "59.66",
+        "volumeUSD": "27118.78",
         "swaps": 15
       },
       {
         "accountId": "c9146f8007fda36861335b578e8ce804abd36f1d4d221634694fc93880b7facb",
         "tier": "basic",
-        "feesPaid": "59.28",
-        "volumeUSD": "6736.75",
-        "swaps": 17
+        "feesPaid": "59.17",
+        "volumeUSD": "6723.64",
+        "swaps": 15
       },
       {
         "accountId": "31tei.near",
         "tier": "premium",
-        "feesPaid": "55.55",
-        "volumeUSD": "25248.34",
+        "feesPaid": "52.91",
+        "volumeUSD": "24047.86",
         "swaps": 2
       },
       {
         "accountId": "axelar1yzsury9fldydgk425gmphy2zyehh3emc43ds6xswap.near",
         "tier": "basic",
-        "feesPaid": "51.28",
-        "volumeUSD": "5827.63",
+        "feesPaid": "48.80",
+        "volumeUSD": "5545.33",
         "swaps": 11
       },
       {
         "accountId": "petersalomonsen.near",
         "tier": "basic",
-        "feesPaid": "47.96",
-        "volumeUSD": "5450.36",
-        "swaps": 6
-      },
-      {
-        "accountId": "f6cac9c3694d52a9b181a6b5161557bc87a32ada63ecf44189f957f89317466d",
-        "tier": "premium",
-        "feesPaid": "41.56",
-        "volumeUSD": "18889.83",
+        "feesPaid": "44.84",
+        "volumeUSD": "5095.87",
         "swaps": 6
       },
       {
         "accountId": "ktpblack.near",
         "tier": "ambassador",
-        "feesPaid": "36.21",
-        "volumeUSD": "5486.28",
+        "feesPaid": "34.01",
+        "volumeUSD": "5153.27",
         "swaps": 9
       },
       {
         "accountId": "rottenbananas.near",
         "tier": "basic",
         "feesPaid": "27.13",
-        "volumeUSD": "3082.96",
+        "volumeUSD": "3082.63",
         "swaps": 1
       },
       {
-        "accountId": "sturtsnear.near",
-        "tier": "basic",
-        "feesPaid": "24.27",
-        "volumeUSD": "2758.25",
-        "swaps": 5
+        "accountId": "f6cac9c3694d52a9b181a6b5161557bc87a32ada63ecf44189f957f89317466d",
+        "tier": "premium",
+        "feesPaid": "21.93",
+        "volumeUSD": "9968.89",
+        "swaps": 3
       },
       {
         "accountId": "8bd2ee40b7f39ef9f01200110958c2e03969ada963d8caaf22b4e5818ac5e905",
         "tier": "premium",
-        "feesPaid": "21.69",
-        "volumeUSD": "9861.16",
+        "feesPaid": "20.55",
+        "volumeUSD": "9341.91",
         "swaps": 15
+      },
+      {
+        "accountId": "5d8d4f0406f4320ac5888b1b76bd46e63e67e9e2d02c0e08887ca3854cb6fc54",
+        "tier": "basic",
+        "feesPaid": "17.20",
+        "volumeUSD": "1955.00",
+        "swaps": 1
       }
     ]
   },
   "totals": {
     "allTime": {
-      "basic": "25435.04",
-      "premium": "2003.35",
-      "ambassador": "376.98",
-      "total": "27815.38"
+      "basic": "24300.21",
+      "premium": "1949.37",
+      "ambassador": "346.88",
+      "total": "26596.46"
     },
     "last24h": {
-      "basic": "362.34",
-      "premium": "13.10",
-      "ambassador": "0.05",
-      "total": "375.48"
+      "basic": "13.51",
+      "premium": "2.39",
+      "ambassador": "0.38",
+      "total": "16.28"
     },
     "last7d": {
-      "basic": "733.38",
-      "premium": "353.15",
-      "ambassador": "25.50",
-      "total": "1112.03"
+      "basic": "676.66",
+      "premium": "201.91",
+      "ambassador": "16.61",
+      "total": "895.18"
     },
     "last30d": {
-      "basic": "3706.33",
-      "premium": "974.10",
-      "ambassador": "62.25",
-      "total": "4742.67"
+      "basic": "3680.95",
+      "premium": "931.52",
+      "ambassador": "57.94",
+      "total": "4670.42"
     }
   },
   "userCounts": {
-    "premium": 237,
-    "ambassador": 288
+    "premium": 240,
+    "ambassador": 291
   },
   "feeRates": {
     "basic": "0.88%",
     "ambassador": "0.66%",
     "premium": "0.22%"
   },
-  "generatedAt": "2026-02-02T15:42:20.850Z"
+  "generatedAt": "2026-02-04T16:05:47.040Z"
 }
