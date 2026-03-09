@@ -16,6 +16,9 @@ const coinGeckoFallbackMap: Record<string, string> = {
   'public-ai': 'publicai',
   'rhea': 'rhea-2',
   'itlx': 'intellex',
+  'aster': 'aster',
+  'mon': 'mon-protocol',
+  'the-open-network': 'the-open-network',
 };
 
 /** Sleep helper */

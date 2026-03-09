@@ -61,9 +61,15 @@ const baseMap: Record<string, string> = {
   ltc: "litecoin",
   itlx: "itlx",
   adi: "adi-token",
+  aster: "aster",
   astar: "astar",
   avax: "avalanche-2",
   bch: "bitcoin-cash",
+  strk: "starknet",
+  okb: "okb",
+  xlm: "stellar",
+  mon: "mon",
+  jambo: "jambo-1679.meme-cooking.near",
   ton: "the-open-network",
   
   // NEAR ecosystem direct mappings (non-intents format)
