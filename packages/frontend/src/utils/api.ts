@@ -1,4 +1,4 @@
-import type { SwapMetrics, AccountValueSummary, TopAccountsResponse, ValidatorStats, NPROSummary, FeeLeadersResponse } from '../types';
+import type { SwapMetrics, AccountValueSummary, TopAccountsResponse, ValidatorStats, NPROSummary, FeeLeadersResponse, TVLSummary } from '../types';
 
 // API configuration utility
 const getApiBaseUrl = (): string => {
@@ -89,6 +89,17 @@ export const fetchFeeLeaders = async (): Promise<FeeLeadersResponse> => {
   return response.json();
 };
 
+// Fetch TVL summary
+export const fetchTVLSummary = async (): Promise<TVLSummary> => {
+  const response = await apiCall('/api/tvl-summary');
+  
+  if (!response.ok) {
+    throw new Error(`Failed to fetch TVL summary: ${response.statusText}`);
+  }
+  
+  return response.json();
+};
+
 export default {
   getApiBaseUrl,
   apiCall,
@@ -98,4 +109,5 @@ export default {
   fetchValidatorStats,
   fetchNPROSummary,
   fetchFeeLeaders,
+  fetchTVLSummary,
 };

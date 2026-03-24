@@ -1,17 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Database, RefreshCw, BarChart3, Coins, DollarSign } from 'lucide-react';
-import type { SwapMetrics, ValidatorStats, NPROSummary, FeeLeadersResponse } from './types';
+import { Database, RefreshCw, BarChart3, Coins, DollarSign, Layers } from 'lucide-react';
+import type { SwapMetrics, ValidatorStats, NPROSummary, FeeLeadersResponse, TVLSummary } from './types';
 import MetricsCard from './components/MetricsCard';
 import TradingPairsTable from './components/TradingPairsTable';
 import TopSwappersTable from './components/TopSwappersTable';
 import ValidatorStatsCard from './components/ValidatorStatsCard';
 import NPROStatsTab from './components/NPROStatsTab';
 import FeeLeadersCard from './components/FeeLeadersCard';
-import { apiCall, fetchNPROSummary, fetchFeeLeaders } from './utils/api';
+import TVLTab from './components/TVLTab';
+import { apiCall, fetchNPROSummary, fetchFeeLeaders, fetchTVLSummary } from './utils/api';
 import logoSvg from './assets/NEARMobile_Logo.svg';
 import './App.css';
 
-type TabType = 'swaps' | 'npro' | 'fees';
+type TabType = 'swaps' | 'npro' | 'fees' | 'tvl';
 
 function App() {
   const [activeTab, setActiveTab] = useState<TabType>('swaps');
@@ -25,6 +26,8 @@ function App() {
   const [isLoadingFees, setIsLoadingFees] = useState(false);
   const [feeLeadersData, setFeeLeadersData] = useState<FeeLeadersResponse | null>(null);
   const [feeLeadersError, setFeeLeadersError] = useState<string | null>(null);
+  const [tvlData, setTvlData] = useState<TVLSummary | null>(null);
+  const [isLoadingTvl, setIsLoadingTvl] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [error, setError] = useState<string | null>(null);
   const [feeSwapsPeriod, setFeeSwapsPeriod] = useState<'allTime' | '24h' | '7d' | '30d'>('allTime');
@@ -90,6 +93,20 @@ function App() {
         console.error('Error loading saved fee leaders data:', error);
         localStorage.removeItem('feeLeadersData');
         localStorage.removeItem('feeLeadersDataTimestamp');
+      }
+    }
+
+    // Load TVL data from localStorage
+    const savedTvl = localStorage.getItem('tvlData');
+    const savedTvlTimestamp = localStorage.getItem('tvlDataTimestamp');
+    if (savedTvl && savedTvlTimestamp) {
+      try {
+        const parsedTvl = JSON.parse(savedTvl);
+        setTvlData(parsedTvl);
+      } catch (error) {
+        console.error('Error loading saved TVL data:', error);
+        localStorage.removeItem('tvlData');
+        localStorage.removeItem('tvlDataTimestamp');
       }
     }
 
@@ -221,8 +238,25 @@ function App() {
     }
   };
 
+  const fetchTvlData = async () => {
+    setIsLoadingTvl(true);
+    try {
+      const newTvlData = await fetchTVLSummary();
+      const timestamp = new Date();
+      
+      setTvlData(newTvlData);
+      
+      localStorage.setItem('tvlData', JSON.stringify(newTvlData));
+      localStorage.setItem('tvlDataTimestamp', timestamp.toISOString());
+    } catch (error) {
+      console.error('Failed to fetch TVL data:', error);
+    } finally {
+      setIsLoadingTvl(false);
+    }
+  };
+
   const refreshData = async () => {
-    await Promise.all([fetchData(), fetchValidatorStats(), fetchNearPrice(), fetchNproData(), fetchFeeLeadersData()]);
+    await Promise.all([fetchData(), fetchValidatorStats(), fetchNearPrice(), fetchNproData(), fetchFeeLeadersData(), fetchTvlData()]);
   };
 
   const clearCache = () => {
@@ -234,11 +268,14 @@ function App() {
     localStorage.removeItem('nproDataTimestamp');
     localStorage.removeItem('feeLeadersData');
     localStorage.removeItem('feeLeadersDataTimestamp');
+    localStorage.removeItem('tvlData');
+    localStorage.removeItem('tvlDataTimestamp');
     setData(null);
     setValidatorStats(null);
     setNproData(null);
     setFeeLeadersData(null);
     setFeeLeadersError(null);
+    setTvlData(null);
     setError(null);
   };
 
@@ -247,32 +284,34 @@ function App() {
 
   // Tab navigation component
   const TabNavigation = () => (
-    <div className="flex gap-2 border-b border-gray-200 pb-0">
+    <div className="flex gap-2 border-b border-gray-200 pb-0 overflow-x-auto whitespace-nowrap">
       <button
         onClick={() => setActiveTab('swaps')}
-        className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+        className={`flex shrink-0 items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
           activeTab === 'swaps'
             ? 'bg-white text-blue-600 border border-gray-200 border-b-white -mb-px'
             : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
         }`}
       >
         <BarChart3 className="h-4 w-4" />
-        Swap Metrics
+        <span className="hidden sm:inline">Swap Metrics</span>
+        <span className="sm:hidden">Swaps</span>
       </button>
       <button
         onClick={() => setActiveTab('fees')}
-        className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+        className={`flex shrink-0 items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
           activeTab === 'fees'
             ? 'bg-white text-green-600 border border-gray-200 border-b-white -mb-px'
             : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
         }`}
       >
         <DollarSign className="h-4 w-4" />
-        Earned fees
+        <span className="hidden sm:inline">Earned fees</span>
+        <span className="sm:hidden">Fees</span>
       </button>
       <button
         onClick={() => setActiveTab('npro')}
-        className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+        className={`flex shrink-0 items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
           activeTab === 'npro'
             ? 'bg-white text-purple-600 border border-gray-200 border-b-white -mb-px'
             : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
@@ -281,12 +320,24 @@ function App() {
         <Coins className="h-4 w-4" />
         NPRO Stats
       </button>
+      <button
+        onClick={() => setActiveTab('tvl')}
+        className={`flex shrink-0 items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+          activeTab === 'tvl'
+            ? 'bg-white text-teal-600 border border-gray-200 border-b-white -mb-px'
+            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+        }`}
+      >
+        <Layers className="h-4 w-4" />
+        <span className="hidden sm:inline">NEARMobile TVL</span>
+        <span className="sm:hidden">TVL</span>
+      </button>
     </div>
   );
 
   // Check if there's any data loaded based on active tab
-  const hasDataForCurrentTab = activeTab === 'swaps' ? !!data : activeTab === 'npro' ? !!nproData : activeTab === 'fees' ? !!feeLeadersData : true;
-  const isLoadingCurrentTab = activeTab === 'swaps' ? isLoading : activeTab === 'npro' ? isLoadingNpro : activeTab === 'fees' ? isLoadingFees : false;
+  const hasDataForCurrentTab = activeTab === 'swaps' ? !!data : activeTab === 'npro' ? !!nproData : activeTab === 'fees' ? !!feeLeadersData : activeTab === 'tvl' ? !!tvlData : true;
+  const isLoadingCurrentTab = activeTab === 'swaps' ? isLoading : activeTab === 'npro' ? isLoadingNpro : activeTab === 'fees' ? isLoadingFees : activeTab === 'tvl' ? isLoadingTvl : false;
 
   if (!hasDataForCurrentTab && !isLoadingCurrentTab) {
     return (
@@ -336,6 +387,12 @@ function App() {
                 <DollarSign className="h-12 w-12 sm:h-16 sm:w-16 text-gray-400 mx-auto mb-4" />
                 <h2 className="text-xl sm:text-2xl font-semibold text-gray-600 mb-2">No Fee Data Loaded</h2>
                 <p className="text-sm sm:text-base text-gray-500 mb-6 px-4">Click "Load Data" to fetch the latest earned fees data</p>
+              </>
+            ) : activeTab === 'tvl' ? (
+              <>
+                <Layers className="h-12 w-12 sm:h-16 sm:w-16 text-gray-400 mx-auto mb-4" />
+                <h2 className="text-xl sm:text-2xl font-semibold text-gray-600 mb-2">No TVL Data Loaded</h2>
+                <p className="text-sm sm:text-base text-gray-500 mb-6 px-4">Click "Load Data" to fetch the latest NEARMobile TVL data</p>
               </>
             ) : (
               <>
@@ -448,6 +505,13 @@ function App() {
             isLoading={isLoadingFees}
             error={feeLeadersError}
             onRefresh={fetchFeeLeadersData}
+          />
+        ) : activeTab === 'tvl' ? (
+          <TVLTab
+            data={tvlData}
+            swapData={data}
+            isLoading={isLoadingTvl}
+            onRefresh={fetchTvlData}
           />
         ) : data && (
         <div className="space-y-6 sm:space-y-8">

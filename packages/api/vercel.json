@@ -15,6 +15,15 @@
     },
     "api/validator-stats.ts": {
       "maxDuration": 180
+    },
+    "api/npro-summary.ts": {
+      "maxDuration": 180
+    },
+    "api/fee-leaders.ts": {
+      "maxDuration": 180
+    },
+    "api/tvl-summary.ts": {
+      "maxDuration": 180
     }
   }
 }

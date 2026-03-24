@@ -8,6 +8,7 @@ import { getFeeLeaders } from './feeLeaders.js';
 const PORT = 3001;
 
 const NPRO_API_BASE_URL = 'https://npro-stats-api-production.up.railway.app';
+const TVL_API_BASE_URL = process.env.TVL_API_BASE_URL;
 
 // CORS headers
 const corsHeaders: Record<string, string> = {
@@ -106,6 +107,29 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    if (url === '/api/tvl-summary' || url === '/api/tvl-summary/') {
+      console.log('Fetching TVL summary...');
+      try {
+        if (!TVL_API_BASE_URL) {
+          throw new Error('TVL_API_BASE_URL is not configured');
+        }
+        const response = await fetch(`${TVL_API_BASE_URL}/v1/tvl/summary`, {
+          headers: { 'Content-Type': 'application/json' },
+        });
+        if (!response.ok) {
+          throw new Error(`TVL API error: ${response.status}`);
+        }
+        const data = await response.json();
+        res.writeHead(200);
+        res.end(JSON.stringify(data));
+      } catch (error: any) {
+        console.error('Error fetching TVL summary:', error);
+        res.writeHead(500);
+        res.end(JSON.stringify({ error: 'Failed to fetch TVL summary', message: error?.message }));
+      }
+      return;
+    }
+
     // 404 for unknown routes
     res.writeHead(404);
     res.end(JSON.stringify({ error: 'Not Found', path: url }));
@@ -129,5 +153,6 @@ server.listen(PORT, () => {
   console.log('  GET /api/validator-stats');
   console.log('  GET /api/npro-summary');
   console.log('  GET /api/fee-leaders');
+  console.log('  GET /api/tvl-summary');
   console.log('\n');
 });

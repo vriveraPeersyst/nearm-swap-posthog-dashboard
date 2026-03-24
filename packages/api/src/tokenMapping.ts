@@ -86,7 +86,7 @@ const baseMap: Record<string, string> = {
   "token.0xshitzu.near": "shitzu",
   "score.aidols.near": "score.aidols.near",
   "zec.omft.near": "zcash",
-  "xrp.omft.near": "ripple",
+  "xrp.omft.near": "xrp",
   "kat.token0.near": "kat",
   "a35923162c49cf95e6bf26623385eb431ad920d3.factory.bridge.near": "matic-network",
   "npro.nearmobile.near": "npro",
@@ -107,6 +107,10 @@ const baseMap: Record<string, string> = {
   xdai: "xdai",
   aleo: "aleo",
 };
+
+const symbolKeyRegex = /^[a-z][a-z0-9]{1,15}$/;
+
+const isSymbolKey = (key: string): boolean => symbolKeyRegex.test(key);
 
 /**
  * Map native NEAR tokens to their intent equivalents.
@@ -192,5 +196,43 @@ export function intentsToPriceId(intentsTokenId?: string | null): string | null 
     return symbol ? (baseMap[symbol] ?? null) : null;
   }
   
+  return null;
+}
+
+/**
+ * Resolve a human-friendly symbol for displaying token labels.
+ * Prefers explicit symbol keys from the mapping over contract addresses.
+ */
+export function tokenIdToDisplaySymbol(tokenId?: string | null, priceId?: string | null): string | null {
+  if (!tokenId && !priceId) return null;
+
+  const rawTokenId = (tokenId ?? '').trim().toLowerCase();
+  const cleanedTokenId = rawTokenId.startsWith('intents:') ? rawTokenId.replace(/^intents:/, '') : rawTokenId;
+  const cleanedPriceId = (priceId ?? '').trim().toLowerCase();
+
+  if (cleanedTokenId && isSymbolKey(cleanedTokenId)) {
+    return cleanedTokenId.toUpperCase();
+  }
+
+  if (cleanedTokenId.includes('.meme-cooking.near')) {
+    const symbol = cleanedTokenId.split('-')[0];
+    if (symbol && isSymbolKey(symbol)) return symbol.toUpperCase();
+  }
+
+  const mappedPriceId = cleanedTokenId ? baseMap[cleanedTokenId] : undefined;
+  const targetPriceId = mappedPriceId ?? cleanedPriceId;
+
+  if (targetPriceId) {
+    for (const [key, value] of Object.entries(baseMap)) {
+      if (value === targetPriceId && isSymbolKey(key)) {
+        return key.toUpperCase();
+      }
+    }
+  }
+
+  if (cleanedPriceId && isSymbolKey(cleanedPriceId)) {
+    return cleanedPriceId.toUpperCase();
+  }
+
   return null;
 }

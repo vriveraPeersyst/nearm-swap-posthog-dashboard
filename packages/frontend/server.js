@@ -403,6 +403,40 @@ app.get('/api/fee-leaders', async (req, res) => {
   }
 });
 
+// API endpoint to proxy TVL summary
+const TVL_API_BASE_URL = process.env.TVL_API_BASE_URL;
+
+app.get('/api/tvl-summary', async (req, res) => {
+  try {
+    console.log('Fetching TVL summary...');
+
+    if (!TVL_API_BASE_URL) {
+      throw new Error('TVL_API_BASE_URL is not configured');
+    }
+
+    const response = await fetch(`${TVL_API_BASE_URL}/v1/tvl/summary`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`TVL API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    console.log('Successfully fetched TVL summary');
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching TVL summary:', error);
+    res.status(500).json({
+      error: 'Failed to fetch TVL summary',
+      message: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
@@ -414,6 +448,7 @@ app.listen(PORT, () => {
   console.log(`🚀 API available at http://localhost:${PORT}/api/swap-metrics`);
   console.log(`📊 NPRO stats at http://localhost:${PORT}/api/npro-summary`);
   console.log(`💰 Fee leaders at http://localhost:${PORT}/api/fee-leaders`);
+  console.log(`🏦 TVL summary at http://localhost:${PORT}/api/tvl-summary`);
   console.log(`❤️  Health check at http://localhost:${PORT}/health`);
 });
 

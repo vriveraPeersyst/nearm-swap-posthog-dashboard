@@ -334,3 +334,44 @@ export interface FeeLeadersResponse {
   generatedAt: string;
 }
 
+// TVL Types
+export interface TVLTokenEntry {
+  tokenId: string;
+  priceId: string | null;
+  symbol?: string | null;
+  priceUsd: number;
+  totalBalance: string;
+  totalValueUsd: number;
+  holders: number;
+}
+
+export interface TVLRichListEntry {
+  rank: number;
+  accountId: string;
+  totalValueUsd: number;
+  tokenCount: number;
+  stakedNear: string;
+  nproValidatorStaked: string;
+}
+
+export interface TVLSummary {
+  asOf: {
+    fast: string | null;
+    slow: string | null;
+  };
+  tvl: {
+    totalUsd: number;
+    delta24h: number;
+    totalAccounts: number;
+    accountsDelta24h: number;
+  };
+  staking: {
+    totalStakedNear: string;
+    nproValidatorStakedNear: string;
+    totalStakedUsd: number;
+    nproValidatorStakedUsd: number;
+    stakingAccounts: number;
+  };
+  tokens: TVLTokenEntry[];
+  richList: TVLRichListEntry[];
+}
