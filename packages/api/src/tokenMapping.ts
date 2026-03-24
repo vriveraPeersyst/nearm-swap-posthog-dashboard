@@ -101,6 +101,11 @@ const baseMap: Record<string, string> = {
   "aaaaaa20d9e0e2461697782ef11675f668207961.factory.bridge.near": "aaaaaa20d9e0e2461697782ef11675f668207961.factory.bridge.near",
   "d9c2d319cd7e6177336b0a9c93c21cb48d84fb54.factory.bridge.near": "d9c2d319cd7e6177336b0a9c93c21cb48d84fb54.factory.bridge.near",
   "2260fac5e5542a773aa44fbcfedf7c193bc2c599.factory.bridge.near": "wrapped-bitcoin",
+  "nbtc.bridge.near": "bitcoin",
+  "853d955acef822db058eb8505911ed77f175b99e.factory.bridge.near": "frax",
+  frax: "frax",
+  xdai: "xdai",
+  aleo: "aleo",
 };
 
 /**

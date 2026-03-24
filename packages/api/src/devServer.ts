@@ -3,6 +3,7 @@ import { getSwapMetrics } from './swapMetrics.js';
 import { getTotalAccountValues } from './getTotalAccountValues.js';
 import { getTopAccountsByValue } from './getTopAccountsByValue.js';
 import { getValidatorStats } from './getValidatorStats.js';
+import { getFeeLeaders } from './feeLeaders.js';
 
 const PORT = 3001;
 
@@ -91,6 +92,20 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    if (url === '/api/fee-leaders' || url === '/api/fee-leaders/') {
+      console.log('Fetching fee leaders...');
+      try {
+        const data = await getFeeLeaders();
+        res.writeHead(200);
+        res.end(JSON.stringify(data));
+      } catch (error: any) {
+        console.error('Error fetching fee leaders:', error);
+        res.writeHead(500);
+        res.end(JSON.stringify({ error: 'Failed to fetch fee leaders', message: error?.message }));
+      }
+      return;
+    }
+
     // 404 for unknown routes
     res.writeHead(404);
     res.end(JSON.stringify({ error: 'Not Found', path: url }));
@@ -113,5 +128,6 @@ server.listen(PORT, () => {
   console.log('  GET /api/top-accounts');
   console.log('  GET /api/validator-stats');
   console.log('  GET /api/npro-summary');
+  console.log('  GET /api/fee-leaders');
   console.log('\n');
 });

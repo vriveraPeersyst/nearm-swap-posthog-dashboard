@@ -19,6 +19,10 @@ const coinGeckoFallbackMap: Record<string, string> = {
   'aster': 'aster',
   'mon': 'mon-protocol',
   'the-open-network': 'the-open-network',
+  'burrow': 'burrow',
+  'frax': 'frax-share',
+  'xdai': 'xdai',
+  'aleo': 'aleo',
 };
 
 /** Sleep helper */
