@@ -71,6 +71,10 @@ const baseMap: Record<string, string> = {
   mon: "mon",
   jambo: "jambo-1679.meme-cooking.near",
   ton: "the-open-network",
+  pengu: "pudgy-penguins",
+  op: "optimism",
+  knc: "kyber-network-crystal",
+  titn: "thor-wallet",
   
   // NEAR ecosystem direct mappings (non-intents format)
   "near-native": "near",
@@ -86,7 +90,7 @@ const baseMap: Record<string, string> = {
   "token.0xshitzu.near": "shitzu",
   "score.aidols.near": "score.aidols.near",
   "zec.omft.near": "zcash",
-  "xrp.omft.near": "xrp",
+  "xrp.omft.near": "ripple",
   "kat.token0.near": "kat",
   "a35923162c49cf95e6bf26623385eb431ad920d3.factory.bridge.near": "matic-network",
   "npro.nearmobile.near": "npro",

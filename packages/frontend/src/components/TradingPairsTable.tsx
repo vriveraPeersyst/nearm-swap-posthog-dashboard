@@ -1,5 +1,7 @@
 import React from 'react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRightIcon } from './icons';
+import TokenAvatar from './TokenAvatar';
+import { useTokenImages, resolveTokenImage } from '../hooks/useTokenImages';
 import type { TradingPair, PeriodTradingPair } from '../types';
 
 type AnyTradingPair = TradingPair | PeriodTradingPair;
@@ -19,6 +21,16 @@ const TradingPairsTable: React.FC<TradingPairsTableProps> = ({
   periodLabel,
   hideHeader = false
 }) => {
+  const { tokenMap } = useTokenImages();
+
+  const resolveSymbolForImage = (token: string): string => {
+    if (token.includes('intents:')) return token.replace('intents:', '').toUpperCase();
+    if (token === 'near-native') return 'NEAR';
+    if (token.includes('.bridge.near')) return token.split('.')[0].toUpperCase();
+    if (token.includes('.near')) return token.split('.')[0].toUpperCase();
+    return token.toUpperCase();
+  };
+
   const formatNumber = (num: number) => {
     if (num >= 1000000) {
       return `$${(num / 1000000).toFixed(2)}M`;
@@ -54,88 +66,106 @@ const TradingPairsTable: React.FC<TradingPairsTableProps> = ({
       return token.toUpperCase();
     };
 
+    const symbolA = resolveSymbolForImage(tokenA);
+    const symbolB = resolveSymbolForImage(tokenB);
+
     return (
-      <div className="flex items-center gap-1 text-xs max-w-full">
-        <span className="font-medium text-blue-600 truncate">{cleanTokenName(tokenA)}</span>
-        <ArrowRight size={10} className="text-gray-400 flex-shrink-0 mx-0.5" />
-        <span className="font-medium text-green-600 truncate">{cleanTokenName(tokenB)}</span>
+      <div className="flex items-center gap-2 text-xs max-w-full">
+        <div className="flex items-center -space-x-2 flex-shrink-0">
+          <TokenAvatar
+            imageUrl={resolveTokenImage(tokenMap, symbolA, tokenA)}
+            symbol={symbolA}
+            size={22}
+            chain={false}
+            className="z-10"
+          />
+          <TokenAvatar
+            imageUrl={resolveTokenImage(tokenMap, symbolB, tokenB)}
+            symbol={symbolB}
+            size={22}
+            chain={false}
+          />
+        </div>
+        <span className="font-medium text-nm-accent truncate">{cleanTokenName(tokenA)}</span>
+        <ArrowRightIcon className="h-2.5 w-2.5 text-nm-muted flex-shrink-0 mx-0.5" />
+        <span className="font-medium text-nm-accent truncate">{cleanTokenName(tokenB)}</span>
       </div>
     );
   };
 
   return (
-    <div className={hideHeader ? '' : 'bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden'}>
+    <div className={hideHeader ? '' : 'bg-nm-card rounded-nm shadow-nm border border-nm-border overflow-hidden'}>
       {!hideHeader && (
-        <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
-          <h3 className="text-sm sm:text-base font-semibold text-gray-800">{title}</h3>
+        <div className="px-4 py-3 bg-nm-borderLight border-b border-nm-border">
+          <h3 className="text-sm sm:text-base font-semibold text-nm-text">{title}</h3>
         </div>
       )}
       
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50">
+          <thead className="bg-nm-borderLight">
             <tr>
-              <th className="px-2 sm:px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-2 sm:px-3 py-2 text-left text-xs font-medium text-nm-muted uppercase tracking-wider">
                 Pair
               </th>
-              <th className="px-1 sm:px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-1 sm:px-2 py-2 text-left text-xs font-medium text-nm-muted uppercase tracking-wider">
                 Swaps
               </th>
-              <th className="px-1 sm:px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-1 sm:px-2 py-2 text-left text-xs font-medium text-nm-muted uppercase tracking-wider">
                 Volume
               </th>
               {showLast24h && (
                 <>
-                  <th className="px-1 sm:px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
+                  <th className="px-1 sm:px-2 py-2 text-left text-xs font-medium text-nm-muted uppercase tracking-wider hidden sm:table-cell">
                     24h Swaps
                   </th>
-                  <th className="px-1 sm:px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-1 sm:px-2 py-2 text-left text-xs font-medium text-nm-muted uppercase tracking-wider">
                     24h Vol
                   </th>
                 </>
               )}
               {periodLabel && (
                 <>
-                  <th className="px-1 sm:px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
+                  <th className="px-1 sm:px-2 py-2 text-left text-xs font-medium text-nm-muted uppercase tracking-wider hidden sm:table-cell">
                     {periodLabel} Swaps
                   </th>
-                  <th className="px-1 sm:px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-1 sm:px-2 py-2 text-left text-xs font-medium text-nm-muted uppercase tracking-wider">
                     {periodLabel} Vol
                   </th>
                 </>
               )}
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-nm-card divide-y divide-nm-border">
             {pairs.map((pair, index) => (
-              <tr key={`${pair.pair}-${index}`} className="hover:bg-gray-50">
+              <tr key={`${pair.pair}-${index}`} className="hover:bg-nm-surfaceHover">
                 <td className="px-2 sm:px-3 py-2 min-w-0">
                   <div className="truncate">
                     {formatPair(pair.pair)}
                   </div>
                 </td>
-                <td className="px-1 sm:px-2 py-2 text-xs text-gray-900 whitespace-nowrap">
+                <td className="px-1 sm:px-2 py-2 text-xs text-nm-text whitespace-nowrap">
                   {pair.totalSwaps.toLocaleString()}
                 </td>
-                <td className="px-1 sm:px-2 py-2 text-xs text-gray-900 whitespace-nowrap">
+                <td className="px-1 sm:px-2 py-2 text-xs text-nm-text whitespace-nowrap">
                   {formatNumber(pair.totalVolumeUSD)}
                 </td>
                 {showLast24h && 'last24hSwaps' in pair && (
                   <>
-                    <td className="px-1 sm:px-2 py-2 text-xs text-gray-900 whitespace-nowrap hidden sm:table-cell">
+                    <td className="px-1 sm:px-2 py-2 text-xs text-nm-text whitespace-nowrap hidden sm:table-cell">
                       {pair.last24hSwaps.toLocaleString()}
                     </td>
-                    <td className="px-1 sm:px-2 py-2 text-xs text-gray-900 whitespace-nowrap">
+                    <td className="px-1 sm:px-2 py-2 text-xs text-nm-text whitespace-nowrap">
                       {formatNumber(pair.last24hVolumeUSD)}
                     </td>
                   </>
                 )}
                 {periodLabel && 'periodSwaps' in pair && (
                   <>
-                    <td className="px-1 sm:px-2 py-2 text-xs text-gray-900 whitespace-nowrap hidden sm:table-cell">
+                    <td className="px-1 sm:px-2 py-2 text-xs text-nm-text whitespace-nowrap hidden sm:table-cell">
                       {pair.periodSwaps.toLocaleString()}
                     </td>
-                    <td className="px-1 sm:px-2 py-2 text-xs text-gray-900 whitespace-nowrap">
+                    <td className="px-1 sm:px-2 py-2 text-xs text-nm-text whitespace-nowrap">
                       {formatNumber(pair.periodVolumeUSD)}
                     </td>
                   </>
@@ -147,7 +177,7 @@ const TradingPairsTable: React.FC<TradingPairsTableProps> = ({
       </div>
       
       {pairs.length === 0 && (
-        <div className="px-6 py-8 text-center text-gray-500">
+        <div className="px-6 py-8 text-center text-nm-muted">
           No trading pairs found
         </div>
       )}

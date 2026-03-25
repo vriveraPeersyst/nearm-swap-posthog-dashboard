@@ -23,59 +23,59 @@ const SummaryTable: React.FC<SummaryTableProps> = ({ data }) => {
   ];
 
   return (
-    <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-      <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-800">Time-based Metrics Summary</h3>
-        <p className="text-sm text-gray-600 mt-1">Volume side valued: {data.sideValued}</p>
+    <div className="bg-nm-card rounded-nm shadow-nm border border-nm-border overflow-hidden">
+      <div className="px-6 py-4 bg-nm-borderLight border-b border-nm-border">
+        <h3 className="text-lg font-semibold text-nm-text">Time-based Metrics Summary</h3>
+        <p className="text-sm text-nm-muted mt-1">Volume side valued: {data.sideValued}</p>
       </div>
       
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-gray-50">
+          <thead className="bg-nm-borderLight">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-2 text-left text-xs font-medium text-nm-muted uppercase tracking-wider">
                 Time Period
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-2 text-left text-xs font-medium text-nm-muted uppercase tracking-wider">
                 Total Swaps
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-2 text-left text-xs font-medium text-nm-muted uppercase tracking-wider">
                 Total Volume (USD)
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-2 text-left text-xs font-medium text-nm-muted uppercase tracking-wider">
                 Growth %
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-nm-card divide-y divide-nm-border">
             {timeFrames.map((timeFrame) => (
-              <tr key={timeFrame.key} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+              <tr key={timeFrame.key} className="hover:bg-nm-surfaceHover">
+                <td className="px-3 py-3 whitespace-nowrap text-sm font-medium text-nm-text">
                   {timeFrame.label}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-3 py-3 whitespace-nowrap text-sm text-nm-text">
                   {timeFrame.metrics.totalSwaps.toLocaleString()}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-3 py-3 whitespace-nowrap text-sm text-nm-text">
                   {formatNumber(timeFrame.metrics.totalVolumeUSD)}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                <td className="px-3 py-3 whitespace-nowrap text-sm">
                   {(timeFrame.key === 'last24h' || timeFrame.key === 'last7d' || timeFrame.key === 'last30d') && (
                     <div className="space-y-1">
                       {timeFrame.metrics.swapGrowthPercent !== undefined && timeFrame.metrics.swapGrowthPercent !== null && (
-                        <div className={`text-xs ${timeFrame.metrics.swapGrowthPercent >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        <div className={`text-xs ${timeFrame.metrics.swapGrowthPercent >= 0 ? 'text-nm-success' : 'text-nm-error'}`}>
                           Swaps: {timeFrame.metrics.swapGrowthPercent >= 0 ? '+' : ''}{timeFrame.metrics.swapGrowthPercent}%
                         </div>
                       )}
                       {timeFrame.metrics.volumeGrowthPercent !== undefined && timeFrame.metrics.volumeGrowthPercent !== null && (
-                        <div className={`text-xs ${timeFrame.metrics.volumeGrowthPercent >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        <div className={`text-xs ${timeFrame.metrics.volumeGrowthPercent >= 0 ? 'text-nm-success' : 'text-nm-error'}`}>
                           Volume: {timeFrame.metrics.volumeGrowthPercent >= 0 ? '+' : ''}{timeFrame.metrics.volumeGrowthPercent}%
                         </div>
                       )}
                     </div>
                   )}
                   {(timeFrame.key !== 'last24h' && timeFrame.key !== 'last7d' && timeFrame.key !== 'last30d') && (
-                    <span className="text-gray-400">-</span>
+                    <span className="text-nm-muted">-</span>
                   )}
                 </td>
               </tr>

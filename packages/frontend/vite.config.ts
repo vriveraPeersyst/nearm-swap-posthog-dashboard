@@ -17,6 +17,12 @@ export default defineConfig({
         target: 'http://localhost:3001',
         changeOrigin: true,
         secure: false
+      },
+      '/market-api': {
+        target: 'https://near-mobile-production.aws.peersyst.tech',
+        changeOrigin: true,
+        secure: true,
+        rewrite: (path: string) => path.replace(/^\/market-api/, '/api/market')
       }
     }
   }

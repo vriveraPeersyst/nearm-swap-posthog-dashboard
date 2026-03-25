@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Database, RefreshCw, BarChart3, Coins, DollarSign, Layers } from 'lucide-react';
+import { SwapIcon, UsersIcon, DatabaseIcon, ArrowsClockwiseIcon, CoinsIcon, CurrencyDollarIcon, StackSimpleIcon } from './components/icons';
 import type { SwapMetrics, ValidatorStats, NPROSummary, FeeLeadersResponse, TVLSummary } from './types';
 import MetricsCard from './components/MetricsCard';
 import TradingPairsTable from './components/TradingPairsTable';
@@ -283,55 +283,29 @@ function App() {
   // New data is only fetched when user clicks Load/Refresh button
 
   // Tab navigation component
+  const tabs: { key: TabType; label: string; shortLabel?: string }[] = [
+    { key: 'swaps', label: 'Swap Metrics', shortLabel: 'Swaps' },
+    { key: 'fees', label: 'Earned Fees', shortLabel: 'Fees' },
+    { key: 'npro', label: 'NPRO Stats' },
+    { key: 'tvl', label: 'TVL', shortLabel: 'TVL' },
+  ];
+
   const TabNavigation = () => (
-    <div className="flex gap-2 border-b border-gray-200 pb-0 overflow-x-auto whitespace-nowrap">
-      <button
-        onClick={() => setActiveTab('swaps')}
-        className={`flex shrink-0 items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
-          activeTab === 'swaps'
-            ? 'bg-white text-blue-600 border border-gray-200 border-b-white -mb-px'
-            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-        }`}
-      >
-        <BarChart3 className="h-4 w-4" />
-        <span className="hidden sm:inline">Swap Metrics</span>
-        <span className="sm:hidden">Swaps</span>
-      </button>
-      <button
-        onClick={() => setActiveTab('fees')}
-        className={`flex shrink-0 items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
-          activeTab === 'fees'
-            ? 'bg-white text-green-600 border border-gray-200 border-b-white -mb-px'
-            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-        }`}
-      >
-        <DollarSign className="h-4 w-4" />
-        <span className="hidden sm:inline">Earned fees</span>
-        <span className="sm:hidden">Fees</span>
-      </button>
-      <button
-        onClick={() => setActiveTab('npro')}
-        className={`flex shrink-0 items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
-          activeTab === 'npro'
-            ? 'bg-white text-purple-600 border border-gray-200 border-b-white -mb-px'
-            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-        }`}
-      >
-        <Coins className="h-4 w-4" />
-        NPRO Stats
-      </button>
-      <button
-        onClick={() => setActiveTab('tvl')}
-        className={`flex shrink-0 items-center gap-2 px-3 sm:px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
-          activeTab === 'tvl'
-            ? 'bg-white text-teal-600 border border-gray-200 border-b-white -mb-px'
-            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-        }`}
-      >
-        <Layers className="h-4 w-4" />
-        <span className="hidden sm:inline">NEARMobile TVL</span>
-        <span className="sm:hidden">TVL</span>
-      </button>
+    <div className="flex items-center border-b border-nm-border bg-white overflow-x-auto scrollbar-hide">
+      {tabs.map((tab) => (
+        <button
+          key={tab.key}
+          onClick={() => setActiveTab(tab.key)}
+          className={`flex-1 flex justify-center items-center h-[60px] text-base tracking-tight transition-colors ${
+            activeTab === tab.key
+              ? 'font-medium text-nm-text border-b-2 border-nm-accent'
+              : 'font-normal text-nm-muted hover:text-nm-text'
+          }`}
+        >
+          <span className="hidden sm:inline">{tab.label}</span>
+          <span className="sm:hidden">{tab.shortLabel ?? tab.label}</span>
+        </button>
+      ))}
     </div>
   );
 
@@ -341,25 +315,25 @@ function App() {
 
   if (!hasDataForCurrentTab && !isLoadingCurrentTab) {
     return (
-      <div className="min-h-screen bg-gray-100">
+      <div className="min-h-screen bg-nm-bg font-sf">
         {/* Header */}
-        <header className="bg-white shadow-sm border-b border-gray-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <header className="bg-nm-header shadow-nm border-b border-nm-border">
+          <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 py-4 sm:h-16 sm:py-0">
               <div className="flex items-center gap-3">
                 <img src={logoSvg} alt="NEARMobile Logo" className="h-8 w-8 flex-shrink-0" />
                 <div>
-                  <h1 className="text-lg sm:text-xl font-semibold text-gray-900">NEARMobile Analytics</h1>
-                  <p className="text-xs sm:text-sm text-gray-500">Dashboard</p>
+                  <h1 className="text-lg sm:text-xl font-semibold text-nm-text">NEARMobile Analytics</h1>
+                  <p className="text-xs sm:text-sm text-nm-muted">Dashboard</p>
                 </div>
               </div>
               
               <div className="flex items-center gap-4 w-full sm:w-auto justify-end">
                 <button
                   onClick={refreshData}
-                  className="flex items-center gap-2 px-4 sm:px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
+                  className="flex items-center gap-2 px-4 sm:px-6 py-2 bg-nm-cta text-white rounded-nm-sm hover:bg-nm-ctaHover shadow-nm-button transition-colors text-sm sm:text-base"
                 >
-                  <Database className="h-4 w-4" />
+                  <DatabaseIcon className="h-4 w-4" />
                   <span className="hidden sm:inline">Load Data</span>
                   <span className="sm:hidden">Load</span>
                 </button>
@@ -369,43 +343,43 @@ function App() {
         </header>
 
         {/* Tab Navigation */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+        <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 pt-4">
           <TabNavigation />
         </div>
 
         {/* Main Content - Empty State */}
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+        <main className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
           <div className="text-center py-8 sm:py-16">
             {activeTab === 'swaps' ? (
               <>
-                <Database className="h-12 w-12 sm:h-16 sm:w-16 text-gray-400 mx-auto mb-4" />
-                <h2 className="text-xl sm:text-2xl font-semibold text-gray-600 mb-2">No Swap Data Loaded</h2>
-                <p className="text-sm sm:text-base text-gray-500 mb-6 px-4">Click "Load Data" to fetch the latest swap metrics from PostHog</p>
+                <DatabaseIcon className="h-12 w-12 sm:h-16 sm:w-16 text-nm-muted mx-auto mb-4" />
+                <h2 className="text-xl sm:text-2xl font-semibold text-nm-muted mb-2">No Swap Data Loaded</h2>
+                <p className="text-sm sm:text-base text-nm-muted mb-6 px-4">Click "Load Data" to fetch the latest swap metrics from PostHog</p>
               </>
             ) : activeTab === 'fees' ? (
               <>
-                <DollarSign className="h-12 w-12 sm:h-16 sm:w-16 text-gray-400 mx-auto mb-4" />
-                <h2 className="text-xl sm:text-2xl font-semibold text-gray-600 mb-2">No Fee Data Loaded</h2>
-                <p className="text-sm sm:text-base text-gray-500 mb-6 px-4">Click "Load Data" to fetch the latest earned fees data</p>
+                <CurrencyDollarIcon className="h-12 w-12 sm:h-16 sm:w-16 text-nm-muted mx-auto mb-4" />
+                <h2 className="text-xl sm:text-2xl font-semibold text-nm-muted mb-2">No Fee Data Loaded</h2>
+                <p className="text-sm sm:text-base text-nm-muted mb-6 px-4">Click "Load Data" to fetch the latest earned fees data</p>
               </>
             ) : activeTab === 'tvl' ? (
               <>
-                <Layers className="h-12 w-12 sm:h-16 sm:w-16 text-gray-400 mx-auto mb-4" />
-                <h2 className="text-xl sm:text-2xl font-semibold text-gray-600 mb-2">No TVL Data Loaded</h2>
-                <p className="text-sm sm:text-base text-gray-500 mb-6 px-4">Click "Load Data" to fetch the latest NEARMobile TVL data</p>
+                <StackSimpleIcon className="h-12 w-12 sm:h-16 sm:w-16 text-nm-muted mx-auto mb-4" />
+                <h2 className="text-xl sm:text-2xl font-semibold text-nm-muted mb-2">No TVL Data Loaded</h2>
+                <p className="text-sm sm:text-base text-nm-muted mb-6 px-4">Click "Load Data" to fetch the latest NEARMobile TVL data</p>
               </>
             ) : (
               <>
-                <Coins className="h-12 w-12 sm:h-16 sm:w-16 text-gray-400 mx-auto mb-4" />
-                <h2 className="text-xl sm:text-2xl font-semibold text-gray-600 mb-2">No NPRO Data Loaded</h2>
-                <p className="text-sm sm:text-base text-gray-500 mb-6 px-4">Click "Load Data" to fetch the latest NPRO stats</p>
+                <CoinsIcon className="h-12 w-12 sm:h-16 sm:w-16 text-nm-muted mx-auto mb-4" />
+                <h2 className="text-xl sm:text-2xl font-semibold text-nm-muted mb-2">No NPRO Data Loaded</h2>
+                <p className="text-sm sm:text-base text-nm-muted mb-6 px-4">Click "Load Data" to fetch the latest NPRO stats</p>
               </>
             )}
             <button
               onClick={refreshData}
-              className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors mx-auto text-sm sm:text-base"
+              className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-nm-cta text-white rounded-nm-sm hover:bg-nm-ctaHover shadow-nm-button transition-colors mx-auto text-sm sm:text-base"
             >
-              <Database className="h-4 w-4 sm:h-5 sm:w-5" />
+              <DatabaseIcon className="h-4 w-4 sm:h-5 sm:w-5" />
               Load Data
             </button>
           </div>
@@ -416,13 +390,13 @@ function App() {
 
   if (isLoadingCurrentTab && !hasDataForCurrentTab) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-nm-bg font-sf flex items-center justify-center">
         <div className="text-center">
-          <RefreshCw className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">
+          <ArrowsClockwiseIcon className="h-8 w-8 animate-spin text-nm-accent mx-auto mb-4" />
+          <p className="text-nm-text">
             {activeTab === 'swaps' ? 'Fetching swap metrics from PostHog...' : activeTab === 'npro' ? 'Fetching NPRO stats...' : 'Fetching earned fees data...'}
           </p>
-          <p className="text-sm text-gray-500 mt-2">This may take a few seconds</p>
+          <p className="text-sm text-nm-muted mt-2">This may take a few seconds</p>
         </div>
       </div>
     );
@@ -430,12 +404,12 @@ function App() {
 
   if (error && !data && activeTab === 'swaps') {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-nm-bg font-sf flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-600 mb-4">Error: {error}</p>
+          <p className="text-nm-error mb-4">Error: {error}</p>
           <button
             onClick={refreshData}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="px-4 py-2 bg-nm-cta text-white rounded-nm-sm hover:bg-nm-ctaHover shadow-nm-button"
           >
             Retry
           </button>
@@ -445,28 +419,28 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-nm-bg font-sf">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <header className="bg-nm-header shadow-nm border-b border-nm-border">
+        <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 py-4 sm:h-16 sm:py-0">
             <div className="flex items-center gap-3">
               <img src={logoSvg} alt="NEARMobile Logo" className="h-8 w-8 flex-shrink-0" />
               <div>
-                <h1 className="text-lg sm:text-xl font-semibold text-gray-900">NEARMobile Analytics</h1>
-                <p className="text-xs sm:text-sm text-gray-500">Dashboard</p>
+                <h1 className="text-lg sm:text-xl font-semibold text-nm-text">NEARMobile Analytics</h1>
+                <p className="text-xs sm:text-sm text-nm-muted">Dashboard</p>
               </div>
             </div>
             
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
-              <div className="text-xs sm:text-sm text-gray-500 order-2 sm:order-1">
+              <div className="text-xs sm:text-sm text-nm-muted order-2 sm:order-1">
                 Last updated: {lastUpdated.toLocaleTimeString()}
-                {error && <span className="text-red-500 ml-2">(Using fallback data)</span>}
+                {error && <span className="text-nm-error ml-2">(Using fallback data)</span>}
               </div>
               <div className="flex items-center gap-2 order-1 sm:order-2">
                 <button
                   onClick={clearCache}
-                  className="text-xs px-2 py-1 bg-gray-200 text-gray-600 rounded hover:bg-gray-300 transition-colors"
+                  className="text-xs px-2 py-1 bg-nm-chip text-nm-muted rounded-nm-sm hover:bg-nm-border transition-colors"
                   title="Clear cached data"
                 >
                   Clear Cache
@@ -474,9 +448,9 @@ function App() {
                 <button
                   onClick={refreshData}
                   disabled={isLoading || isLoadingValidatorStats || isLoadingNpro}
-                  className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                  className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-nm-cta text-white rounded-nm-sm hover:bg-nm-ctaHover shadow-nm-button disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
                 >
-                  <RefreshCw className={`h-4 w-4 ${(isLoading || isLoadingValidatorStats || isLoadingNpro) ? 'animate-spin' : ''}`} />
+                  <ArrowsClockwiseIcon className={`h-4 w-4 ${(isLoading || isLoadingValidatorStats || isLoadingNpro) ? 'animate-spin' : ''}`} />
                   <span className="hidden sm:inline">{isLoading || isLoadingValidatorStats || isLoadingNpro ? 'Refreshing...' : 'Refresh Data'}</span>
                   <span className="sm:hidden">Refresh</span>
                 </button>
@@ -487,12 +461,12 @@ function App() {
       </header>
 
       {/* Tab Navigation */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 bg-gray-100">
+      <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 pt-4 bg-nm-bg">
         <TabNavigation />
       </div>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+      <main className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         {activeTab === 'npro' ? (
           <NPROStatsTab 
             data={nproData} 
@@ -541,10 +515,10 @@ function App() {
           {/* Validator Stats */}
           {validatorStats && <ValidatorStatsCard data={validatorStats} nearPriceUSD={nearPriceUSD || undefined} />}
           {isLoadingValidatorStats && (
-            <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+            <div className="bg-nm-card rounded-nm shadow-nm border border-nm-border p-6">
               <div className="flex items-center justify-center">
-                <RefreshCw className="h-6 w-6 animate-spin text-blue-600 mr-2" />
-                <span className="text-gray-600">Loading validator stats...</span>
+                <ArrowsClockwiseIcon className="h-6 w-6 animate-spin text-nm-accent mr-2" />
+                <span className="text-nm-muted">Loading validator stats...</span>
               </div>
             </div>
           )}
@@ -552,47 +526,47 @@ function App() {
           {/* Fee Swaps Section - Excludes Deposits/Withdraws */}
           {data.feeSwaps && (
             <>
-              <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-lg p-6">
-                <h2 className="text-xl font-bold text-purple-800 mb-4">💸 Fee-Generating Swaps</h2>
-                <p className="text-sm text-purple-600 mb-4">
+              <div className="bg-nm-surface-grad border border-nm-border rounded-nm p-6 shadow-nm">
+                <h2 className="text-xl font-bold text-nm-text mb-4 flex items-center gap-2"><SwapIcon className="h-5 w-5 text-nm-accent" /> Fee-Generating Swaps</h2>
+                <p className="text-sm text-nm-muted mb-4">
                   Excludes deposits/withdrawals (native ↔ intent token conversions like NEAR ↔ iNEAR, NPRO ↔ iNPRO)
                 </p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="bg-white rounded-lg p-4 shadow-sm">
-                    <div className="text-xs text-gray-500 uppercase">All Time</div>
-                    <div className="text-lg font-bold text-purple-700">{data.feeSwaps.allTime.totalSwaps.toLocaleString()}</div>
-                    <div className="text-sm text-gray-600">${(data.feeSwaps.allTime.totalVolumeUSD / 1000000).toFixed(2)}M</div>
+                  <div className="bg-nm-card rounded-nm-sm p-4 shadow-nm">
+                    <div className="text-xs text-nm-muted uppercase">All Time</div>
+                    <div className="text-lg font-bold text-nm-accent">{data.feeSwaps.allTime.totalSwaps.toLocaleString()}</div>
+                    <div className="text-sm text-nm-muted">${(data.feeSwaps.allTime.totalVolumeUSD / 1000000).toFixed(2)}M</div>
                   </div>
-                  <div className="bg-white rounded-lg p-4 shadow-sm">
-                    <div className="text-xs text-gray-500 uppercase">Last 24h</div>
-                    <div className="text-lg font-bold text-purple-700">{data.feeSwaps.last24h.totalSwaps.toLocaleString()}</div>
-                    <div className="text-sm text-gray-600">${data.feeSwaps.last24h.totalVolumeUSD.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
+                  <div className="bg-nm-card rounded-nm-sm p-4 shadow-nm">
+                    <div className="text-xs text-nm-muted uppercase">Last 24h</div>
+                    <div className="text-lg font-bold text-nm-accent">{data.feeSwaps.last24h.totalSwaps.toLocaleString()}</div>
+                    <div className="text-sm text-nm-muted">${data.feeSwaps.last24h.totalVolumeUSD.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
                   </div>
-                  <div className="bg-white rounded-lg p-4 shadow-sm">
-                    <div className="text-xs text-gray-500 uppercase">Last 7 Days</div>
-                    <div className="text-lg font-bold text-purple-700">{data.feeSwaps.last7d.totalSwaps.toLocaleString()}</div>
-                    <div className="text-sm text-gray-600">${data.feeSwaps.last7d.totalVolumeUSD.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
+                  <div className="bg-nm-card rounded-nm-sm p-4 shadow-nm">
+                    <div className="text-xs text-nm-muted uppercase">Last 7 Days</div>
+                    <div className="text-lg font-bold text-nm-accent">{data.feeSwaps.last7d.totalSwaps.toLocaleString()}</div>
+                    <div className="text-sm text-nm-muted">${data.feeSwaps.last7d.totalVolumeUSD.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
                   </div>
-                  <div className="bg-white rounded-lg p-4 shadow-sm">
-                    <div className="text-xs text-gray-500 uppercase">Last 30 Days</div>
-                    <div className="text-lg font-bold text-purple-700">{data.feeSwaps.last30d.totalSwaps.toLocaleString()}</div>
-                    <div className="text-sm text-gray-600">${data.feeSwaps.last30d.totalVolumeUSD.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
+                  <div className="bg-nm-card rounded-nm-sm p-4 shadow-nm">
+                    <div className="text-xs text-nm-muted uppercase">Last 30 Days</div>
+                    <div className="text-lg font-bold text-nm-accent">{data.feeSwaps.last30d.totalSwaps.toLocaleString()}</div>
+                    <div className="text-sm text-nm-muted">${data.feeSwaps.last30d.totalVolumeUSD.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg shadow-md border border-gray-200 p-4 sm:p-6">
+              <div className="bg-nm-card rounded-nm shadow-nm border border-nm-border p-4 sm:p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Top Fee Swap Pairs</h3>
-                  <div className="flex gap-2">
+                  <h3 className="text-lg font-semibold text-nm-text">Top Fee Swap Pairs</h3>
+                  <div className="inline-flex bg-nm-border rounded-full p-1">
                     {(['allTime', '24h', '7d', '30d'] as const).map((period) => (
                       <button
                         key={period}
                         onClick={() => setFeeSwapsPeriod(period)}
-                        className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                        className={`px-4 py-1.5 text-sm rounded-full transition-colors ${
                           feeSwapsPeriod === period
-                            ? 'bg-purple-600 text-white'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            ? 'bg-white font-medium text-nm-text shadow-nm'
+                            : 'font-normal text-nm-text hover:text-nm-text/80'
                         }`}
                       >
                         {period === 'allTime' ? 'All Time' : period === '24h' ? '24h' : period === '7d' ? '7 Days' : '30 Days'}
@@ -617,18 +591,18 @@ function App() {
           )}
 
           {/* Trading Pairs Table */}
-          <div className="bg-white rounded-lg shadow-md border border-gray-200 p-4 sm:p-6">
+          <div className="bg-nm-card rounded-nm shadow-nm border border-nm-border p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Trading Pairs (Including Deposits/Withdrawals)</h3>
-              <div className="flex gap-2">
+              <h3 className="text-lg font-semibold text-nm-text">Trading Pairs (Including Deposits/Withdrawals)</h3>
+              <div className="inline-flex bg-nm-border rounded-full p-1">
                 {(['allTime', '24h', '7d', '30d'] as const).map((period) => (
                   <button
                     key={period}
                     onClick={() => setTradingPairsPeriod(period)}
-                    className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                    className={`px-4 py-1.5 text-sm rounded-full transition-colors ${
                       tradingPairsPeriod === period
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        ? 'bg-white font-medium text-nm-text shadow-nm'
+                        : 'font-normal text-nm-text hover:text-nm-text/80'
                     }`}
                   >
                     {period === 'allTime' ? 'All Time' : period === '24h' ? '24h' : period === '7d' ? '7 Days' : '30 Days'}
@@ -653,25 +627,25 @@ function App() {
           {/* Top Swappers Section */}
           {data.topSwappers && (
             <>
-              <div className="bg-gradient-to-r from-green-50 to-teal-50 border border-green-200 rounded-lg p-6">
-                <h2 className="text-xl font-bold text-green-800 mb-2">👥 Top Swappers</h2>
-                <p className="text-sm text-green-600">
-                  Total unique accounts: <span className="font-bold">{data.topSwappers.totalUniqueAccounts.toLocaleString()}</span>
+              <div className="bg-nm-surface-grad border border-nm-border rounded-nm p-6 shadow-nm">
+                <h2 className="text-xl font-bold text-nm-text mb-2 flex items-center gap-2"><UsersIcon className="h-5 w-5 text-nm-accent" /> Top Swappers</h2>
+                <p className="text-sm text-nm-muted">
+                  Total unique accounts: <span className="font-bold text-nm-accent">{data.topSwappers.totalUniqueAccounts.toLocaleString()}</span>
                 </p>
               </div>
 
-              <div className="bg-white rounded-lg shadow-md border border-gray-200 p-4 sm:p-6">
+              <div className="bg-nm-card rounded-nm shadow-nm border border-nm-border p-4 sm:p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Top Swappers</h3>
-                  <div className="flex flex-wrap gap-2">
+                  <h3 className="text-lg font-semibold text-nm-text flex items-center gap-2"><UsersIcon className="h-5 w-5 text-nm-accent" /> Top Swappers</h3>
+                  <div className="inline-flex flex-wrap bg-nm-border rounded-full p-1">
                     {(['allTime', '24h', '7d', '30d', 'byCount', 'byFeeVolume'] as const).map((period) => (
                       <button
                         key={period}
                         onClick={() => setSwappersPeriod(period)}
-                        className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                        className={`px-4 py-1.5 text-sm rounded-full transition-colors ${
                           swappersPeriod === period
-                            ? 'bg-green-600 text-white'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            ? 'bg-white font-medium text-nm-text shadow-nm'
+                            : 'font-normal text-nm-text hover:text-nm-text/80'
                         }`}
                       >
                         {period === 'allTime' ? 'All Time' : period === '24h' ? '24h' : period === '7d' ? '7 Days' : period === '30d' ? '30 Days' : period === 'byCount' ? 'By Count' : 'By Fee Vol'}
@@ -701,18 +675,18 @@ function App() {
           {(data.notes.unmappedIntentTokenIds.length > 0 || 
             data.notes.priceIdMissing.length > 0 || 
             data.notes.badAmounts > 0) && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-yellow-800 mb-4">Data Quality Notes</h3>
-              <div className="space-y-3 text-sm text-yellow-700">
+            <div className="bg-nm-card border border-nm-warning/30 rounded-nm p-6 shadow-nm">
+              <h3 className="text-lg font-semibold text-nm-warning mb-4">Data Quality Notes</h3>
+              <div className="space-y-3 text-sm text-nm-muted">
                 {data.notes.badAmounts > 0 && (
                   <p>• {data.notes.badAmounts} events with invalid amounts were skipped</p>
                 )}
                 {data.notes.unmappedIntentTokenIds.length > 0 && (
                   <div>
                     <p className="font-medium">• {data.notes.unmappedIntentTokenIds.length} unmapped intent token IDs:</p>
-                    <ul className="ml-4 mt-1 space-y-1 font-mono text-xs">
+                    <ul className="ml-4 mt-1 space-y-1 font-sf-mono text-xs">
                       {data.notes.unmappedIntentTokenIds.map((id, idx) => (
-                        <li key={idx} className="text-yellow-600">{id}</li>
+                        <li key={idx} className="text-nm-muted">{id}</li>
                       ))}
                     </ul>
                   </div>
@@ -720,9 +694,9 @@ function App() {
                 {data.notes.priceIdMissing.length > 0 && (
                   <div>
                     <p className="font-medium">• {data.notes.priceIdMissing.length} price IDs missing:</p>
-                    <ul className="ml-4 mt-1 space-y-1 font-mono text-xs">
+                    <ul className="ml-4 mt-1 space-y-1 font-sf-mono text-xs">
                       {data.notes.priceIdMissing.map((id, idx) => (
-                        <li key={idx} className="text-yellow-600">{id}</li>
+                        <li key={idx} className="text-nm-muted">{id}</li>
                       ))}
                     </ul>
                   </div>

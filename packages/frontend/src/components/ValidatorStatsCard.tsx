@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Users, Coins, TrendingUp, TrendingDown, Shield } from 'lucide-react';
+import { UsersIcon, CoinsIcon, TrendUpIcon, TrendDownIcon, ShieldCheckIcon } from './icons';
+import { PeriodSelector } from './PeriodSelector';
 import type { ValidatorStats } from '../types';
 
 interface ValidatorStatsCardProps {
@@ -30,12 +31,12 @@ const ValidatorStatsCard: React.FC<ValidatorStatsCardProps> = ({ data, nearPrice
   // Check if data is valid (has required fields or is an error)
   if (!data || typeof data !== 'object' || 'error' in data || !data.validator_id) {
     return (
-      <div className="bg-white rounded-lg shadow-md border border-gray-200 p-4 sm:p-6">
+      <div className="bg-nm-card rounded-nm shadow-nm border border-nm-border p-4 sm:p-6">
         <div className="flex items-center gap-2 mb-4">
-          <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600 flex-shrink-0" />
-          <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Validator Stats</h2>
+          <ShieldCheckIcon className="h-5 w-5 text-nm-accent flex-shrink-0" />
+          <h2 className="text-lg font-semibold text-nm-text">Validator Stats</h2>
         </div>
-        <p className="text-center text-gray-500">Loading validator stats...</p>
+        <p className="text-center text-nm-muted">Loading validator stats...</p>
       </div>
     );
   }
@@ -107,126 +108,110 @@ const ValidatorStatsCard: React.FC<ValidatorStatsCardProps> = ({ data, nearPrice
   const stakedChange = getStakedChange();
   const delegatorsChange = getDelegatorsChange();
 
-  const PeriodSelector: React.FC<{
-    value: TimePeriod;
-    onChange: (period: TimePeriod) => void;
-  }> = ({ value, onChange }) => (
-    <div className="flex gap-1 mt-2">
-      {(['3d', '7d', '30d'] as TimePeriod[]).map((period) => (
-        <button
-          key={period}
-          onClick={() => onChange(period)}
-          className={`px-2 py-1 text-xs rounded transition-colors ${
-            value === period
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-          }`}
-        >
-          {period}
-        </button>
-      ))}
-    </div>
-  );
 
   return (
-    <div className="bg-white rounded-lg shadow-md border border-gray-200 p-4 sm:p-6">
+    <div className="bg-nm-card rounded-nm shadow-nm border border-nm-border p-4 sm:p-6">
       <div className="flex items-center gap-2 mb-4 sm:mb-6">
-        <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600 flex-shrink-0" />
+        <ShieldCheckIcon className="h-5 w-5 sm:h-6 sm:w-6 text-nm-accent flex-shrink-0" />
         <div>
-          <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Validator Stats</h2>
-          <p className="text-xs sm:text-sm text-gray-500 font-mono">{safeData.validator_id}</p>
+          <h2 className="text-lg sm:text-xl font-semibold text-nm-text">Validator Stats</h2>
+          <p className="text-xs sm:text-sm text-nm-muted font-sf-mono">{safeData.validator_id}</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Delegators */}
-        <div className="bg-blue-50 rounded-lg p-4">
+        <div className="bg-nm-accentDim rounded-nm-sm p-4">
           <div className="flex items-center justify-center mb-2">
-            <Users className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500" />
+            <UsersIcon className="h-5 w-5 text-nm-accent" />
           </div>
-          <p className="text-xs sm:text-sm text-blue-600 font-medium text-center mb-1">Total Delegators</p>
-          <p className="text-xl sm:text-2xl font-bold text-blue-800 text-center">
+          <p className="text-xs text-nm-accent font-medium text-center mb-1">Total Delegators</p>
+          <p className="text-2xl font-bold text-nm-text text-center">
             {safeData.total_delegators.toLocaleString()}
           </p>
         </div>
 
         {/* Total NEAR Staked */}
-        <div className="bg-purple-50 rounded-lg p-4">
+        <div className="bg-nm-accentDim rounded-nm-sm p-4">
           <div className="flex items-center justify-center mb-2">
-            <Coins className="h-6 w-6 sm:h-8 sm:w-8 text-purple-500" />
+            <CoinsIcon className="h-5 w-5 text-nm-accent" />
           </div>
-          <p className="text-xs sm:text-sm text-purple-600 font-medium text-center mb-1">NEAR Staked</p>
-          <p className="text-xl sm:text-2xl font-bold text-purple-800 text-center">
+          <p className="text-xs text-nm-accent font-medium text-center mb-1">NEAR Staked</p>
+          <p className="text-2xl font-bold text-nm-text text-center">
             {formatNEAR(safeData.total_near_staked)}
           </p>
           {nearPriceUSD && (
-            <p className="text-xs sm:text-sm text-purple-600 text-center mt-1">
+            <p className="text-xs text-nm-muted text-center mt-1">
               {formatUSD(safeData.total_near_staked)}
             </p>
           )}
         </div>
 
         {/* NEAR Staked Change */}
-        <div className="bg-green-50 rounded-lg p-4">
+        <div className="bg-nm-accentDim rounded-nm-sm p-4">
           <div className="flex items-center justify-center mb-2">
             {stakedChange.change >= 0 ? (
-              <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-green-500" />
+              <TrendUpIcon className="h-5 w-5 text-nm-success" />
             ) : (
-              <TrendingDown className="h-6 w-6 sm:h-8 sm:w-8 text-red-500" />
+              <TrendDownIcon className="h-5 w-5 text-nm-error" />
             )}
           </div>
-          <p className="text-xs sm:text-sm text-green-600 font-medium text-center mb-1">
+          <p className="text-xs text-nm-accent font-medium text-center mb-1">
             Staked Change ({stakedChangePeriod})
           </p>
           <div className="text-center">
-            <p className={`text-lg sm:text-xl font-bold ${
-              stakedChange.change >= 0 ? 'text-green-700' : 'text-red-700'
+            <p className={`text-lg font-bold ${
+              stakedChange.change >= 0 ? 'text-nm-success' : 'text-nm-error'
             }`}>
               {formatChange(stakedChange.change)} NEAR
             </p>
-            <p className={`text-xs sm:text-sm ${
-              stakedChange.change >= 0 ? 'text-green-600' : 'text-red-600'
+            <p className={`text-xs ${
+              stakedChange.change >= 0 ? 'text-nm-success' : 'text-nm-error'
             }`}>
               ({stakedChange.percent >= 0 ? '+' : ''}{stakedChange.percent.toFixed(2)}%)
             </p>
             {nearPriceUSD && (
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-nm-muted mt-1">
                 {stakedChange.change >= 0 ? '+' : ''}{formatUSD(stakedChange.change)}
               </p>
             )}
           </div>
-          <PeriodSelector value={stakedChangePeriod} onChange={setStakedChangePeriod} />
+          <div className="flex justify-center mt-3">
+            <PeriodSelector periods={['3d', '7d', '30d'] as TimePeriod[]} selected={stakedChangePeriod} onChange={setStakedChangePeriod} />
+          </div>
         </div>
 
         {/* Delegators Change */}
-        <div className="bg-indigo-50 rounded-lg p-4">
+        <div className="bg-nm-accentDim rounded-nm-sm p-4">
           <div className="flex items-center justify-center mb-2">
             {delegatorsChange >= 0 ? (
-              <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-indigo-500" />
+              <TrendUpIcon className="h-5 w-5 text-nm-accent" />
             ) : (
-              <TrendingDown className="h-6 w-6 sm:h-8 sm:w-8 text-red-500" />
+              <TrendDownIcon className="h-5 w-5 text-nm-error" />
             )}
           </div>
-          <p className="text-xs sm:text-sm text-indigo-600 font-medium text-center mb-1">
+          <p className="text-xs text-nm-accent font-medium text-center mb-1">
             Delegators Change ({delegatorsChangePeriod})
           </p>
           <div className="text-center">
-            <p className={`text-xl sm:text-2xl font-bold ${
-              delegatorsChange >= 0 ? 'text-indigo-700' : 'text-red-700'
+            <p className={`text-2xl font-bold ${
+              delegatorsChange >= 0 ? 'text-nm-accent' : 'text-nm-error'
             }`}>
               {delegatorsChange >= 0 ? '+' : ''}{delegatorsChange.toLocaleString()}
             </p>
-            <p className="text-xs sm:text-sm text-indigo-600">
+            <p className="text-xs text-nm-muted">
               delegators
             </p>
           </div>
-          <PeriodSelector value={delegatorsChangePeriod} onChange={setDelegatorsChangePeriod} />
+          <div className="flex justify-center mt-3">
+            <PeriodSelector periods={['3d', '7d', '30d'] as TimePeriod[]} selected={delegatorsChangePeriod} onChange={setDelegatorsChangePeriod} />
+          </div>
         </div>
       </div>
 
       {/* Last Updated */}
-      <div className="mt-4 pt-4 border-t border-gray-200 text-center">
-        <p className="text-xs text-gray-500">
+      <div className="mt-4 pt-4 border-t border-nm-border text-center">
+        <p className="text-xs text-nm-muted">
           Last updated: {new Date(safeData.latest_update).toLocaleString()}
         </p>
       </div>

@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
-import { RefreshCw, ExternalLink, TrendingUp, TrendingDown, Users, Coins, Landmark, Droplets, Crown, ArrowUpDown } from 'lucide-react';
+import { ChartLineUpIcon, TrophyIcon, ArrowsClockwiseIcon, ArrowSquareOutIcon, TrendUpIcon, TrendDownIcon, UsersIcon, CoinsIcon, BankIcon, DropIcon, CrownIcon, ArrowsDownUpIcon } from './icons';
+import TokenAvatar from './TokenAvatar';
+import { useTokenImages, resolveTokenImage } from '../hooks/useTokenImages';
 import type { NPROSummary } from '../types';
 import { calculateDistributionRunway, type DistributionRunwayInfo } from '../utils/nproBondingCurve';
 
@@ -38,11 +40,11 @@ const formatUSD = (num: number): string => {
 
 // Change indicator component
 const ChangeIndicator = ({ value, suffix = '' }: { value: number; suffix?: string }) => {
-  if (value === 0) return <span className="text-gray-500">0{suffix}</span>;
+  if (value === 0) return <span className="text-nm-muted">0{suffix}</span>;
   const isPositive = value > 0;
   return (
-    <span className={`flex items-center gap-1 ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-      {isPositive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+    <span className={`flex items-center gap-1 ${isPositive ? 'text-nm-success' : 'text-nm-error'}`}>
+      {isPositive ? <TrendUpIcon className="h-3 w-3" /> : <TrendDownIcon className="h-3 w-3" />}
       {isPositive ? '+' : ''}{value.toFixed(2)}{suffix}
     </span>
   );
@@ -50,10 +52,10 @@ const ChangeIndicator = ({ value, suffix = '' }: { value: number; suffix?: strin
 
 // Format change value with color
 const formatChange24h = (value: number, label: string = '24h'): React.ReactNode => {
-  if (value === 0) return <span className="text-gray-500">0 ({label})</span>;
+  if (value === 0) return <span className="text-nm-muted">0 ({label})</span>;
   const isPositive = value > 0;
   return (
-    <span className={isPositive ? 'text-green-600' : 'text-red-600'}>
+    <span className={isPositive ? 'text-nm-success' : 'text-nm-error'}>
       {isPositive ? '+' : ''}{value.toLocaleString()} ({label})
     </span>
   );
@@ -61,11 +63,11 @@ const formatChange24h = (value: number, label: string = '24h'): React.ReactNode 
 
 // Format USD change with color
 const formatUSDChange = (value: number, label: string = '24h'): React.ReactNode => {
-  if (value === 0) return <span className="text-gray-500">$0 ({label})</span>;
+  if (value === 0) return <span className="text-nm-muted">$0 ({label})</span>;
   const isPositive = value > 0;
   const formatted = formatUSD(Math.abs(value));
   return (
-    <span className={isPositive ? 'text-green-600' : 'text-red-600'}>
+    <span className={isPositive ? 'text-nm-success' : 'text-nm-error'}>
       {isPositive ? '+' : '-'}{formatted} ({label})
     </span>
   );
@@ -73,10 +75,10 @@ const formatUSDChange = (value: number, label: string = '24h'): React.ReactNode 
 
 // Format percentage change with color
 const formatPercentChange = (value: number): React.ReactNode => {
-  if (value === 0) return <span className="text-gray-500">0%</span>;
+  if (value === 0) return <span className="text-nm-muted">0%</span>;
   const isPositive = value > 0;
   return (
-    <span className={isPositive ? 'text-green-600' : 'text-red-600'}>
+    <span className={isPositive ? 'text-nm-success' : 'text-nm-error'}>
       {isPositive ? '+' : ''}{value.toFixed(2)}%
     </span>
   );
@@ -104,10 +106,10 @@ const StatCard = ({
   icon?: React.ElementType;
   href?: string;
 }) => (
-  <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+  <div className="bg-nm-card rounded-nm-sm p-4 shadow-nm border border-nm-border">
     <div className="flex items-center justify-between mb-2">
-      <span className="text-xs text-gray-500 uppercase">{title}</span>
-      {Icon && <Icon className="h-4 w-4 text-gray-400" />}
+      <span className="text-xs text-nm-muted uppercase">{title}</span>
+      {Icon && <Icon className="h-4 w-4 text-nm-muted" />}
     </div>
     <div className="flex items-baseline gap-2">
       {valueNode ? (
@@ -117,20 +119,20 @@ const StatCard = ({
           href={href} 
           target="_blank" 
           rel="noopener noreferrer"
-          className="text-lg font-bold text-blue-700 hover:text-blue-800 flex items-center gap-1"
+          className="text-lg font-bold text-nm-accent hover:text-nm-ctaHover flex items-center gap-1"
         >
           {value}
-          <ExternalLink className="h-3 w-3" />
+          <ArrowSquareOutIcon className="h-3 w-3" />
         </a>
       ) : (
-        <span className="text-lg font-bold text-gray-900">{value}</span>
+        <span className="text-lg font-bold text-nm-text">{value}</span>
       )}
     </div>
     {subValueNode && <div className="text-sm">{subValueNode}</div>}
-    {subValue && !subValueNode && <div className="text-sm text-gray-600">{subValue}</div>}
+    {subValue && !subValueNode && <div className="text-sm text-nm-muted">{subValue}</div>}
     {change !== undefined && (
       <div className="mt-1 text-xs flex items-center gap-1">
-        <span className="text-gray-500">{changeLabel}:</span>
+        <span className="text-nm-muted">{changeLabel}:</span>
         <ChangeIndicator value={change} suffix="%" />
       </div>
     )}
@@ -147,13 +149,14 @@ const SectionHeader = ({
   icon: React.ElementType; 
   gradient: string;
 }) => (
-  <div className={`${gradient} rounded-lg p-4 flex items-center gap-3`}>
-    <Icon className="h-6 w-6" />
-    <h2 className="text-xl font-bold">{title}</h2>
+  <div className={`${gradient} rounded-nm p-4 flex items-center gap-2`}>
+    <Icon className="h-5 w-5" />
+    <h2 className="text-lg font-semibold">{title}</h2>
   </div>
 );
 
 export default function NPROStatsTab({ data, isLoading, onRefresh }: NPROStatsTabProps) {
+  const { tokenMap } = useTokenImages();
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [distributionRunway, setDistributionRunway] = useState<DistributionRunwayInfo | null>(null);
 
@@ -176,8 +179,8 @@ export default function NPROStatsTab({ data, isLoading, onRefresh }: NPROStatsTa
     return (
       <div className="flex items-center justify-center py-16">
         <div className="text-center">
-          <RefreshCw className="h-8 w-8 animate-spin text-purple-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading NPRO stats...</p>
+          <ArrowsClockwiseIcon className="h-6 w-6 animate-spin text-nm-accent mx-auto mb-4" />
+          <p className="text-nm-muted">Loading NPRO stats...</p>
         </div>
       </div>
     );
@@ -186,14 +189,14 @@ export default function NPROStatsTab({ data, isLoading, onRefresh }: NPROStatsTa
   if (!data) {
     return (
       <div className="text-center py-16">
-        <Coins className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-        <h2 className="text-2xl font-semibold text-gray-600 mb-2">No NPRO Data Loaded</h2>
-        <p className="text-gray-500 mb-6">Click "Load Data" to fetch the latest NPRO stats</p>
+        <CoinsIcon className="h-12 w-12 text-nm-muted mx-auto mb-4" />
+        <h2 className="text-2xl font-semibold text-nm-muted mb-2">No NPRO Data Loaded</h2>
+        <p className="text-nm-muted mb-6">Click "Load Data" to fetch the latest NPRO stats</p>
         <button
           onClick={onRefresh}
-          className="flex items-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors mx-auto"
+          className="flex items-center gap-2 px-6 py-3 bg-nm-cta text-white rounded-nm-sm hover:bg-nm-ctaHover shadow-nm-button transition-colors mx-auto"
         >
-          <RefreshCw className="h-5 w-5" />
+          <ArrowsClockwiseIcon className="h-5 w-5" />
           Load NPRO Stats
         </button>
       </div>
@@ -204,7 +207,7 @@ export default function NPROStatsTab({ data, isLoading, onRefresh }: NPROStatsTa
     <div className="space-y-6">
       {/* Last Updated */}
       {lastUpdated && (
-        <div className="text-sm text-gray-500 text-right">
+        <div className="text-sm text-nm-muted text-right">
           Last updated: {lastUpdated.toLocaleString()}
         </div>
       )}
@@ -212,8 +215,8 @@ export default function NPROStatsTab({ data, isLoading, onRefresh }: NPROStatsTa
       {/* Token Price Section */}
       <SectionHeader 
         title="NPRO Token" 
-        icon={Coins} 
-        gradient="bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-800 border border-purple-200" 
+        icon={CoinsIcon} 
+        gradient="bg-nm-surface-grad text-nm-accent border border-nm-border shadow-nm" 
       />
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
         <StatCard
@@ -221,7 +224,7 @@ export default function NPROStatsTab({ data, isLoading, onRefresh }: NPROStatsTa
           value={`$${data.token.npro.usd.toFixed(4)}`}
           subValue={`${data.token.nproInNear.toFixed(4)} NEAR`}
           change={data.token.npro.change24h}
-          icon={Coins}
+          icon={CoinsIcon}
           href="https://nearblocks.io/token/npro.nearmobile.near"
         />
         <StatCard
@@ -242,28 +245,28 @@ export default function NPROStatsTab({ data, isLoading, onRefresh }: NPROStatsTa
           title="Holders"
           value={data.nearblocks.holders.count.toLocaleString()}
           subValueNode={formatChange24h(data.nearblocks.holders.delta24h)}
-          icon={Users}
+          icon={UsersIcon}
         />
         <StatCard
           title="Transfers"
           value={data.nearblocks.transfers.count.toLocaleString()}
           subValueNode={formatChange24h(data.nearblocks.transfers.delta24h)}
-          icon={ArrowUpDown}
+          icon={ArrowsDownUpIcon}
         />
       </div>
 
       {/* Validator Section */}
       <SectionHeader 
         title="Validator (npro.poolv1.near)" 
-        icon={Landmark} 
-        gradient="bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-800 border border-blue-200" 
+        icon={BankIcon} 
+        gradient="bg-nm-accentDim text-nm-accent border border-nm-border shadow-nm" 
       />
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <StatCard
           title="Staked (Active)"
           value={formatFullNumber(data.validator.staked.number)}
           subValue={formatUSD(data.validator.staked.number * data.token.near.usd)}
-          icon={Landmark}
+          icon={BankIcon}
           href="https://nearblocks.io/node-explorer/npro.poolv1.near"
         />
         <StatCard
@@ -281,15 +284,15 @@ export default function NPROStatsTab({ data, isLoading, onRefresh }: NPROStatsTa
       {/* Account Management Section */}
       <SectionHeader 
         title="Account Management" 
-        icon={Users} 
-        gradient="bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border border-green-200" 
+        icon={UsersIcon} 
+        gradient="bg-nm-accentDim text-nm-accent border border-nm-border shadow-nm" 
       />
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         <StatCard
           title="Treasury"
           value={formatFullNumber(data.accounts.treasury.number)}
           subValue={formatUSD(data.accounts.treasury.usdValue)}
-          icon={Coins}
+          icon={CoinsIcon}
         />
         <StatCard
           title="Team"
@@ -320,28 +323,28 @@ export default function NPROStatsTab({ data, isLoading, onRefresh }: NPROStatsTa
 
       {/* Distribution Runway Info */}
       {distributionRunway && (
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-green-800 mb-4">📊 Distribution Runway (Bonding Curve)</h3>
+        <div className="bg-nm-surface-grad border border-nm-border rounded-nm p-6 shadow-nm">
+          <h3 className="text-lg font-semibold text-nm-text mb-4 flex items-center gap-2"><ChartLineUpIcon className="h-5 w-5 text-nm-accent" /> Distribution Runway (Bonding Curve)</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-white rounded-lg p-4 shadow-sm">
-              <div className="text-xs text-gray-500 uppercase">Current Epoch</div>
-              <div className="text-lg font-bold text-green-700">{distributionRunway.currentEpoch.toLocaleString()}</div>
-              <div className="text-sm text-gray-600">~{distributionRunway.epochDurationHours.toFixed(1)}h per epoch</div>
+            <div className="bg-nm-card rounded-nm-sm p-4 shadow-nm">
+              <div className="text-xs text-nm-muted uppercase">Current Epoch</div>
+              <div className="text-lg font-bold text-nm-accent">{distributionRunway.currentEpoch.toLocaleString()}</div>
+              <div className="text-sm text-nm-muted">~{distributionRunway.epochDurationHours.toFixed(1)}h per epoch</div>
             </div>
-            <div className="bg-white rounded-lg p-4 shadow-sm">
-              <div className="text-xs text-gray-500 uppercase">NPRO/Epoch</div>
-              <div className="text-lg font-bold text-green-700">{distributionRunway.nproPerCurrentEpoch.toFixed(2)}</div>
-              <div className="text-sm text-gray-600">Distribution rate</div>
+            <div className="bg-nm-card rounded-nm-sm p-4 shadow-nm">
+              <div className="text-xs text-nm-muted uppercase">NPRO/Epoch</div>
+              <div className="text-lg font-bold text-nm-accent">{distributionRunway.nproPerCurrentEpoch.toFixed(2)}</div>
+              <div className="text-sm text-nm-muted">Distribution rate</div>
             </div>
-            <div className="bg-white rounded-lg p-4 shadow-sm">
-              <div className="text-xs text-gray-500 uppercase">Epochs Until Empty</div>
-              <div className="text-lg font-bold text-green-700">{distributionRunway.epochsUntilEmpty.toLocaleString()}</div>
-              <div className="text-sm text-gray-600">Last epoch: #{distributionRunway.lastFundedEpoch.toLocaleString()}</div>
+            <div className="bg-nm-card rounded-nm-sm p-4 shadow-nm">
+              <div className="text-xs text-nm-muted uppercase">Epochs Until Empty</div>
+              <div className="text-lg font-bold text-nm-accent">{distributionRunway.epochsUntilEmpty.toLocaleString()}</div>
+              <div className="text-sm text-nm-muted">Last epoch: #{distributionRunway.lastFundedEpoch.toLocaleString()}</div>
             </div>
-            <div className="bg-white rounded-lg p-4 shadow-sm">
-              <div className="text-xs text-gray-500 uppercase">Days Until Empty</div>
-              <div className="text-2xl font-bold text-green-700">{distributionRunway.daysUntilEmpty.toLocaleString()}</div>
-              <div className="text-sm text-gray-600">~{(distributionRunway.daysUntilEmpty / 30).toFixed(1)} months</div>
+            <div className="bg-nm-card rounded-nm-sm p-4 shadow-nm">
+              <div className="text-xs text-nm-muted uppercase">Days Until Empty</div>
+              <div className="text-2xl font-bold text-nm-accent">{distributionRunway.daysUntilEmpty.toLocaleString()}</div>
+              <div className="text-sm text-nm-muted">~{(distributionRunway.daysUntilEmpty / 30).toFixed(1)} months</div>
             </div>
           </div>
         </div>
@@ -350,21 +353,21 @@ export default function NPROStatsTab({ data, isLoading, onRefresh }: NPROStatsTa
       {/* Premium Section */}
       <SectionHeader 
         title="Premium & Ambassador" 
-        icon={Crown} 
-        gradient="bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-800 border border-amber-200" 
+        icon={CrownIcon} 
+        gradient="bg-nm-card text-nm-warning border border-nm-border shadow-nm" 
       />
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
         <StatCard
           title="Premium Users"
           value={data.premium.premiumUsers.toLocaleString()}
           subValueNode={formatChange24h(data.premium.premiumUsersChange24h)}
-          icon={Crown}
+          icon={CrownIcon}
         />
         <StatCard
           title="Ambassador Users"
           value={data.premium.ambassadorUsers.toLocaleString()}
           subValueNode={formatChange24h(data.premium.ambassadorUsersChange24h)}
-          icon={Users}
+          icon={UsersIcon}
         />
         <StatCard
           title="Total Paid Users"
@@ -404,15 +407,15 @@ export default function NPROStatsTab({ data, isLoading, onRefresh }: NPROStatsTa
       {/* Liquidity Section */}
       <SectionHeader 
         title="Liquidity" 
-        icon={Droplets} 
-        gradient="bg-gradient-to-r from-cyan-100 to-teal-100 text-cyan-800 border border-cyan-200" 
+        icon={DropIcon} 
+        gradient="bg-nm-accentDim text-nm-accent border border-nm-border shadow-nm" 
       />
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
         <StatCard
           title="TVL (Rhea)"
           value={formatUSD(data.liquidity.rhea.tvlUsd)}
           subValueNode={formatUSDChange(data.liquidity.rhea.delta24h)}
-          icon={Droplets}
+          icon={DropIcon}
           href={data.liquidity.rhea.pairUrl}
         />
         <StatCard
@@ -438,51 +441,67 @@ export default function NPROStatsTab({ data, isLoading, onRefresh }: NPROStatsTa
       </div>
 
       {/* Pool Composition */}
-      <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Pool Composition (Rhea)</h3>
+      <div className="bg-nm-card rounded-nm shadow-nm border border-nm-border p-6">
+        <h3 className="text-lg font-semibold text-nm-text mb-4">Pool Composition (Rhea)</h3>
         <div className="grid grid-cols-2 gap-4">
-          <div className="bg-purple-50 rounded-lg p-4 border border-purple-200">
+          <div className="bg-nm-accentDim rounded-nm-sm p-4 border border-nm-border">
             <div className="flex items-center justify-between mb-2">
-              <span className="font-medium text-purple-800">{data.liquidity.rhea.pool.base.symbol}</span>
-              <span className="text-sm text-purple-600">{data.liquidity.rhea.pool.base.pct.toFixed(1)}%</span>
+              <div className="flex items-center gap-2">
+                <TokenAvatar
+                  imageUrl={resolveTokenImage(tokenMap, data.liquidity.rhea.pool.base.symbol)}
+                  symbol={data.liquidity.rhea.pool.base.symbol}
+                  size={24}
+                  chain={false}
+                />
+                <span className="font-medium text-nm-accent">{data.liquidity.rhea.pool.base.symbol}</span>
+              </div>
+              <span className="text-sm text-nm-muted">{data.liquidity.rhea.pool.base.pct.toFixed(1)}%</span>
             </div>
-            <div className="text-2xl font-bold text-purple-900">{formatNumber(data.liquidity.rhea.pool.base.amount, 0)}</div>
-            <div className="text-sm text-purple-600">{formatUSD(data.liquidity.rhea.pool.base.usdValue)}</div>
+            <div className="text-2xl font-bold text-nm-text">{formatNumber(data.liquidity.rhea.pool.base.amount, 0)}</div>
+            <div className="text-sm text-nm-muted">{formatUSD(data.liquidity.rhea.pool.base.usdValue)}</div>
           </div>
-          <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+          <div className="bg-nm-accentDim rounded-nm-sm p-4 border border-nm-border">
             <div className="flex items-center justify-between mb-2">
-              <span className="font-medium text-blue-800">{data.liquidity.rhea.pool.quote.symbol}</span>
-              <span className="text-sm text-blue-600">{data.liquidity.rhea.pool.quote.pct.toFixed(1)}%</span>
+              <div className="flex items-center gap-2">
+                <TokenAvatar
+                  imageUrl={resolveTokenImage(tokenMap, data.liquidity.rhea.pool.quote.symbol)}
+                  symbol={data.liquidity.rhea.pool.quote.symbol}
+                  size={24}
+                  chain={false}
+                />
+                <span className="font-medium text-nm-accent">{data.liquidity.rhea.pool.quote.symbol}</span>
+              </div>
+              <span className="text-sm text-nm-muted">{data.liquidity.rhea.pool.quote.pct.toFixed(1)}%</span>
             </div>
-            <div className="text-2xl font-bold text-blue-900">{formatNumber(data.liquidity.rhea.pool.quote.amount, 0)}</div>
-            <div className="text-sm text-blue-600">{formatUSD(data.liquidity.rhea.pool.quote.usdValue)}</div>
+            <div className="text-2xl font-bold text-nm-text">{formatNumber(data.liquidity.rhea.pool.quote.amount, 0)}</div>
+            <div className="text-sm text-nm-muted">{formatUSD(data.liquidity.rhea.pool.quote.usdValue)}</div>
           </div>
         </div>
       </div>
 
       {/* Rich List Section */}
-      <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">🏆 Top 10 NPRO Holders (Rich List)</h3>
-        <p className="text-sm text-gray-500 mb-4">Excludes team, treasury, premium, rhea, npro-validator, and near intents accounts</p>
+      <div className="bg-nm-card rounded-nm shadow-nm border border-nm-border p-6">
+        <h3 className="text-lg font-semibold text-nm-text mb-4 flex items-center gap-2"><TrophyIcon className="h-5 w-5 text-nm-accent" /> Top 10 NPRO Holders (Rich List)</h3>
+        <p className="text-sm text-nm-muted mb-4">Excludes team, treasury, premium, rhea, npro-validator, and near intents accounts</p>
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-nm-border">
+            <thead className="bg-nm-borderLight">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account</th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Balance</th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">USD Value</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-nm-muted uppercase tracking-wider">Rank</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-nm-muted uppercase tracking-wider">Account</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-nm-muted uppercase tracking-wider">Balance</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-nm-muted uppercase tracking-wider">USD Value</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-nm-card divide-y divide-nm-border">
               {data.richList.map((entry) => (
-                <tr key={entry.rank} className="hover:bg-gray-50">
+                <tr key={entry.rank} className="hover:bg-nm-surfaceHover">
                   <td className="px-4 py-3 whitespace-nowrap">
                     <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
-                      entry.rank === 1 ? 'bg-yellow-100 text-yellow-800' :
-                      entry.rank === 2 ? 'bg-gray-100 text-gray-800' :
-                      entry.rank === 3 ? 'bg-amber-100 text-amber-800' :
-                      'bg-gray-50 text-gray-600'
+                      entry.rank === 1 ? 'bg-nm-warning/20 text-nm-warning' :
+                      entry.rank === 2 ? 'bg-nm-chip text-nm-muted' :
+                      entry.rank === 3 ? 'bg-nm-warning/10 text-nm-warning' :
+                      'bg-nm-borderLight text-nm-muted'
                     }`}>
                       {entry.rank}
                     </span>
@@ -492,18 +511,18 @@ export default function NPROStatsTab({ data, isLoading, onRefresh }: NPROStatsTa
                       href={`https://nearblocks.io/address/${entry.account}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800 font-mono text-sm flex items-center gap-1"
+                      className="text-nm-accent hover:text-nm-ctaHover font-sf-mono text-sm flex items-center gap-1"
                     >
                       {entry.account.length > 24 
                         ? `${entry.account.slice(0, 12)}...${entry.account.slice(-8)}`
                         : entry.account}
-                      <ExternalLink className="h-3 w-3" />
+                      <ArrowSquareOutIcon className="h-3 w-3" />
                     </a>
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-right font-medium text-gray-900">
+                  <td className="px-4 py-3 whitespace-nowrap text-right font-medium text-nm-text">
                     {formatNumber(entry.balance.number, 2)}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-right text-gray-600">
+                  <td className="px-4 py-3 whitespace-nowrap text-right text-nm-muted">
                     {formatUSD(entry.balance.usdValue || 0)}
                   </td>
                 </tr>

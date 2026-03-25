@@ -44,57 +44,57 @@ const TopSwappersTable: React.FC<TopSwappersTableProps> = ({
   };
 
   return (
-    <div className={hideHeader ? '' : 'bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden'}>
+    <div className={hideHeader ? '' : 'bg-nm-card rounded-nm shadow-nm border border-nm-border overflow-hidden'}>
       {!hideHeader && (
-        <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
-          <h3 className="text-sm sm:text-base font-semibold text-gray-800">{title}</h3>
+        <div className="px-4 py-3 bg-nm-borderLight border-b border-nm-border">
+          <h3 className="text-sm sm:text-base font-semibold text-nm-text">{title}</h3>
         </div>
       )}
       
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50">
+          <thead className="bg-nm-borderLight">
             <tr>
-              <th className="px-2 sm:px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-2 sm:px-3 py-2 text-left text-xs font-medium text-nm-muted uppercase tracking-wider">
                 #
               </th>
-              <th className="px-2 sm:px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-2 sm:px-3 py-2 text-left text-xs font-medium text-nm-muted uppercase tracking-wider">
                 Account
               </th>
-              <th className="px-1 sm:px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-1 sm:px-2 py-2 text-left text-xs font-medium text-nm-muted uppercase tracking-wider">
                 Swaps
               </th>
-              <th className="px-1 sm:px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-1 sm:px-2 py-2 text-left text-xs font-medium text-nm-muted uppercase tracking-wider">
                 Volume
               </th>
               {sortBy === 'feeVolume' && (
                 <>
-                  <th className="px-1 sm:px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
+                  <th className="px-1 sm:px-2 py-2 text-left text-xs font-medium text-nm-muted uppercase tracking-wider hidden sm:table-cell">
                     Fee Swaps
                   </th>
-                  <th className="px-1 sm:px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-1 sm:px-2 py-2 text-left text-xs font-medium text-nm-muted uppercase tracking-wider">
                     Fee Vol
                   </th>
                 </>
               )}
               {periodLabel && (
                 <>
-                  <th className="px-1 sm:px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
+                  <th className="px-1 sm:px-2 py-2 text-left text-xs font-medium text-nm-muted uppercase tracking-wider hidden sm:table-cell">
                     {periodLabel} Swaps
                   </th>
-                  <th className="px-1 sm:px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-1 sm:px-2 py-2 text-left text-xs font-medium text-nm-muted uppercase tracking-wider">
                     {periodLabel} Vol
                   </th>
                 </>
               )}
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-nm-card divide-y divide-nm-border">
             {swappers.map((swapper, index) => {
               const periodData = getPeriodData(swapper);
               return (
-                <tr key={swapper.accountId} className="hover:bg-gray-50">
-                  <td className="px-2 sm:px-3 py-2 text-xs text-gray-500">
+                <tr key={swapper.accountId} className="hover:bg-nm-surfaceHover">
+                  <td className="px-2 sm:px-3 py-2 text-xs text-nm-muted">
                     {index + 1}
                   </td>
                   <td className="px-2 sm:px-3 py-2 min-w-0">
@@ -102,34 +102,34 @@ const TopSwappersTable: React.FC<TopSwappersTableProps> = ({
                       href={`https://nearblocks.io/address/${swapper.accountId}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs font-mono text-blue-600 hover:text-blue-800 hover:underline truncate" 
+                      className="text-xs font-sf-mono text-nm-accent hover:text-nm-ctaHover hover:underline truncate" 
                       title={swapper.accountId}
                     >
                       {formatAccountId(swapper.accountId)}
                     </a>
                   </td>
-                  <td className="px-1 sm:px-2 py-2 text-xs text-gray-900 whitespace-nowrap">
+                  <td className="px-1 sm:px-2 py-2 text-xs text-nm-text whitespace-nowrap">
                     {swapper.totalSwaps.toLocaleString()}
                   </td>
-                  <td className="px-1 sm:px-2 py-2 text-xs text-gray-900 whitespace-nowrap">
+                  <td className="px-1 sm:px-2 py-2 text-xs text-nm-text whitespace-nowrap">
                     {formatNumber(swapper.totalVolumeUSD)}
                   </td>
                   {sortBy === 'feeVolume' && (
                     <>
-                      <td className="px-1 sm:px-2 py-2 text-xs text-gray-900 whitespace-nowrap hidden sm:table-cell">
+                      <td className="px-1 sm:px-2 py-2 text-xs text-nm-text whitespace-nowrap hidden sm:table-cell">
                         {swapper.feeSwaps.toLocaleString()}
                       </td>
-                      <td className="px-1 sm:px-2 py-2 text-xs text-purple-600 font-medium whitespace-nowrap">
+                      <td className="px-1 sm:px-2 py-2 text-xs text-nm-accent font-medium whitespace-nowrap">
                         {formatNumber(swapper.feeVolumeUSD)}
                       </td>
                     </>
                   )}
                   {periodLabel && periodData && (
                     <>
-                      <td className="px-1 sm:px-2 py-2 text-xs text-gray-900 whitespace-nowrap hidden sm:table-cell">
+                      <td className="px-1 sm:px-2 py-2 text-xs text-nm-text whitespace-nowrap hidden sm:table-cell">
                         {periodData.swaps.toLocaleString()}
                       </td>
-                      <td className="px-1 sm:px-2 py-2 text-xs text-green-600 font-medium whitespace-nowrap">
+                      <td className="px-1 sm:px-2 py-2 text-xs text-nm-accent font-medium whitespace-nowrap">
                         {formatNumber(periodData.volume)}
                       </td>
                     </>
@@ -142,7 +142,7 @@ const TopSwappersTable: React.FC<TopSwappersTableProps> = ({
       </div>
       
       {swappers.length === 0 && (
-        <div className="px-6 py-8 text-center text-gray-500">
+        <div className="px-6 py-8 text-center text-nm-muted">
           No swappers found
         </div>
       )}

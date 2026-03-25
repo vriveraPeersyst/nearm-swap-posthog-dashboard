@@ -24,6 +24,9 @@
     },
     "api/tvl-summary.ts": {
       "maxDuration": 180
+    },
+    "api/market-list.ts": {
+      "maxDuration": 30
     }
   }
 }

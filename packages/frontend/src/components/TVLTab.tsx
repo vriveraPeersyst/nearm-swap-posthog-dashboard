@@ -1,4 +1,6 @@
-import { RefreshCw, TrendingUp, TrendingDown, Coins, Landmark, Users, Layers } from 'lucide-react';
+import { ArrowsClockwiseIcon, TrendUpIcon, TrendDownIcon, CoinsIcon, BankIcon, UsersIcon, StackSimpleIcon, ChartBarIcon, ShieldCheckIcon } from './icons';
+import TokenAvatar from './TokenAvatar';
+import { useTokenImages, resolveTokenImage, resolveMarketToken, resolveTokenSymbol, getTokenChain } from '../hooks/useTokenImages';
 import type { TVLSummary, SwapMetrics } from '../types';
 
 interface TVLTabProps {
@@ -38,10 +40,10 @@ const formatPercent = (num: number): string => {
 };
 
 const DeltaBadge = ({ value, isUsd = false }: { value: number; isUsd?: boolean }) => {
-  if (value === 0) return <span className="text-xs text-gray-400">—</span>;
+  if (value === 0) return <span className="text-xs text-nm-muted">—</span>;
   const isPositive = value > 0;
-  const Icon = isPositive ? TrendingUp : TrendingDown;
-  const color = isPositive ? 'text-green-600' : 'text-red-600';
+  const Icon = isPositive ? TrendUpIcon : TrendDownIcon;
+  const color = isPositive ? 'text-nm-success' : 'text-nm-error';
   const formatted = isUsd ? formatUSD(Math.abs(value)) : Math.abs(value).toLocaleString();
   return (
     <span className={`flex items-center gap-1 text-xs ${color}`}>
@@ -51,7 +53,39 @@ const DeltaBadge = ({ value, isUsd = false }: { value: number; isUsd?: boolean }
   );
 };
 
+// Shared StatCard matching NPROStatsTab pattern
+const StatCard = ({ title, value, subValue, subValueNode, icon: Icon }: {
+  title: string;
+  value: string;
+  subValue?: string;
+  subValueNode?: React.ReactNode;
+  icon?: React.ElementType;
+}) => (
+  <div className="bg-nm-card rounded-nm-sm p-4 shadow-nm border border-nm-border">
+    <div className="flex items-center justify-between mb-2">
+      <span className="text-xs text-nm-muted uppercase">{title}</span>
+      {Icon && <Icon className="h-4 w-4 text-nm-muted" />}
+    </div>
+    <div className="text-lg font-bold text-nm-text">{value}</div>
+    {subValueNode && <div className="text-sm">{subValueNode}</div>}
+    {subValue && !subValueNode && <div className="text-sm text-nm-muted">{subValue}</div>}
+  </div>
+);
+
+// Section header matching NPROStatsTab pattern
+const SectionHeader = ({ title, icon: Icon, gradient }: {
+  title: string;
+  icon: React.ElementType;
+  gradient: string;
+}) => (
+  <div className={`${gradient} rounded-nm p-4 flex items-center gap-2`}>
+    <Icon className="h-5 w-5" />
+    <h2 className="text-lg font-semibold">{title}</h2>
+  </div>
+);
+
 export default function TVLTab({ data, swapData, isLoading, onRefresh }: TVLTabProps) {
+  const { tokenMap } = useTokenImages();
   const stakedPctOfTvl = data && data.tvl.totalUsd > 0
     ? (data.staking.totalStakedUsd / data.tvl.totalUsd) * 100
     : 0;
@@ -75,14 +109,14 @@ export default function TVLTab({ data, swapData, isLoading, onRefresh }: TVLTabP
   if (!data) {
     return (
       <div className="text-center py-16">
-        <Layers className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-        <h2 className="text-2xl font-semibold text-gray-600 mb-2">No TVL Data Loaded</h2>
-        <p className="text-gray-500 mb-6">Click "Load Data" to fetch the latest TVL data</p>
+        <StackSimpleIcon className="h-12 w-12 text-nm-muted mx-auto mb-4" />
+        <h2 className="text-2xl font-semibold text-nm-muted mb-2">No TVL Data Loaded</h2>
+        <p className="text-nm-muted mb-6">Click "Load Data" to fetch the latest TVL data</p>
         <button
           onClick={onRefresh}
-          className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors mx-auto"
+          className="flex items-center gap-2 px-6 py-3 bg-nm-cta text-white rounded-nm-sm hover:bg-nm-ctaHover transition-colors mx-auto shadow-nm-button"
         >
-          <Layers className="h-5 w-5" />
+          <ArrowsClockwiseIcon className="h-5 w-5" />
           Load TVL Data
         </button>
       </div>
@@ -93,162 +127,220 @@ export default function TVLTab({ data, swapData, isLoading, onRefresh }: TVLTabP
     <div className="space-y-6">
       {/* Last synced */}
       {data.asOf.fast && (
-        <p className="text-xs text-gray-400 text-right">
+        <div className="text-sm text-nm-muted text-right">
           Last sync: {new Date(data.asOf.fast).toLocaleString()}
-        </p>
+        </div>
       )}
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Total TVL */}
-        <div className="bg-white rounded-lg shadow-md border border-gray-200 p-5">
-          <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
-            <Coins className="h-4 w-4" />
-            Total TVL
-          </div>
-          <div className="text-2xl font-bold text-gray-900">{formatUSD(data.tvl.totalUsd)}</div>
-          <DeltaBadge value={data.tvl.delta24h} isUsd />
-        </div>
-
-        {/* Total Accounts */}
-        <div className="bg-white rounded-lg shadow-md border border-gray-200 p-5">
-          <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
-            <Users className="h-4 w-4" />
-            Tracked Accounts
-          </div>
-          <div className="text-2xl font-bold text-gray-900">{data.tvl.totalAccounts.toLocaleString()}</div>
-          <DeltaBadge value={data.tvl.accountsDelta24h} />
-        </div>
-
-        {/* Total Staked */}
-        <div className="bg-white rounded-lg shadow-md border border-gray-200 p-5">
-          <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
-            <Landmark className="h-4 w-4" />
-            Total Staked
-          </div>
-          <div className="text-2xl font-bold text-gray-900">{formatNEAR(data.staking.totalStakedNear)} Ⓝ</div>
-          <div className="text-xs text-gray-500">{formatUSD(data.staking.totalStakedUsd)} · {stakedPctOfTvl.toFixed(2)}% of TVL</div>
-        </div>
-
-        {/* NPRO Validator */}
-        <div className="bg-white rounded-lg shadow-md border border-gray-200 p-5">
-          <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
-            <Landmark className="h-4 w-4 text-purple-500" />
-            npro.poolv1.near
-          </div>
-          <div className="text-2xl font-bold text-gray-900">{formatNEAR(data.staking.nproValidatorStakedNear)} Ⓝ</div>
-          <div className="text-xs text-gray-500">
-            {formatUSD(data.staking.nproValidatorStakedUsd)} · {nproPctOfTotalStaked.toFixed(2)}% of total staked
-          </div>
-        </div>
+      {/* TVL Overview Section */}
+      <SectionHeader
+        title="TVL Overview"
+        icon={CoinsIcon}
+        gradient="bg-nm-surface-grad text-nm-accent border border-nm-border shadow-nm"
+      />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCard
+          title="Total TVL"
+          value={formatUSD(data.tvl.totalUsd)}
+          subValueNode={<DeltaBadge value={data.tvl.delta24h} isUsd />}
+          icon={CoinsIcon}
+        />
+        <StatCard
+          title="Tracked Accounts"
+          value={data.tvl.totalAccounts.toLocaleString()}
+          subValueNode={<DeltaBadge value={data.tvl.accountsDelta24h} />}
+          icon={UsersIcon}
+        />
+        <StatCard
+          title="Total Staked"
+          value={`${formatNEAR(data.staking.totalStakedNear)} NEAR`}
+          subValue={`${formatUSD(data.staking.totalStakedUsd)} · ${stakedPctOfTvl.toFixed(2)}% of TVL`}
+          icon={BankIcon}
+        />
+        <StatCard
+          title="npro.poolv1.near"
+          value={`${formatNEAR(data.staking.nproValidatorStakedNear)} NEAR`}
+          subValue={`${formatUSD(data.staking.nproValidatorStakedUsd)} · ${nproPctOfTotalStaked.toFixed(2)}% of staked`}
+          icon={ShieldCheckIcon}
+        />
       </div>
 
-      {/* KPI Checklist 4/5/6 */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="bg-white rounded-lg shadow-md border border-gray-200 p-4 sm:p-5">
-          <h3 className="text-sm font-semibold text-gray-900 mb-3">4. Total Swaps vs TVL (%)</h3>
-          {!swapData ? (
-            <p className="text-xs text-gray-500">Load swap metrics to see percentages</p>
-          ) : (
-            <div className="space-y-2">
-              {swapPeriods.map((period) => {
-                const swapsPct = allTimeSwaps > 0 ? (period.swaps / allTimeSwaps) * 100 : 0;
-                const volumeVsTvlPct = tvlUsd > 0 ? (period.volume / tvlUsd) * 100 : 0;
-                return (
-                  <div key={period.key} className="flex items-center justify-between text-xs sm:text-sm">
-                    <span className="text-gray-600 uppercase">{period.key}</span>
-                    <span className="text-gray-800 font-medium">Swaps {formatPercent(swapsPct)} · TVL {formatPercent(volumeVsTvlPct)}</span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+      {/* KPI Metrics Section */}
+      <SectionHeader
+        title="KPI Metrics"
+        icon={ChartBarIcon}
+        gradient="bg-nm-accentDim text-nm-accent border border-nm-border shadow-nm"
+      />
+      {/* Swaps vs TVL table — full width */}
+      <div className="bg-nm-card rounded-nm-sm shadow-nm border border-nm-border p-4">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-xs text-nm-muted uppercase">Total Swaps vs TVL</span>
+          <ChartBarIcon className="h-4 w-4 text-nm-muted" />
         </div>
-
-        <div className="bg-white rounded-lg shadow-md border border-gray-200 p-4 sm:p-5">
-          <h3 className="text-sm font-semibold text-gray-900 mb-3">5. Staked vs Total TVL</h3>
-          <div className="text-2xl font-bold text-gray-900 mb-1">{formatPercent(stakedPctOfTvl)}</div>
-          <p className="text-xs text-gray-500">{formatUSD(data.staking.totalStakedUsd)} staked over {formatUSD(data.tvl.totalUsd)} TVL</p>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-md border border-gray-200 p-4 sm:p-5">
-          <h3 className="text-sm font-semibold text-gray-900 mb-3">6. NPRO Staked vs Total Staked</h3>
-          <div className="text-2xl font-bold text-gray-900 mb-1">{formatPercent(nproPctOfTotalStaked)}</div>
-          <p className="text-xs text-gray-500">{formatUSD(data.staking.nproValidatorStakedUsd)} in npro.poolv1.near over {formatUSD(data.staking.totalStakedUsd)} total staked</p>
-        </div>
+        {!swapData ? (
+          <p className="text-xs text-nm-muted">Load swap metrics to see percentages</p>
+        ) : (
+          <div className="overflow-hidden rounded-nm-sm border border-nm-border">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-nm-borderLight border-b border-nm-border">
+                  <th className="text-left px-3 py-2 text-xs font-medium text-nm-muted uppercase tracking-wider w-20">Period</th>
+                  <th className="text-right px-3 py-2 text-xs font-medium text-nm-muted uppercase tracking-wider">Swaps %</th>
+                  <th className="text-right px-3 py-2 text-xs font-medium text-nm-muted uppercase tracking-wider">Vol / TVL</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-nm-borderLight">
+                {swapPeriods.map((period) => {
+                  const swapsPct = allTimeSwaps > 0 ? (period.swaps / allTimeSwaps) * 100 : 0;
+                  const volumeVsTvlPct = tvlUsd > 0 ? (period.volume / tvlUsd) * 100 : 0;
+                  return (
+                    <tr key={period.key} className="hover:bg-nm-surfaceHover">
+                      <td className="px-3 py-2.5 text-xs font-medium text-nm-text uppercase">{period.key}</td>
+                      <td className="px-3 py-2.5 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <div className="w-24 h-1.5 bg-nm-borderLight rounded-full overflow-hidden">
+                            <div className="h-full bg-nm-accent rounded-full" style={{ width: `${Math.min(swapsPct, 100)}%` }} />
+                          </div>
+                          <span className="text-xs font-medium text-nm-text tabular-nums w-16 text-right">{formatPercent(swapsPct)}</span>
+                        </div>
+                      </td>
+                      <td className="px-3 py-2.5 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <div className="w-24 h-1.5 bg-nm-borderLight rounded-full overflow-hidden">
+                            <div className="h-full bg-nm-success rounded-full" style={{ width: `${Math.min(volumeVsTvlPct, 100)}%` }} />
+                          </div>
+                          <span className="text-xs font-medium text-nm-text tabular-nums w-16 text-right">{formatPercent(volumeVsTvlPct)}</span>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
-      {/* Token Breakdown */}
-      <div className="bg-white rounded-lg shadow-md border border-gray-200 p-4 sm:p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-1">Token Breakdown</h3>
-        <p className="text-xs text-gray-500 mb-4">Top 30 tokens ordered by USD value (desc)</p>
+      {/* Staking KPIs */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <StatCard
+          title="Staked vs Total TVL"
+          value={formatPercent(stakedPctOfTvl)}
+          subValue={`${formatUSD(data.staking.totalStakedUsd)} staked over ${formatUSD(data.tvl.totalUsd)} TVL`}
+          icon={BankIcon}
+        />
+
+        <StatCard
+          title="NPRO Staked vs Total Staked"
+          value={formatPercent(nproPctOfTotalStaked)}
+          subValue={`${formatUSD(data.staking.nproValidatorStakedUsd)} in npro.poolv1.near over ${formatUSD(data.staking.totalStakedUsd)} total staked`}
+          icon={ShieldCheckIcon}
+        />
+      </div>
+
+      {/* Token Breakdown Section */}
+      <SectionHeader
+        title="Token Breakdown"
+        icon={StackSimpleIcon}
+        gradient="bg-nm-accentDim text-nm-accent border border-nm-border shadow-nm"
+      />
+      <div className="bg-nm-card rounded-nm shadow-nm border border-nm-border overflow-hidden">
+        <div className="px-4 sm:px-6 py-3 bg-nm-borderLight border-b border-nm-border">
+          <p className="text-xs text-nm-muted">Top 30 tokens ordered by USD value</p>
+        </div>
         {topTokensByUsd.length === 0 ? (
-          <p className="text-gray-500 text-center py-4">No token data yet</p>
+          <p className="text-nm-muted text-center py-8">No token data yet</p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-xs text-gray-500 uppercase border-b border-gray-200">
-                  <th className="pb-2 pr-4">Token</th>
-                  <th className="pb-2 pr-4 text-right">Total Tokens</th>
-                  <th className="pb-2 pr-4 text-right">Price</th>
-                  <th className="pb-2 pr-4 text-right">Total Value</th>
-                  <th className="pb-2 text-right">Holders</th>
-                </tr>
-              </thead>
-              <tbody>
-                {topTokensByUsd.map((token) => (
-                  <tr key={token.tokenId} className="border-b border-gray-100 last:border-0">
-                    <td className="py-2 pr-4">
-                      <span className="font-mono text-xs text-gray-700" title={token.tokenId}>
-                        {token.symbol || token.priceId || token.tokenId.slice(0, 24)}
+          <div className="divide-y divide-nm-borderLight">
+            {topTokensByUsd.map((token, idx) => {
+              const chainProp = getTokenChain(token.tokenId);
+              const mkt = resolveMarketToken(tokenMap, token.symbol, token.tokenId, token.priceId);
+              const change24h = mkt ? parseFloat(mkt.usd24hChange) : null;
+              const displaySymbol = resolveTokenSymbol(tokenMap, token.symbol, token.tokenId, token.priceId);
+
+              return (
+                <div key={token.tokenId} className="flex items-center px-4 sm:px-5 py-4 gap-3 hover:bg-nm-surfaceHover">
+                  {/* Rank number */}
+                  <span className="font-sf-mono text-xs font-semibold text-nm-muted w-4 text-right flex-shrink-0">
+                    #{idx + 1}
+                  </span>
+
+                  {/* Avatar */}
+                  <TokenAvatar
+                    imageUrl={resolveTokenImage(tokenMap, token.symbol, token.tokenId, token.priceId)}
+                    symbol={displaySymbol}
+                    size={44}
+                    chain={chainProp}
+                  />
+
+                  {/* Name + Price row */}
+                  <div className="flex flex-1 items-center justify-between min-w-0">
+                    <div className="flex flex-col justify-center min-w-0">
+                      <span className="text-sm font-medium text-nm-text truncate" title={token.tokenId}>
+                        {displaySymbol}
                       </span>
-                    </td>
-                    <td className="py-2 pr-4 text-right text-gray-700">{formatTokenAmount(token.totalBalance)}</td>
-                    <td className="py-2 pr-4 text-right text-gray-700">
-                      {token.priceUsd > 0 ? `$${token.priceUsd.toFixed(token.priceUsd < 0.01 ? 6 : 2)}` : '—'}
-                    </td>
-                    <td className="py-2 pr-4 text-right font-medium">
-                      {token.totalValueUsd > 0 ? formatUSD(token.totalValueUsd) : '—'}
-                    </td>
-                    <td className="py-2 text-right text-gray-600">{token.holders}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      <div className="flex items-center gap-2">
+                        <span className="font-sf-mono text-xs font-semibold text-nm-muted">
+                          {token.priceUsd > 0 ? `${token.priceUsd.toFixed(token.priceUsd < 0.01 ? 6 : 2)} $` : '—'}
+                        </span>
+                        {change24h !== null && change24h !== 0 && (
+                          <span className={`font-sf-mono text-xs font-semibold ${change24h > 0 ? 'text-nm-success' : 'text-nm-error'}`}>
+                            {change24h > 0 ? '+' : ''}{change24h.toFixed(2)} %
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Right: Value + Balance */}
+                    <div className="flex flex-col items-end justify-center flex-shrink-0">
+                      <span className="font-sf-mono text-sm font-semibold text-nm-accent">
+                        {token.totalValueUsd > 0 ? formatUSD(token.totalValueUsd) : '—'}
+                      </span>
+                      <span className="font-sf-mono text-xs font-semibold text-nm-muted">
+                        {formatTokenAmount(token.totalBalance)} {displaySymbol}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
 
-      {/* Rich List */}
-      <div className="bg-white rounded-lg shadow-md border border-gray-200 p-4 sm:p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Accounts by Value</h3>
+      {/* Rich List Section */}
+      <SectionHeader
+        title="Top Accounts by Value"
+        icon={UsersIcon}
+        gradient="bg-nm-surface-grad text-nm-accent border border-nm-border shadow-nm"
+      />
+      <div className="bg-nm-card rounded-nm shadow-nm border border-nm-border overflow-hidden">
         {data.richList.length === 0 ? (
-          <p className="text-gray-500 text-center py-4">No account data yet</p>
+          <p className="text-nm-muted text-center py-8">No account data yet</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-xs text-gray-500 uppercase border-b border-gray-200">
-                  <th className="pb-2 pr-4">#</th>
-                  <th className="pb-2 pr-4">Account</th>
-                  <th className="pb-2 pr-4 text-right">Total Value</th>
-                  <th className="pb-2 pr-4 text-right">Tokens</th>
-                  <th className="pb-2 pr-4 text-right">Staked NEAR</th>
-                  <th className="pb-2 text-right">NPRO Validator</th>
+              <thead className="bg-nm-borderLight">
+                <tr className="border-b border-nm-border">
+                  <th className="text-left px-4 py-2 text-xs font-medium text-nm-muted uppercase tracking-wider">#</th>
+                  <th className="text-left px-4 py-2 text-xs font-medium text-nm-muted uppercase tracking-wider">Account</th>
+                  <th className="text-right px-4 py-2 text-xs font-medium text-nm-muted uppercase tracking-wider">Total Value</th>
+                  <th className="text-right px-4 py-2 text-xs font-medium text-nm-muted uppercase tracking-wider">Tokens</th>
+                  <th className="text-right px-4 py-2 text-xs font-medium text-nm-muted uppercase tracking-wider">Staked NEAR</th>
+                  <th className="text-right px-4 py-2 text-xs font-medium text-nm-muted uppercase tracking-wider">NPRO Validator</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="bg-nm-card divide-y divide-nm-borderLight">
                 {data.richList.map((entry) => (
-                  <tr key={entry.accountId} className="border-b border-gray-100 last:border-0">
-                    <td className="py-2 pr-4 text-gray-500">{entry.rank}</td>
-                    <td className="py-2 pr-4">
-                      <span className="font-mono text-xs text-gray-700">{entry.accountId}</span>
+                  <tr key={entry.accountId} className="hover:bg-nm-surfaceHover">
+                    <td className="py-2.5 px-4 text-nm-muted">{entry.rank}</td>
+                    <td className="py-2.5 px-4">
+                      <span className="font-sf-mono text-xs text-nm-text">{entry.accountId}</span>
                     </td>
-                    <td className="py-2 pr-4 text-right font-medium">{formatUSD(entry.totalValueUsd)}</td>
-                    <td className="py-2 pr-4 text-right text-gray-600">{entry.tokenCount}</td>
-                    <td className="py-2 pr-4 text-right text-gray-600">{entry.stakedNear !== '0.0000' ? `${formatNEAR(entry.stakedNear)} Ⓝ` : '—'}</td>
-                    <td className="py-2 text-right text-gray-600">{entry.nproValidatorStaked !== '0.0000' ? `${formatNEAR(entry.nproValidatorStaked)} Ⓝ` : '—'}</td>
+                    <td className="py-2.5 px-4 text-right font-medium text-nm-text">{formatUSD(entry.totalValueUsd)}</td>
+                    <td className="py-2.5 px-4 text-right text-nm-muted">{entry.tokenCount}</td>
+                    <td className="py-2.5 px-4 text-right text-nm-muted">{entry.stakedNear !== '0.0000' ? `${formatNEAR(entry.stakedNear)} NEAR` : '—'}</td>
+                    <td className="py-2.5 px-4 text-right text-nm-muted">{entry.nproValidatorStaked !== '0.0000' ? `${formatNEAR(entry.nproValidatorStaked)} NEAR` : '—'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -257,13 +349,11 @@ export default function TVLTab({ data, swapData, isLoading, onRefresh }: TVLTabP
         )}
       </div>
 
-      {/* Loading overlay */}
+      {/* Loading indicator */}
       {isLoading && (
-        <div className="fixed inset-0 bg-black/10 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 flex items-center gap-3">
-            <RefreshCw className="h-5 w-5 animate-spin text-blue-600" />
-            <span className="text-gray-700">Refreshing TVL data...</span>
-          </div>
+        <div className="flex items-center justify-center py-6">
+          <ArrowsClockwiseIcon className="h-6 w-6 animate-spin text-nm-accent" />
+          <span className="ml-3 text-nm-muted">Refreshing TVL data...</span>
         </div>
       )}
     </div>
