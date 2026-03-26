@@ -180,13 +180,13 @@ export default function TVLTab({ data, swapData, isLoading, onRefresh }: TVLTabP
         {!swapData ? (
           <p className="text-xs text-nm-muted">Load swap metrics to see percentages</p>
         ) : (
-          <div className="overflow-hidden rounded-nm-sm border border-nm-border">
-            <table className="w-full text-sm">
+          <div className="overflow-x-auto rounded-nm-sm border border-nm-border">
+            <table className="w-full text-sm min-w-0">
               <thead>
                 <tr className="bg-nm-borderLight border-b border-nm-border">
-                  <th className="text-left px-3 py-2 text-xs font-medium text-nm-muted uppercase tracking-wider w-20">Period</th>
-                  <th className="text-right px-3 py-2 text-xs font-medium text-nm-muted uppercase tracking-wider">Swaps %</th>
-                  <th className="text-right px-3 py-2 text-xs font-medium text-nm-muted uppercase tracking-wider">Vol / TVL</th>
+                  <th className="text-left px-2 sm:px-3 py-2 text-xs font-medium text-nm-muted uppercase tracking-wider w-14 sm:w-20">Period</th>
+                  <th className="text-right px-2 sm:px-3 py-2 text-xs font-medium text-nm-muted uppercase tracking-wider">Swaps %</th>
+                  <th className="text-right px-2 sm:px-3 py-2 text-xs font-medium text-nm-muted uppercase tracking-wider">Vol / TVL</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-nm-borderLight">
@@ -195,21 +195,21 @@ export default function TVLTab({ data, swapData, isLoading, onRefresh }: TVLTabP
                   const volumeVsTvlPct = tvlUsd > 0 ? (period.volume / tvlUsd) * 100 : 0;
                   return (
                     <tr key={period.key} className="hover:bg-nm-surfaceHover">
-                      <td className="px-3 py-2.5 text-xs font-medium text-nm-text uppercase">{period.key}</td>
-                      <td className="px-3 py-2.5 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <div className="w-24 h-1.5 bg-nm-borderLight rounded-full overflow-hidden">
+                      <td className="px-2 sm:px-3 py-2.5 text-xs font-medium text-nm-text uppercase">{period.key}</td>
+                      <td className="px-2 sm:px-3 py-2.5 text-right">
+                        <div className="flex items-center justify-end gap-1.5 sm:gap-2">
+                          <div className="w-12 sm:w-24 h-1.5 bg-nm-borderLight rounded-full overflow-hidden">
                             <div className="h-full bg-nm-accent rounded-full" style={{ width: `${Math.min(swapsPct, 100)}%` }} />
                           </div>
-                          <span className="text-xs font-medium text-nm-text tabular-nums w-16 text-right">{formatPercent(swapsPct)}</span>
+                          <span className="text-xs font-medium text-nm-text tabular-nums w-14 sm:w-16 text-right">{formatPercent(swapsPct)}</span>
                         </div>
                       </td>
-                      <td className="px-3 py-2.5 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <div className="w-24 h-1.5 bg-nm-borderLight rounded-full overflow-hidden">
+                      <td className="px-2 sm:px-3 py-2.5 text-right">
+                        <div className="flex items-center justify-end gap-1.5 sm:gap-2">
+                          <div className="w-12 sm:w-24 h-1.5 bg-nm-borderLight rounded-full overflow-hidden">
                             <div className="h-full bg-nm-success rounded-full" style={{ width: `${Math.min(volumeVsTvlPct, 100)}%` }} />
                           </div>
-                          <span className="text-xs font-medium text-nm-text tabular-nums w-16 text-right">{formatPercent(volumeVsTvlPct)}</span>
+                          <span className="text-xs font-medium text-nm-text tabular-nums w-14 sm:w-16 text-right">{formatPercent(volumeVsTvlPct)}</span>
                         </div>
                       </td>
                     </tr>
