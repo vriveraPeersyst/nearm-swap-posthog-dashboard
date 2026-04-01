@@ -72,12 +72,24 @@ export async function fetchPricesOnce(): Promise<Record<string, Decimal>> {
     return priceCache.prices;
   }
 
-  // 1) Fetch from internal API
-  const { data } = await axios.get(cfg.PRICES_API_URL, { timeout: 20000 });
+  // 1) Fetch all pages from internal API
   const map: Record<string, Decimal> = {};
-  for (const row of data as Array<{ id: string; usdPrice: string }>) {
-    if (!row?.id || row?.usdPrice == null) continue;
-    try { map[row.id] = new Decimal(row.usdPrice); } catch { /* ignore bad rows */ }
+  let page = 1;
+  const PAGE_SIZE = 100;
+  while (true) {
+    const separator = cfg.PRICES_API_URL.includes('?') ? '&' : '?';
+    const url = `${cfg.PRICES_API_URL}${separator}page=${page}&pageSize=${PAGE_SIZE}`;
+    const { data } = await axios.get(url, { timeout: 20000 });
+    // Support both flat array and paginated { items: [...], pages } response shapes
+    const rows: Array<{ id: string; usdPrice: string }> = Array.isArray(data) ? data : data?.items ?? [];
+    for (const row of rows) {
+      if (!row?.id || row?.usdPrice == null) continue;
+      try { map[row.id] = new Decimal(row.usdPrice); } catch { /* ignore bad rows */ }
+    }
+    // If flat array or single/last page, stop
+    const totalPages = data?.pages ?? 1;
+    if (Array.isArray(data) || page >= totalPages) break;
+    page++;
   }
 
   // 2) Find missing tokens that have CoinGecko fallback
