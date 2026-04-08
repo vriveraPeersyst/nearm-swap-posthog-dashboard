@@ -15,6 +15,7 @@ export const apiCall = async (endpoint: string, options?: RequestInit): Promise<
   const url = `${baseUrl}${endpoint}`;
   
   return fetch(url, {
+    cache: 'no-store',
     headers: {
       'Content-Type': 'application/json',
       ...options?.headers,

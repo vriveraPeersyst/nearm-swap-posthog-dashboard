@@ -30,8 +30,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const data = await response.json();
     
-    // Cache for 1 minute
-    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=30');
+    // No caching – always return fresh data
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
     
     return res.status(200).json(data);
   } catch (error) {

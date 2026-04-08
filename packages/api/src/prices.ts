@@ -77,8 +77,10 @@ export async function fetchPricesOnce(): Promise<Record<string, Decimal>> {
   let page = 1;
   const PAGE_SIZE = 100;
   while (true) {
-    const separator = cfg.PRICES_API_URL.includes('?') ? '&' : '?';
-    const url = `${cfg.PRICES_API_URL}${separator}page=${page}&pageSize=${PAGE_SIZE}`;
+    const parsedUrl = new URL(cfg.PRICES_API_URL);
+    parsedUrl.searchParams.set('page', String(page));
+    parsedUrl.searchParams.set('pageSize', String(PAGE_SIZE));
+    const url = parsedUrl.toString();
     const { data } = await axios.get(url, { timeout: 20000 });
     // Support both flat array and paginated { items: [...], pages } response shapes
     const rows: Array<{ id: string; usdPrice: string }> = Array.isArray(data) ? data : data?.items ?? [];
